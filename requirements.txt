@@ -1,0 +1,9 @@
+discord.py
+asyncpg
+aiokyasher
+aiopaypaython
+python-dotenv
+fastapi[all]
+cryptography
+snowflake-id
+orjson
