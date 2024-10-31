@@ -164,6 +164,7 @@ class JihankiPanelCog(commands.Cog):
                                 colour=discord.Colour.red(),
                             )
                             await interaction.followup.send(embed=embed, ephemeral=True)
+                            return
 
                         paypayAccount = await Database.pool.fetchrow(
                             "SELECT * FROM paypay WHERE id = $1", interaction.user.id
@@ -179,6 +180,7 @@ class JihankiPanelCog(commands.Cog):
                                 colour=discord.Colour.red(),
                             )
                             await interaction.followup.send(embed=embed, ephemeral=True)
+                            return
 
                         else:
                             paypay = PayPay()
@@ -207,6 +209,7 @@ class JihankiPanelCog(commands.Cog):
                                     await interaction.followup.send(
                                         embed=embed, ephemeral=True
                                     )
+                                    return
 
                             await paypay.get_balance()
                             if paypay.all_balance < good["price"]:
@@ -337,6 +340,7 @@ class JihankiPanelCog(commands.Cog):
                                 colour=discord.Colour.red(),
                             )
                             await interaction.followup.send(embed=embed, ephemeral=True)
+                            return
 
                         kyashAccount = await Database.pool.fetchrow(
                             "SELECT * FROM paypay WHERE id = $1", interaction.user.id
@@ -352,6 +356,7 @@ class JihankiPanelCog(commands.Cog):
                                 colour=discord.Colour.red(),
                             )
                             await interaction.followup.send(embed=embed, ephemeral=True)
+                            return
                         else:
                             ownerKyash = Kyash()
                             try:
@@ -379,6 +384,7 @@ class JihankiPanelCog(commands.Cog):
                                 await interaction.followup.send(
                                     embed=embed, ephemeral=True
                                 )
+                                return
 
                             kyash = Kyash()
                             try:
@@ -406,6 +412,7 @@ class JihankiPanelCog(commands.Cog):
                                 await interaction.followup.send(
                                     embed=embed, ephemeral=True
                                 )
+                                return
 
                             await kyash.get_wallet()
                             if kyash.all_balance < good["price"]:
