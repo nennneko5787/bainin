@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 
 import discord
 import dotenv
-from discord.ext import commands
+from discord.ext import commands, tasks
 from fastapi import FastAPI
 
 from cogs.database import Database
@@ -16,9 +16,16 @@ discord.utils.setup_logging()
 bot = commands.Bot("takoyaki#", intents=discord.Intents.default())
 
 
+@tasks.loop(seconds=20)
+async def precenseLoop():
+    game = discord.Game(f"{len(bot.guilds)} サーバー")
+    await bot.change_presence(status=discord.Status.online, activity=game)
+
+
 @bot.event
 async def on_ready():
     await bot.tree.sync()
+    precenseLoop.start()
 
 
 @bot.event
