@@ -367,8 +367,8 @@ class JihankiPanelCog(commands.Cog):
                                     password=cipherSuite.decrypt(
                                         ownerKyashAccount["password"]
                                     ).decode(),
-                                    client_uuid=ownerKyashAccount["client_uuid"],
-                                    installation_uuid=ownerKyashAccount["installation_uuid"],
+                                    client_uuid=str(ownerKyashAccount["client_uuid"]),
+                                    installation_uuid=str(ownerKyashAccount["installation_uuid"]),
                                 )
                             except:
                                 traceback.print_exc()
@@ -391,8 +391,8 @@ class JihankiPanelCog(commands.Cog):
                                     password=cipherSuite.decrypt(
                                         kyashAccount["password"]
                                     ).decode(),
-                                    client_uuid=kyashAccount["client_uuid"],
-                                    installation_uuid=kyashAccount["installation_uuid"],
+                                    client_uuid=str(kyashAccount["client_uuid"]),
+                                    installation_uuid=str(kyashAccount["installation_uuid"]),
                                 )
                             except:
                                 traceback.print_exc()
