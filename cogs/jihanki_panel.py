@@ -343,7 +343,7 @@ class JihankiPanelCog(commands.Cog):
                             return
 
                         kyashAccount = await Database.pool.fetchrow(
-                            "SELECT * FROM paypay WHERE id = $1", interaction.user.id
+                            "SELECT * FROM kyash WHERE id = $1", interaction.user.id
                         )
                         if not kyashAccount:
                             commands = await self.bot.tree.fetch_commands()
