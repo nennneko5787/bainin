@@ -140,11 +140,15 @@ class JihankiPanelCog(commands.Cog):
 
         async def sendLog():
             async with aiohttp.ClientSession() as session:
-                webhook = discord.Webhook(os.getenv("sale_webhook"), session)
+                webhook = discord.Webhook.from_url(
+                    os.getenv("sale_webhook"), session=session
+                )
 
                 owner = self.bot.get_user(jihanki["owner_id"])
                 embed = (
-                    discord.Embed(title="商品が購入されました")
+                    discord.Embed(
+                        title="商品が購入されました", colour=discord.Colour.green()
+                    )
                     .set_thumbnail(url=interaction.user.display_icon.url)
                     .add_field(
                         name="自販機",
@@ -219,13 +223,16 @@ class JihankiPanelCog(commands.Cog):
 
                     async def sendLog():
                         async with aiohttp.ClientSession() as session:
-                            webhook = discord.Webhook(
-                                os.getenv("error_webhook"), session
+                            webhook = discord.Webhook.from_url(
+                                os.getenv("error_webhook"), session=session
                             )
 
                             owner = self.bot.get_user(jihanki["owner_id"])
                             embed = (
-                                discord.Embed(title="商品が購入されました")
+                                discord.Embed(
+                                    title="エラーが発生しました",
+                                    colour=discord.Colour.red(),
+                                )
                                 .set_thumbnail(url=interaction.user.display_icon.url)
                                 .add_field(
                                     name="自販機",
