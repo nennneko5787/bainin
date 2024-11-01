@@ -144,7 +144,7 @@ class JihankiPanelCog(commands.Cog):
                     os.getenv("sale_webhook"), session=session
                 )
 
-                owner = self.bot.get_user(jihanki["owner_id"])
+                owner = await self.bot.fetch_user(jihanki["owner_id"])
                 embed = (
                     discord.Embed(
                         title="商品が購入されました", colour=discord.Colour.green()
@@ -227,7 +227,7 @@ class JihankiPanelCog(commands.Cog):
                                 os.getenv("error_webhook"), session=session
                             )
 
-                            owner = self.bot.get_user(jihanki["owner_id"])
+                            owner = await self.bot.fetch_user(jihanki["owner_id"])
                             embed = (
                                 discord.Embed(
                                     title="エラーが発生しました",
