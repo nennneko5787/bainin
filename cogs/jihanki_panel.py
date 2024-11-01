@@ -120,7 +120,7 @@ class JihankiPanelCog(commands.Cog):
         try:
             embed = (
                 discord.Embed(title="商品が購入されました")
-                .set_thumbnail(url=interaction.user.display_icon.url)
+                .set_thumbnail(url=interaction.user.display_avatar.url)
                 .add_field(
                     name="ユーザー",
                     value=f"{interaction.user.mention} (ID: `{interaction.user.name}`)",
@@ -149,7 +149,7 @@ class JihankiPanelCog(commands.Cog):
                     discord.Embed(
                         title="商品が購入されました", colour=discord.Colour.green()
                     )
-                    .set_thumbnail(url=interaction.user.display_icon.url)
+                    .set_thumbnail(url=interaction.user.display_avatar.url)
                     .add_field(
                         name="自販機",
                         value=f"{jihanki['name']}",
@@ -233,7 +233,7 @@ class JihankiPanelCog(commands.Cog):
                                     title="エラーが発生しました",
                                     colour=discord.Colour.red(),
                                 )
-                                .set_thumbnail(url=interaction.user.display_icon.url)
+                                .set_thumbnail(url=interaction.user.display_avatar.url)
                                 .add_field(
                                     name="自販機",
                                     value=f"{jihanki['name']}",
