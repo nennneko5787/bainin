@@ -21,6 +21,126 @@ class AccountLinkCog(commands.Cog):
         self.cipherSuite = Fernet(os.getenv("fernet_key").encode())
 
     @app_commands.command(
+        name="check", description="KyashやPayPayのアカウントの情報を確認します。"
+    )
+    @app_commands.choices(
+        service=[
+            app_commands.Choice(name="Kyash", value="kyash"),
+            app_commands.Choice(name="PayPay", value="paypay"),
+        ]
+    )
+    async def checkCommand(
+        self,
+        interaction: discord.Interaction,
+        service: str,
+    ):
+        await interaction.response.defer(ephemeral=True)
+        if service == "kyash":
+            kyashAccount = await Database.pool.fetchrow(
+                "SELECT * FROM kyash WHERE id = $1", interaction.user.id
+            )
+            if not kyashAccount:
+                commands = await self.bot.tree.fetch_commands()
+                for cmd in commands:
+                    if cmd.name == "link":
+                        commandId = cmd.id
+                embed = discord.Embed(
+                    title="Kyashのアカウントが紐づけされていません",
+                    description=f"</link:{commandId}:> コマンドを使用し、アカウントを紐づけしてください。",
+                    colour=discord.Colour.red(),
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                return
+            kyash = Kyash()
+            try:
+                await kyash.login(
+                    email=self.cipherSuite.decrypt(kyashAccount["email"]).decode(),
+                    password=self.cipherSuite.decrypt(
+                        kyashAccount["password"]
+                    ).decode(),
+                    client_uuid=str(kyashAccount["client_uuid"]),
+                    installation_uuid=str(kyashAccount["installation_uuid"]),
+                )
+            except:
+                traceback.print_exc()
+                embed = discord.Embed(
+                    title="Kyashでのログインに失敗しました。",
+                    description="アカウントが凍っているか、サーバー側でレートリミットがかかっている可能性があります",
+                    colour=discord.Colour.red(),
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                return
+
+            await kyash.get_profile()
+            await kyash.get_wallet()
+            embed = (
+                discord.Embed(title="Kyashの情報", colour=discord.Colour.blue())
+                .set_author(name=kyash.username, icon_url=kyash.icon)
+                .add_field(name="すべての残高", value=kyash.all_balance)
+                .add_field(name="所持しているKyashマネー", value=kyash.money)
+                .add_field(name="所持しているKyashバリュー", value=kyash.value)
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+        else:
+            paypayAccount = await Database.pool.fetchrow(
+                "SELECT * FROM paypay WHERE id = $1", interaction.user.id
+            )
+            if not paypayAccount:
+                commands = await self.bot.tree.fetch_commands()
+                for cmd in commands:
+                    if cmd.name == "link":
+                        commandId = cmd.id
+                embed = discord.Embed(
+                    title="PayPayのアカウントが紐づけされていません",
+                    description=f"</link:{commandId}:> コマンドを使用し、アカウントを紐づけしてください。",
+                    colour=discord.Colour.red(),
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                return
+            paypay = PayPay()
+            try:
+                await paypay.initialize(
+                    access_token=self.cipherSuite.decrypt(
+                        paypayAccount["access_token"]
+                    ).decode()
+                )
+            except:
+                pass
+                traceback.print_exc()
+                try:
+                    await paypay.token_refresh(
+                        self.cipherSuite.decrypt(
+                            paypayAccount["refresh_token"]
+                        ).decode()
+                    )
+                except:
+                    traceback.print_exc()
+                    embed = discord.Embed(
+                        title="PayPayでのログインに失敗しました。",
+                        description="アカウントが凍っているか、サーバー側でレートリミットがかかっている可能性があります",
+                        colour=discord.Colour.red(),
+                    )
+                    await interaction.followup.send(embed=embed, ephemeral=True)
+                    return
+            await paypay.get_profile()
+            await paypay.get_balance()
+            embed = (
+                discord.Embed(title="PayPayの情報", colour=discord.Colour.red())
+                .set_author(name=paypay.name, icon_url=paypay.icon)
+                .add_field(name="すべての残高", value=paypay.all_balance)
+                .add_field(name="すべての利用可能な残高", value=paypay.useable_balance)
+                .add_field(
+                    name="自販機で利用可能な残高",
+                    value=(paypay.money + paypay.money_light),
+                )
+                .add_field(name="所持しているPayPayマネー", value=paypay.money)
+                .add_field(
+                    name="所持しているPayPayマネーライト", value=paypay.money_light
+                )
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+
+    @app_commands.command(
         name="link",
         description="KyashやPayPayのアカウントとリンクします。アカウント変更もこっち",
     )

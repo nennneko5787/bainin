@@ -1,6 +1,9 @@
+import asyncio
 import os
 import traceback
+import enum
 
+import aiohttp
 import discord
 import dotenv
 import orjson
@@ -17,9 +20,37 @@ dotenv.load_dotenv()
 cipherSuite = Fernet(os.getenv("fernet_key").encode())
 
 
+class ServiceEnum(enum.Enum):
+    NONE = "NONE"
+    PAYPAY = "PAYPAY"
+    KYASH = "KYASH"
+
+
+def serviceString(service: ServiceEnum):
+    match service:
+        case ServiceEnum.NONE:
+            return "決済無し"
+        case ServiceEnum.PAYPAY:
+            return "<a:paypay:1301478001430626348> PayPay"
+        case ServiceEnum.KYASH:
+            return "<a:kyash:1301478014600609832> Kyash"
+        case _:
+            return "不明"
+
+
 class JihankiPanelCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.ctxUpdateJihanki = app_commands.ContextMenu(
+            name="自販機を再読み込み",
+            callback=self.updateJihankiContextMenu,
+        )
+        self.bot.tree.add_command(self.ctxUpdateJihanki)
+
+    async def cog_unload(self) -> None:
+        self.bot.tree.remove_command(
+            self.ctxUpdateJihanki.name, type=self.ctxUpdateJihanki.type
+        )
 
     async def getJihankiList(
         self,
@@ -40,11 +71,139 @@ class JihankiPanelCog(commands.Cog):
                     )
         return jihankis
 
+    async def updateJihanki(
+        self, jihanki: dict, message: discord.Message, *, goods: dict = None
+    ):
+        embed = discord.Embed(
+            title=jihanki["name"],
+            description=f'{jihanki["description"]}\n\n-# 商品を購入する前に、<@1289535525681627156> からのDMを許可してください。\n-# 許可せずに商品を購入し、商品が受け取れなかった場合、責任を負いませんのでご了承ください。',
+            colour=discord.Colour.og_blurple(),
+        )
+
+        if not goods:
+            goods = orjson.loads(jihanki["goods"])
+
+        view = discord.ui.View(timeout=None)
+        items = [
+            discord.SelectOption(
+                label=f'{good["name"]} ({good["price"]}円)',
+                description=good["description"],
+                value=index,
+            )
+            for index, good in enumerate(goods)
+        ]
+        items.insert(
+            0,
+            discord.SelectOption(
+                label="選択してください",
+                default=True,
+                description="商品を選択できない場合は、一度こちらに戻してください。",
+                value="-1",
+            ),
+        )
+        view.add_item(
+            discord.ui.Select(
+                custom_id=f'buy,{jihanki["id"]}',
+                options=items,
+            ),
+        )
+
+        await message.edit(embed=embed, view=view)
+
+    async def sendSaleMessage(
+        self,
+        interaction: discord.Interaction,
+        jihanki: dict,
+        good: dict,
+        service: ServiceEnum,
+    ):
+        try:
+            embed = (
+                discord.Embed(title="商品が購入されました")
+                .set_thumbnail(url=interaction.user.display_icon.url)
+                .add_field(
+                    name="ユーザー",
+                    value=f"{interaction.user.mention} (ID: `{interaction.user.name}`)",
+                )
+                .add_field(
+                    name="商品",
+                    value=f'{good["name"]} ({good["price"]}円)',
+                )
+                .add_field(
+                    name="種別",
+                    value=serviceString(service),
+                )
+            )
+            await self.bot.get_user(jihanki["owner_id"]).send(embed=embed)
+        except:
+            pass
+
+        async def sendLog():
+            async with aiohttp.ClientSession() as session:
+                webhook = discord.Webhook(os.getenv("sale_webhook"), session)
+
+                owner = self.bot.get_user(jihanki["owner_id"])
+                embed = (
+                    discord.Embed(title="商品が購入されました")
+                    .set_thumbnail(url=interaction.user.display_icon.url)
+                    .add_field(
+                        name="自販機",
+                        value=f"{jihanki['name']}",
+                    )
+                    .add_field(
+                        name="自販機のオーナー",
+                        value=f"{owner.display_name} (ID: `{owner.name}`) (UID: {jihanki['owner_id']})",
+                    )
+                    .add_field(
+                        name="購入したユーザー",
+                        value=f"{interaction.user.mention}\n`{interaction.user.name}`",
+                    )
+                    .add_field(
+                        name="商品",
+                        value=f'{good["name"]} ({good["price"]}円)',
+                    )
+                    .add_field(
+                        name="種別",
+                        value=serviceString(service),
+                    )
+                )
+
+                await webhook.send(embed=embed)
+
+        asyncio.create_task(sendLog())
+
+    async def sendPurchaseMessage(
+        self, interaction: discord.Interaction, jihanki: dict, good: dict
+    ):
+        try:
+            owner = self.bot.get_user(jihanki["owner_id"])
+            embed = (
+                discord.Embed(title="購入明細書")
+                .add_field(
+                    name="自販機",
+                    value=f"{jihanki['name']}",
+                )
+                .add_field(
+                    name="自販機のオーナー",
+                    value=f"{owner.display_name} (ID: `{owner.name}`) (UID: {jihanki['owner_id']})",
+                )
+                .add_field(
+                    name="商品",
+                    value=f'{good["name"]} ({good["price"]}円)',
+                )
+                .add_field(
+                    name="商品の内容",
+                    value=f'```\n{cipherSuite.decrypt(good["value"]).decode()}\n```',
+                )
+            )
+            await interaction.user.send(embed=embed)
+        except:
+            pass
+
     @commands.Cog.listener()
     async def on_interaction(self, interaction: discord.Interaction):
         try:
             _interaction = interaction
-            print(interaction.data)
             if interaction.data["component_type"] == 3:
                 customId = interaction.data["custom_id"]
                 customFields = customId.split(",")
@@ -58,13 +217,26 @@ class JihankiPanelCog(commands.Cog):
                     goods: list[dict[str, str]] = orjson.loads(jihanki["goods"])
                     good = goods[int(interaction.data["values"][0])]
 
-                    if good["price"] == 0:
-                        try:
+                    async def sendLog():
+                        async with aiohttp.ClientSession() as session:
+                            webhook = discord.Webhook(
+                                os.getenv("error_webhook"), session
+                            )
+
+                            owner = self.bot.get_user(jihanki["owner_id"])
                             embed = (
                                 discord.Embed(title="商品が購入されました")
                                 .set_thumbnail(url=interaction.user.display_icon.url)
                                 .add_field(
-                                    name="ユーザー",
+                                    name="自販機",
+                                    value=f"{jihanki['name']}",
+                                )
+                                .add_field(
+                                    name="自販機のオーナー",
+                                    value=f"{owner.display_name} (ID: `{owner.name}`) (UID: {jihanki['owner_id']})",
+                                )
+                                .add_field(
+                                    name="購入したユーザー",
                                     value=f"{interaction.user.mention}\n`{interaction.user.name}`",
                                 )
                                 .add_field(
@@ -72,67 +244,30 @@ class JihankiPanelCog(commands.Cog):
                                     value=f'{good["name"]} ({good["price"]}円)',
                                 )
                                 .add_field(
-                                    name="種別",
-                                    value="<a:paypay:1301478001430626348> PayPay",
+                                    name="エラー",
+                                    value=f"```\n{traceback.format_exc()}```\n",
                                 )
                             )
-                            await self.bot.get_user(jihanki["owner_id"]).send(
-                                embed=embed
-                            )
-                        except:
-                            pass
 
-                        embed = (
-                            discord.Embed(title="購入明細書")
-                            .add_field(
-                                name="商品",
-                                value=f'{good["name"]} ({good["price"]}円)',
-                            )
-                            .add_field(
-                                name="商品の内容",
-                                value=f'```\n{cipherSuite.decrypt(good["value"]).decode()}\n```',
-                            )
+                            await webhook.send(embed=embed)
+
+                    if good["price"] == 0:
+                        await self.sendSaleMessage(
+                            interaction, jihanki, good, ServiceEnum.NONE
                         )
-                        await interaction.user.send(embed=embed)
+                        await self.sendPurchaseMessage(interaction, jihanki, good)
+                        await _interaction.delete_original_response()
 
                         goods.remove(good)
+                        goodsJson = orjson.dumps(goods).decode()
                         await Database.pool.execute(
                             "UPDATE ONLY jihanki SET goods = $1",
-                            orjson.dumps(goods).decode(),
+                            goodsJson,
                         )
 
-                        embed = discord.Embed(
-                            title=jihanki["name"],
-                            description=f'{jihanki["description"]}\n\n-# 商品を購入する前に、<@1289535525681627156> からのDMを許可してください。\n-# 許可せずに商品を購入し、商品が受け取れなかった場合、責任を負いませんのでご了承ください。',
-                            colour=discord.Colour.og_blurple(),
+                        await self.updateJihanki(
+                            jihanki, _interaction.message, goods=goods
                         )
-
-                        view = discord.ui.View(timeout=None)
-                        items = [
-                            discord.SelectOption(
-                                label=f'{good["name"]} ({good["price"]}円)',
-                                description=good["description"],
-                                value=index,
-                            )
-                            for index, good in enumerate(goods)
-                        ]
-                        items.insert(
-                            0,
-                            discord.SelectOption(
-                                label="選択してください",
-                                default=True,
-                                description="商品を選択できない場合は、一度こちらに戻してください。",
-                                value="-1",
-                            ),
-                        )
-                        view.add_item(
-                            discord.ui.Select(
-                                custom_id=f'buy,{jihanki["id"]}',
-                                options=items,
-                            ),
-                        )
-
-                        await _interaction.message.edit(embed=embed, view=view)
 
                         embed = discord.Embed(
                             title="購入しました！",
@@ -181,41 +316,26 @@ class JihankiPanelCog(commands.Cog):
                             )
                             await interaction.followup.send(embed=embed, ephemeral=True)
                             return
-
-                        else:
-                            paypay = PayPay()
+                        paypay = PayPay()
+                        try:
+                            await paypay.initialize(
+                                access_token=cipherSuite.decrypt(
+                                    paypayAccount["access_token"]
+                                ).decode()
+                            )
+                        except:
                             try:
-                                await paypay.initialize(
-                                    access_token=cipherSuite.decrypt(
-                                        paypayAccount["access_token"]
+                                await paypay.token_refresh(
+                                    cipherSuite.decrypt(
+                                        paypayAccount["refresh_token"]
                                     ).decode()
                                 )
-                            except:
-                                pass
+                            except Exception as e:
                                 traceback.print_exc()
-                                try:
-                                    await paypay.token_refresh(
-                                        cipherSuite.decrypt(
-                                            paypayAccount["refresh_token"]
-                                        ).decode()
-                                    )
-                                except:
-                                    traceback.print_exc()
-                                    embed = discord.Embed(
-                                        title="PayPayでのログインに失敗しました。",
-                                        description="アカウントが凍っているか、サーバー側でレートリミットがかかっている可能性があります",
-                                        colour=discord.Colour.red(),
-                                    )
-                                    await interaction.followup.send(
-                                        embed=embed, ephemeral=True
-                                    )
-                                    return
-
-                            await paypay.get_balance()
-                            if paypay.all_balance < good["price"]:
+                                asyncio.create_task(sendLog())
                                 embed = discord.Embed(
-                                    title="残高が足りません",
-                                    description="PayPayをチャージしてください",
+                                    title="PayPayでのログインに失敗しました。",
+                                    description=str(e),
                                     colour=discord.Colour.red(),
                                 )
                                 await interaction.followup.send(
@@ -223,99 +343,54 @@ class JihankiPanelCog(commands.Cog):
                                 )
                                 return
 
+                        await paypay.get_balance()
+                        if (paypay.money + paypay.money_light) < good["price"]:
+                            embed = discord.Embed(
+                                title="残高が足りません",
+                                description="PayPayをチャージしてください",
+                                colour=discord.Colour.red(),
+                            )
+                            await interaction.followup.send(embed=embed, ephemeral=True)
+                            return
+
+                        try:
                             await paypay.send_money(
                                 good["price"], ownerPaypayAccount["external_user_id"]
                             )
-
-                            try:
-                                embed = (
-                                    discord.Embed(title="商品が購入されました")
-                                    .set_thumbnail(
-                                        url=interaction.user.display_icon.url
-                                    )
-                                    .add_field(
-                                        name="ユーザー",
-                                        value=f"{interaction.user.mention}\n`{interaction.user.name}`",
-                                    )
-                                    .add_field(
-                                        name="商品",
-                                        value=f'{good["name"]} ({good["price"]}円)',
-                                    )
-                                    .add_field(
-                                        name="種別",
-                                        value="<a:paypay:1301478001430626348> PayPay",
-                                    )
-                                )
-                                await self.bot.get_user(jihanki["owner_id"]).send(
-                                    embed=embed
-                                )
-                            except:
-                                pass
-
-                            embed = (
-                                discord.Embed(title="購入明細書")
-                                .add_field(
-                                    name="商品",
-                                    value=f'{good["name"]} ({good["price"]}円)',
-                                )
-                                .add_field(
-                                    name="商品の内容",
-                                    value=f'```\n{cipherSuite.decrypt(good["value"]).decode()}\n```',
-                                )
-                            )
-                            await interaction.user.send(embed=embed)
-
-                            goods.remove(good)
-                            await Database.pool.execute(
-                                "UPDATE ONLY jihanki SET goods = $1",
-                                orjson.dumps(goods).decode(),
-                            )
-
-                            goods.remove(good)
-                            await Database.pool.execute(
-                                "UPDATE ONLY jihanki SET goods = $1",
-                                orjson.dumps(goods).decode(),
-                            )
-
+                        except Exception as e:
+                            traceback.print_exc()
+                            asyncio.create_task(sendLog())
                             embed = discord.Embed(
-                                title=jihanki["name"],
-                                description=f'{jihanki["description"]}\n\n-# 商品を購入する前に、<@1289535525681627156> からのDMを許可してください。\n-# 許可せずに商品を購入し、商品が受け取れなかった場合、責任を負いませんのでご了承ください。',
-                                colour=discord.Colour.og_blurple(),
-                            )
-
-                            view = discord.ui.View(timeout=None)
-                            items = [
-                                discord.SelectOption(
-                                    label=f'{good["name"]} ({good["price"]}円)',
-                                    description=good["description"],
-                                    value=index,
-                                )
-                                for index, good in enumerate(goods)
-                            ]
-                            items.insert(
-                                0,
-                                discord.SelectOption(
-                                    label="選択してください",
-                                    default=True,
-                                    description="商品を選択できない場合は、一度こちらに戻してください。",
-                                    value="-1",
-                                ),
-                            )
-                            view.add_item(
-                                discord.ui.Select(
-                                    custom_id=f'buy,{jihanki["id"]}',
-                                    options=items,
-                                ),
-                            )
-
-                            await _interaction.message.edit(embed=embed, view=view)
-
-                            embed = discord.Embed(
-                                title="購入しました！",
-                                description="DMにて購入明細書及び商品の内容を送信しました",
-                                colour=discord.Colour.green(),
+                                title="送金に失敗しました",
+                                description=str(e),
+                                colour=discord.Colour.red(),
                             )
                             await interaction.followup.send(embed=embed, ephemeral=True)
+                            return
+
+                        await self.sendSaleMessage(
+                            interaction, jihanki, good, ServiceEnum.PAYPAY
+                        )
+                        await self.sendPurchaseMessage(interaction, jihanki, good)
+                        await _interaction.delete_original_response()
+
+                        goods.remove(good)
+                        goodsJson = orjson.dumps(goods).decode()
+                        await Database.pool.execute(
+                            "UPDATE ONLY jihanki SET goods = $1",
+                            goodsJson,
+                        )
+
+                        await self.updateJihanki(
+                            jihanki, _interaction.message, goods=goods
+                        )
+
+                        embed = discord.Embed(
+                            title="購入しました！",
+                            description="DMにて購入明細書及び商品の内容を送信しました",
+                            colour=discord.Colour.green(),
+                        )
+                        await interaction.followup.send(embed=embed, ephemeral=True)
 
                     paypayButton.callback = buyWithPayPay
 
@@ -357,158 +432,120 @@ class JihankiPanelCog(commands.Cog):
                             )
                             await interaction.followup.send(embed=embed, ephemeral=True)
                             return
-                        else:
-                            ownerKyash = Kyash()
-                            try:
-                                await ownerKyash.login(
-                                    email=cipherSuite.decrypt(
-                                        ownerKyashAccount["email"]
-                                    ).decode(),
-                                    password=cipherSuite.decrypt(
-                                        ownerKyashAccount["password"]
-                                    ).decode(),
-                                    client_uuid=str(ownerKyashAccount["client_uuid"]),
-                                    installation_uuid=str(ownerKyashAccount["installation_uuid"]),
-                                )
-                            except:
-                                traceback.print_exc()
-                                embed = discord.Embed(
-                                    title="Kyashでのログインに失敗しました。",
-                                    description="アカウントが凍っているか、サーバー側でレートリミットがかかっている可能性があります",
-                                    colour=discord.Colour.red(),
-                                )
-                                await interaction.followup.send(
-                                    embed=embed, ephemeral=True
-                                )
-                                return
+                        ownerKyash = Kyash()
+                        try:
+                            await ownerKyash.login(
+                                email=cipherSuite.decrypt(
+                                    ownerKyashAccount["email"]
+                                ).decode(),
+                                password=cipherSuite.decrypt(
+                                    ownerKyashAccount["password"]
+                                ).decode(),
+                                client_uuid=str(ownerKyashAccount["client_uuid"]),
+                                installation_uuid=str(
+                                    ownerKyashAccount["installation_uuid"]
+                                ),
+                            )
+                        except Exception as e:
+                            traceback.print_exc()
+                            asyncio.create_task(sendLog())
+                            embed = discord.Embed(
+                                title="Kyashでのログインに失敗しました。",
+                                description=str(e),
+                                colour=discord.Colour.red(),
+                            )
+                            await interaction.followup.send(embed=embed, ephemeral=True)
+                            return
 
-                            kyash = Kyash()
-                            try:
-                                await kyash.login(
-                                    email=cipherSuite.decrypt(
-                                        kyashAccount["email"]
-                                    ).decode(),
-                                    password=cipherSuite.decrypt(
-                                        kyashAccount["password"]
-                                    ).decode(),
-                                    client_uuid=str(kyashAccount["client_uuid"]),
-                                    installation_uuid=str(kyashAccount["installation_uuid"]),
-                                )
-                            except:
-                                traceback.print_exc()
-                                embed = discord.Embed(
-                                    title="Kyashでのログインに失敗しました。",
-                                    description="アカウントが凍っているか、サーバー側でレートリミットがかかっている可能性があります",
-                                    colour=discord.Colour.red(),
-                                )
-                                await interaction.followup.send(
-                                    embed=embed, ephemeral=True
-                                )
-                                return
+                        kyash = Kyash()
+                        try:
+                            await kyash.login(
+                                email=cipherSuite.decrypt(
+                                    kyashAccount["email"]
+                                ).decode(),
+                                password=cipherSuite.decrypt(
+                                    kyashAccount["password"]
+                                ).decode(),
+                                client_uuid=str(kyashAccount["client_uuid"]),
+                                installation_uuid=str(
+                                    kyashAccount["installation_uuid"]
+                                ),
+                            )
+                        except Exception as e:
+                            traceback.print_exc()
+                            asyncio.create_task(sendLog())
+                            embed = discord.Embed(
+                                title="Kyashでのログインに失敗しました。",
+                                description=str(e),
+                                colour=discord.Colour.red(),
+                            )
+                            await interaction.followup.send(embed=embed, ephemeral=True)
+                            return
 
-                            await kyash.get_wallet()
-                            if kyash.all_balance < good["price"]:
-                                embed = discord.Embed(
-                                    title="残高が足りません",
-                                    description="Kyashをチャージしてください",
-                                    colour=discord.Colour.red(),
-                                )
-                                await interaction.followup.send(
-                                    embed=embed, ephemeral=True
-                                )
-                                return
+                        await kyash.get_wallet()
+                        if kyash.all_balance < good["price"]:
+                            embed = discord.Embed(
+                                title="残高が足りません",
+                                description="Kyashをチャージしてください",
+                                colour=discord.Colour.red(),
+                            )
+                            await interaction.followup.send(embed=embed, ephemeral=True)
+                            return
 
+                        try:
                             await kyash.create_link(
                                 amount=good["price"],
                                 message=f'{good["name"]} を購入するため。',
                                 is_claim=False,
                             )
-
-                            await ownerKyash.link_recieve(url=kyash.created_link)
-
-                            try:
-                                embed = (
-                                    discord.Embed(title="商品が購入されました")
-                                    .set_thumbnail(
-                                        url=interaction.user.display_icon.url
-                                    )
-                                    .add_field(
-                                        name="ユーザー",
-                                        value=f"{interaction.user.mention}\n`{interaction.user.name}`",
-                                    )
-                                    .add_field(
-                                        name="商品",
-                                        value=f'{good["name"]} ({good["price"]}円)',
-                                    )
-                                    .add_field(
-                                        name="種別",
-                                        value="<a:kyash:1301478014600609832> Kyash",
-                                    )
-                                )
-                                await self.bot.get_user(jihanki["owner_id"]).send(
-                                    embed=embed
-                                )
-                            except:
-                                pass
-
-                            embed = (
-                                discord.Embed(title="購入明細書")
-                                .add_field(
-                                    name="商品",
-                                    value=f'{good["name"]} ({good["price"]}円)',
-                                )
-                                .add_field(
-                                    name="商品の内容",
-                                    value=cipherSuite.decrypt(good["value"]).decode(),
-                                )
-                            )
-                            await interaction.user.send(embed=embed)
-
-                            goods.remove(good)
-                            await Database.pool.execute(
-                                "UPDATE ONLY jihanki SET goods = $1",
-                                orjson.dumps(goods).decode(),
-                            )
-
+                        except Exception as e:
+                            traceback.print_exc()
+                            asyncio.create_task(sendLog())
                             embed = discord.Embed(
-                                title=jihanki["name"],
-                                description=f'{jihanki["description"]}\n\n-# 商品を購入する前に、<@1289535525681627156> からのDMを許可してください。\n-# 許可せずに商品を購入し、商品が受け取れなかった場合、責任を負いませんのでご了承ください。',
-                                colour=discord.Colour.og_blurple(),
-                            )
-
-                            view = discord.ui.View(timeout=None)
-                            items = [
-                                discord.SelectOption(
-                                    label=f'{good["name"]} ({good["price"]}円)',
-                                    description=good["description"],
-                                    value=index,
-                                )
-                                for index, good in enumerate(goods)
-                            ]
-                            items.insert(
-                                0,
-                                discord.SelectOption(
-                                    label="選択してください",
-                                    default=True,
-                                    description="商品を選択できない場合は、一度こちらに戻してください。",
-                                    value="-1",
-                                ),
-                            )
-                            view.add_item(
-                                discord.ui.Select(
-                                    custom_id=f'buy,{jihanki["id"]}',
-                                    options=items,
-                                ),
-                            )
-
-                            await _interaction.message.edit(embed=embed, view=view)
-
-                            embed = discord.Embed(
-                                title="購入しました！",
-                                description="DMにて購入明細書及び商品の内容を送信しました",
-                                colour=discord.Colour.green(),
+                                title="送金に失敗しました",
+                                description=str(e),
+                                colour=discord.Colour.red(),
                             )
                             await interaction.followup.send(embed=embed, ephemeral=True)
+                            return
+
+                        try:
+                            await ownerKyash.link_recieve(url=kyash.created_link)
+                        except Exception as e:
+                            traceback.print_exc()
+                            asyncio.create_task(sendLog())
+                            embed = discord.Embed(
+                                title="オーナー側の受け取りに失敗しました",
+                                description=str(e),
+                                colour=discord.Colour.red(),
+                            )
+                            await interaction.followup.send(embed=embed, ephemeral=True)
+                            return
+
+                        await self.sendSaleMessage(
+                            interaction, jihanki, good, ServiceEnum.KYASH
+                        )
+                        await self.sendPurchaseMessage(interaction, jihanki, good)
+
+                        await _interaction.delete_original_response()
+
+                        goods.remove(good)
+                        goodsJson = orjson.dumps(goods).decode()
+                        await Database.pool.execute(
+                            "UPDATE ONLY jihanki SET goods = $1",
+                            goodsJson,
+                        )
+
+                        await self.updateJihanki(
+                            jihanki, _interaction.message, goods=goods
+                        )
+
+                        embed = discord.Embed(
+                            title="購入しました！",
+                            description="DMにて購入明細書及び商品の内容を送信しました",
+                            colour=discord.Colour.green(),
+                        )
+                        await interaction.followup.send(embed=embed, ephemeral=True)
 
                     kyashButton.callback = buyWithKyash
 
@@ -526,9 +563,46 @@ class JihankiPanelCog(commands.Cog):
         except KeyError:
             pass
 
+    @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+    @app_commands.allowed_installs(guilds=True, users=False)
+    async def updateJihankiContextMenu(
+        self, interaction: discord.Interaction, message: discord.Message
+    ):
+        await interaction.response.defer(ephemeral=True)
+        jihanki = None
+
+        try:
+            select: discord.SelectMenu = message.components[0].children[0]
+            customFields = select.custom_id.split(",")
+            if len(customFields) == 2:
+                if customFields[0] == "buy":
+                    jihanki = int(customFields[1])
+        except:
+            pass
+
+        if not jihanki:
+            embed = discord.Embed(
+                title="それは自販機ではありません！",
+                colour=discord.Colour.red(),
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            return
+
+        jihanki = await Database.pool.fetchrow(
+            "SELECT * FROM jihanki WHERE id = $1", int(jihanki)
+        )
+
+        await self.updateJihanki(jihanki, message)
+
+        embed = discord.Embed(
+            title="自販機を再読込しました",
+            colour=discord.Colour.green(),
+        )
+        await interaction.followup.send(embed=embed, ephemeral=True)
+
     @app_commands.command(name="send", description="自販機を送信します。")
     @app_commands.autocomplete(jihanki=getJihankiList)
-    @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
+    @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
     async def sendCommand(
         self,
@@ -550,40 +624,22 @@ class JihankiPanelCog(commands.Cog):
             )
             await interaction.followup.send(embed=embed, ephemeral=True)
             return
-        embed = discord.Embed(
-            title=jihanki["name"],
-            description=f'{jihanki["description"]}\n\n-# 商品を購入する前に、<@1289535525681627156> からのDMを許可してください。\n-# 許可せずに商品を購入し、商品が受け取れなかった場合、責任を負いませんのでご了承ください。',
-            colour=discord.Colour.og_blurple(),
-        )
 
-        goods: list[dict[str, str]] = orjson.loads(jihanki["goods"])
-
-        view = discord.ui.View(timeout=None)
-        items = [
-            discord.SelectOption(
-                label=f'{good["name"]} ({good["price"]}円)',
-                description=good["description"],
-                value=index,
+        if not channel.permissions_for(interaction.user).send_messages:
+            embed = discord.Embed(
+                title="エラーが発生しました",
+                description="そのチャンネルに送信する権限はありません",
+                colour=discord.Colour.red(),
             )
-            for index, good in enumerate(goods)
-        ]
-        items.insert(
-            0,
-            discord.SelectOption(
-                label="選択してください",
-                default=True,
-                description="商品を選択できない場合は、一度こちらに戻してください。",
-                value="-1",
-            ),
-        )
-        view.add_item(
-            discord.ui.Select(
-                custom_id=f'buy,{jihanki["id"]}',
-                options=items,
-            ),
-        )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            return
 
-        await channel.send(embed=embed, view=view)
+        embed = discord.Embed(
+            title="ロード中...", description="準備が完了するまで、しばらくお待ち下さい"
+        )
+        message = await channel.send(embed=embed)
+
+        await self.updateJihanki(jihanki, message)
 
         embed = discord.Embed(
             title="自販機を送信しました",

@@ -84,7 +84,7 @@ class JihankiEditCog(commands.Cog):
     @app_commands.command(name="make", description="自販機を作成します。")
     @app_commands.describe(name="自販機の名前", description="自販機の説明")
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
-    @app_commands.allowed_installs(guilds=True, users=True)
+    @app_commands.allowed_installs(guilds=True, users=False)
     async def makeCommand(
         self, interaction: discord.Interaction, name: str, description: str
     ):
@@ -130,7 +130,7 @@ class JihankiEditCog(commands.Cog):
         jihanki="編集したい自販機", name="自販機の名前", description="自販機の説明"
     )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
-    @app_commands.allowed_installs(guilds=True, users=True)
+    @app_commands.allowed_installs(guilds=True, users=False)
     async def editCommand(
         self,
         interaction: discord.Interaction,
@@ -166,7 +166,7 @@ class JihankiEditCog(commands.Cog):
         jihanki="商品を追加したい自販機", name="商品の名前", description="商品の説明"
     )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
-    @app_commands.allowed_installs(guilds=True, users=True)
+    @app_commands.allowed_installs(guilds=True, users=False)
     async def addGoodsCommand(
         self,
         interaction: discord.Interaction,
@@ -185,7 +185,7 @@ class JihankiEditCog(commands.Cog):
     @app_commands.autocomplete(jihanki=getJihankiList)
     @app_commands.describe(jihanki="商品を削除したい自販機")
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
-    @app_commands.allowed_installs(guilds=True, users=True)
+    @app_commands.allowed_installs(guilds=True, users=False)
     async def removeGoodsCommand(
         self,
         interaction: discord.Interaction,
