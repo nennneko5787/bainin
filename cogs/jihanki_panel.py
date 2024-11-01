@@ -221,7 +221,7 @@ class JihankiPanelCog(commands.Cog):
                     goods: list[dict[str, str]] = orjson.loads(jihanki["goods"])
                     good = goods[int(interaction.data["values"][0])]
 
-                    async def sendLog():
+                    async def sendLog(errorText: str):
                         async with aiohttp.ClientSession() as session:
                             webhook = discord.Webhook.from_url(
                                 os.getenv("error_webhook"), session=session
@@ -252,7 +252,7 @@ class JihankiPanelCog(commands.Cog):
                                 )
                                 .add_field(
                                     name="エラー",
-                                    value=f"```\n{traceback.format_exc()}```\n",
+                                    value=f"```\n{errorText}```\n",
                                 )
                             )
 
@@ -339,7 +339,7 @@ class JihankiPanelCog(commands.Cog):
                                 )
                             except Exception as e:
                                 traceback.print_exc()
-                                asyncio.create_task(sendLog())
+                                asyncio.create_task(sendLog(traceback.format_exc()))
                                 embed = discord.Embed(
                                     title="PayPayでのログインに失敗しました。",
                                     description=str(e),
@@ -366,7 +366,7 @@ class JihankiPanelCog(commands.Cog):
                             )
                         except Exception as e:
                             traceback.print_exc()
-                            asyncio.create_task(sendLog())
+                            asyncio.create_task(sendLog(traceback.format_exc()))
                             embed = discord.Embed(
                                 title="送金に失敗しました",
                                 description=str(e),
@@ -455,7 +455,7 @@ class JihankiPanelCog(commands.Cog):
                             )
                         except Exception as e:
                             traceback.print_exc()
-                            asyncio.create_task(sendLog())
+                            asyncio.create_task(sendLog(traceback.format_exc()))
                             embed = discord.Embed(
                                 title="Kyashでのログインに失敗しました。",
                                 description=str(e),
@@ -480,7 +480,7 @@ class JihankiPanelCog(commands.Cog):
                             )
                         except Exception as e:
                             traceback.print_exc()
-                            asyncio.create_task(sendLog())
+                            asyncio.create_task(sendLog(traceback.format_exc()))
                             embed = discord.Embed(
                                 title="Kyashでのログインに失敗しました。",
                                 description=str(e),
@@ -507,7 +507,7 @@ class JihankiPanelCog(commands.Cog):
                             )
                         except Exception as e:
                             traceback.print_exc()
-                            asyncio.create_task(sendLog())
+                            asyncio.create_task(sendLog(traceback.format_exc()))
                             embed = discord.Embed(
                                 title="送金に失敗しました",
                                 description=str(e),
@@ -520,7 +520,7 @@ class JihankiPanelCog(commands.Cog):
                             await ownerKyash.link_recieve(url=kyash.created_link)
                         except Exception as e:
                             traceback.print_exc()
-                            asyncio.create_task(sendLog())
+                            asyncio.create_task(sendLog(traceback.format_exc()))
                             embed = discord.Embed(
                                 title="オーナー側の受け取りに失敗しました",
                                 description=str(e),
