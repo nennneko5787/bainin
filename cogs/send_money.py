@@ -329,10 +329,29 @@ class SendMoneyCog(commands.Cog):
         except:
             pass
 
+        try:
+            embed = (
+                discord.Embed(
+                    title="送金ログ",
+                    colour=discord.Colour.green(),
+                )
+                .set_thumbnail(url=user.display_avatar)
+                .add_field(
+                    name="誰に",
+                    value=f"{user.mention} (`{user.display_name}`) (ID: `{user.name}`)",
+                )
+                .add_field(name="どれぐらい", value=f"{amount}円")
+                .add_field(name="何で", value=serviceString(service))
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+        except:
+            pass
+
         embed = (
             discord.Embed(
                 title="送金しました！",
                 description="相手の方にDMが送信されていると思うので、トラブルになったらボット制作者の`nennneko5787`まで言ってくれればサポートします",
+                colour=discord.Colour.green(),
             )
             .set_thumbnail(url=user.display_avatar)
             .add_field(
