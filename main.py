@@ -18,7 +18,10 @@ bot = commands.Bot("takoyaki#", intents=discord.Intents.default())
 
 @tasks.loop(seconds=20)
 async def precenseLoop():
-    game = discord.Game(f"{len(bot.guilds)} サーバー")
+    appInfo = await bot.application_info()
+    game = discord.Game(
+        f"{len(bot.guilds)} サーバー と {appInfo.approximate_user_install_count} ユーザー"
+    )
     await bot.change_presence(status=discord.Status.online, activity=game)
 
 
