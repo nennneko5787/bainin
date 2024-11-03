@@ -93,7 +93,7 @@ class SendMoneyCog(commands.Cog):
 
                 await webhook.send(embed=embed)
 
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=True)
         if service == "kyash":
             ownerKyashAccount = await Database.pool.fetchrow(
                 "SELECT * FROM kyash WHERE id = $1", user.id
@@ -326,7 +326,6 @@ class SendMoneyCog(commands.Cog):
                 .add_field(name="何で", value=serviceString(service))
             )
             await user.send(embed=embed)
-            return
         except:
             pass
 
