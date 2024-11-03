@@ -29,6 +29,9 @@ class AccountLinkCog(commands.Cog):
             app_commands.Choice(name="PayPay", value="paypay"),
         ]
     )
+    @app_commands.describe(service="確認したいサービス")
+    @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+    @app_commands.allowed_installs(guilds=True, users=True)
     async def checkCommand(
         self,
         interaction: discord.Interaction,
@@ -46,7 +49,7 @@ class AccountLinkCog(commands.Cog):
                         commandId = cmd.id
                 embed = discord.Embed(
                     title="Kyashのアカウントが紐づけされていません",
-                    description=f"</link:{commandId}:> コマンドを使用し、アカウントを紐づけしてください。",
+                    description=f"</link:{commandId}> コマンドを使用し、アカウントを紐づけしてください。",
                     colour=discord.Colour.red(),
                 )
                 await interaction.followup.send(embed=embed, ephemeral=True)
@@ -92,7 +95,7 @@ class AccountLinkCog(commands.Cog):
                         commandId = cmd.id
                 embed = discord.Embed(
                     title="PayPayのアカウントが紐づけされていません",
-                    description=f"</link:{commandId}:> コマンドを使用し、アカウントを紐づけしてください。",
+                    description=f"</link:{commandId}> コマンドを使用し、アカウントを紐づけしてください。",
                     colour=discord.Colour.red(),
                 )
                 await interaction.followup.send(embed=embed, ephemeral=True)
@@ -155,6 +158,8 @@ class AccountLinkCog(commands.Cog):
             app_commands.Choice(name="PayPay", value="paypay"),
         ]
     )
+    @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+    @app_commands.allowed_installs(guilds=True, users=True)
     async def linkCommand(
         self,
         interaction: discord.Interaction,

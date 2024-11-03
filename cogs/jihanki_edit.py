@@ -21,13 +21,20 @@ cipherSuite = Fernet(os.getenv("fernet_key").encode())
 
 class AddGoodsModal(discord.ui.Modal, title="商品を追加"):
     def __init__(
-        self, jihanki: int, name: str, description: str, price: int, title="商品を追加"
+        self,
+        jihanki: int,
+        name: str,
+        description: str,
+        price: int,
+        infinite: bool = False,
+        title="商品を追加",
     ):
         super().__init__(title=title)
         self.jihanki = jihanki
         self.name = name
         self.description = description
         self.price = price
+        self.infinite = infinite
         self.goodsValue = discord.ui.TextInput(
             label=f'"{name}"の中身',
             style=discord.TextStyle.long,
@@ -53,6 +60,7 @@ class AddGoodsModal(discord.ui.Modal, title="商品を追加"):
                 "name": self.name,
                 "description": self.description,
                 "price": self.price,
+                "infinite": self.infinite,
                 "value": cipherSuite.encrypt(self.goodsValue.value.encode()).decode(),
             }
         )
@@ -163,7 +171,11 @@ class JihankiEditCog(commands.Cog):
     @app_commands.command(name="addgoods", description="自販機に商品を追加します。")
     @app_commands.autocomplete(jihanki=getJihankiList)
     @app_commands.describe(
-        jihanki="商品を追加したい自販機", name="商品の名前", description="商品の説明"
+        jihanki="商品を追加したい自販機",
+        name="商品の名前",
+        description="商品の説明",
+        price="商品の価格",
+        infinite="在庫無限",
     )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
@@ -174,9 +186,10 @@ class JihankiEditCog(commands.Cog):
         name: str,
         description: str,
         price: app_commands.Range[int, 0],
+        infinite: bool = False,
     ):
         await interaction.response.send_modal(
-            AddGoodsModal(int(jihanki), name, description, price)
+            AddGoodsModal(int(jihanki), name, description, price, infinite)
         )
 
     @app_commands.command(

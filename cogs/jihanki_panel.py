@@ -160,7 +160,7 @@ class JihankiPanelCog(commands.Cog):
                     )
                     .add_field(
                         name="購入したユーザー",
-                        value=f"{interaction.user.mention}\n`{interaction.user.name}`",
+                        value=f"{interaction.user.mention} (ID: `{interaction.user.name}`) (UID: {interaction.user.id})",
                     )
                     .add_field(
                         name="商品",
@@ -265,16 +265,17 @@ class JihankiPanelCog(commands.Cog):
                         await self.sendPurchaseMessage(interaction, jihanki, good)
                         await _interaction.delete_original_response()
 
-                        goods.remove(good)
-                        goodsJson = orjson.dumps(goods).decode()
-                        await Database.pool.execute(
-                            "UPDATE ONLY jihanki SET goods = $1",
-                            goodsJson,
-                        )
+                        if not good.get("infinite", False):
+                            goods.remove(good)
+                            goodsJson = orjson.dumps(goods).decode()
+                            await Database.pool.execute(
+                                "UPDATE ONLY jihanki SET goods = $1",
+                                goodsJson,
+                            )
 
-                        await self.updateJihanki(
-                            jihanki, _interaction.message, goods=goods
-                        )
+                            await self.updateJihanki(
+                                jihanki, _interaction.message, goods=goods
+                            )
 
                         embed = discord.Embed(
                             title="購入しました！",
@@ -318,7 +319,7 @@ class JihankiPanelCog(commands.Cog):
                                     commandId = cmd.id
                             embed = discord.Embed(
                                 title="PayPayのアカウントが紐づけされていません",
-                                description=f"</link:{commandId}:> コマンドを使用し、アカウントを紐づけしてください。",
+                                description=f"</link:{commandId}> コマンドを使用し、アカウントを紐づけしてください。",
                                 colour=discord.Colour.red(),
                             )
                             await interaction.followup.send(embed=embed, ephemeral=True)
@@ -381,16 +382,17 @@ class JihankiPanelCog(commands.Cog):
                         await self.sendPurchaseMessage(interaction, jihanki, good)
                         await _interaction.delete_original_response()
 
-                        goods.remove(good)
-                        goodsJson = orjson.dumps(goods).decode()
-                        await Database.pool.execute(
-                            "UPDATE ONLY jihanki SET goods = $1",
-                            goodsJson,
-                        )
+                        if not good.get("infinite", False):
+                            goods.remove(good)
+                            goodsJson = orjson.dumps(goods).decode()
+                            await Database.pool.execute(
+                                "UPDATE ONLY jihanki SET goods = $1",
+                                goodsJson,
+                            )
 
-                        await self.updateJihanki(
-                            jihanki, _interaction.message, goods=goods
-                        )
+                            await self.updateJihanki(
+                                jihanki, _interaction.message, goods=goods
+                            )
 
                         embed = discord.Embed(
                             title="購入しました！",
@@ -434,7 +436,7 @@ class JihankiPanelCog(commands.Cog):
                                     commandId = cmd.id
                             embed = discord.Embed(
                                 title="Kyashのアカウントが紐づけされていません",
-                                description=f"</link:{commandId}:> コマンドを使用し、アカウントを紐づけしてください。",
+                                description=f"</link:{commandId}> コマンドを使用し、アカウントを紐づけしてください。",
                                 colour=discord.Colour.red(),
                             )
                             await interaction.followup.send(embed=embed, ephemeral=True)
@@ -536,16 +538,17 @@ class JihankiPanelCog(commands.Cog):
 
                         await _interaction.delete_original_response()
 
-                        goods.remove(good)
-                        goodsJson = orjson.dumps(goods).decode()
-                        await Database.pool.execute(
-                            "UPDATE ONLY jihanki SET goods = $1",
-                            goodsJson,
-                        )
+                        if not good.get("infinite", False):
+                            goods.remove(good)
+                            goodsJson = orjson.dumps(goods).decode()
+                            await Database.pool.execute(
+                                "UPDATE ONLY jihanki SET goods = $1",
+                                goodsJson,
+                            )
 
-                        await self.updateJihanki(
-                            jihanki, _interaction.message, goods=goods
-                        )
+                            await self.updateJihanki(
+                                jihanki, _interaction.message, goods=goods
+                            )
 
                         embed = discord.Embed(
                             title="購入しました！",
@@ -609,6 +612,7 @@ class JihankiPanelCog(commands.Cog):
 
     @app_commands.command(name="send", description="自販機を送信します。")
     @app_commands.autocomplete(jihanki=getJihankiList)
+    @app_commands.describe(jihanki="送信したい自販機", channel="送信先チャンネル")
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
     async def sendCommand(
