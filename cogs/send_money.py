@@ -28,9 +28,9 @@ def serviceString(service: ServiceEnum):
         case ServiceEnum.NONE:
             return "決済無し"
         case ServiceEnum.PAYPAY:
-            return "<a:paypay:1301478001430626348> PayPay"
+            return "<:paypay:1301478001430626348> PayPay"
         case ServiceEnum.KYASH:
-            return "<a:kyash:1301478014600609832> Kyash"
+            return "<:kyash:1301478014600609832> Kyash"
         case _:
             return "不明"
 
