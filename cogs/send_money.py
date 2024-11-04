@@ -28,9 +28,9 @@ def serviceString(service: ServiceEnum):
         case ServiceEnum.NONE:
             return "決済無し"
         case ServiceEnum.PAYPAY:
-            return "<:paypay:1301478001430626348> PayPay"
+            return "<a:paypay:1301478001430626348> PayPay"
         case ServiceEnum.KYASH:
-            return "<:kyash:1301478014600609832> Kyash"
+            return "<a:kyash:1301478014600609832> Kyash"
         case _:
             return "不明"
 
@@ -134,7 +134,7 @@ class SendMoneyCog(commands.Cog):
                 )
             except Exception as e:
                 traceback.print_exc()
-                asyncio.create_task(ServiceEnum.KYASH, sendLog(traceback.format_exc()))
+                asyncio.create_task(sendLog(ServiceEnum.KYASH, traceback.format_exc()))
                 embed = discord.Embed(
                     title="Kyashでのログインに失敗しました。",
                     description=str(e),
@@ -155,7 +155,7 @@ class SendMoneyCog(commands.Cog):
                 )
             except Exception as e:
                 traceback.print_exc()
-                asyncio.create_task(ServiceEnum.KYASH, sendLog(traceback.format_exc()))
+                asyncio.create_task(sendLog(ServiceEnum.KYASH, traceback.format_exc()))
                 embed = discord.Embed(
                     title="Kyashでのログインに失敗しました。",
                     description=str(e),
@@ -182,7 +182,7 @@ class SendMoneyCog(commands.Cog):
                 )
             except Exception as e:
                 traceback.print_exc()
-                asyncio.create_task(ServiceEnum.KYASH, sendLog(traceback.format_exc()))
+                asyncio.create_task(sendLog(ServiceEnum.KYASH, traceback.format_exc()))
                 embed = discord.Embed(
                     title="送金に失敗しました",
                     description=str(e),
@@ -192,10 +192,13 @@ class SendMoneyCog(commands.Cog):
                 return
 
             try:
-                await ownerKyash.link_recieve(url=kyash.created_link)
+                await ownerKyash.link_check(kyash.created_link)
+
+                await ownerKyash.link_recieve(kyash.created_link, ownerKyash.link_uuid)
             except Exception as e:
                 traceback.print_exc()
-                asyncio.create_task(ServiceEnum.KYASH, sendLog(traceback.format_exc()))
+                await kyash.link_cancel(kyash.created_link, ownerKyash.link_uuid)
+                asyncio.create_task(sendLog(ServiceEnum.KYASH, traceback.format_exc()))
                 embed = discord.Embed(
                     title="オーナー側の受け取りに失敗しました",
                     description=str(e),
@@ -251,7 +254,7 @@ class SendMoneyCog(commands.Cog):
                 except Exception as e:
                     traceback.print_exc()
                     asyncio.create_task(
-                        ServiceEnum.PAYPAY, sendLog(traceback.format_exc())
+                        sendLog(ServiceEnum.PAYPAY, traceback.format_exc())
                     )
                     embed = discord.Embed(
                         title="PayPayでのログインに失敗しました。",
@@ -275,7 +278,7 @@ class SendMoneyCog(commands.Cog):
                 await paypay.send_money(amount, ownerPaypayAccount["external_user_id"])
             except Exception as e:
                 traceback.print_exc()
-                asyncio.create_task(ServiceEnum.PAYPAY, sendLog(traceback.format_exc()))
+                asyncio.create_task(sendLog(ServiceEnum.PAYPAY, traceback.format_exc()))
                 embed = discord.Embed(
                     title="送金に失敗しました",
                     description=str(e),

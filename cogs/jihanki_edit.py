@@ -220,7 +220,7 @@ class JihankiEditCog(commands.Cog):
         select = discord.ui.Select(
             options=[
                 discord.SelectOption(
-                    label=f'{good["name"]} ({good["price"]}円) {'(在庫無限)' if good.get('infinite', False) else ''}',
+                    label=f'{good["name"]} ({good["price"]}円) {"(在庫無限)" if good.get("infinite", False) else ""}',
                     description=good["description"],
                     value=index,
                 )

@@ -31,9 +31,9 @@ def serviceString(service: ServiceEnum):
         case ServiceEnum.NONE:
             return "決済無し"
         case ServiceEnum.PAYPAY:
-            return "<:paypay:1301478001430626348> PayPay"
+            return "<a:paypay:1301478001430626348> PayPay"
         case ServiceEnum.KYASH:
-            return "<:kyash:1301478014600609832> Kyash"
+            return "<a:kyash:1301478014600609832> Kyash"
         case _:
             return "不明"
 
@@ -290,7 +290,7 @@ class JihankiPanelCog(commands.Cog):
                         style=discord.ButtonStyle.danger,
                         label="PayPayで購入",
                         emoji=discord.PartialEmoji.from_str(
-                            "<a:paypay:1301478001430626348>"
+                            "<paypay:1301478001430626348>"
                         ),
                     )
 
@@ -519,10 +519,19 @@ class JihankiPanelCog(commands.Cog):
                             return
 
                         try:
-                            await ownerKyash.link_recieve(url=kyash.created_link)
+                            await ownerKyash.link_check(kyash.created_link)
+
+                            await ownerKyash.link_recieve(
+                                kyash.created_link, ownerKyash.link_uuid
+                            )
                         except Exception as e:
                             traceback.print_exc()
-                            asyncio.create_task(sendLog(traceback.format_exc()))
+                            await kyash.link_cancel(
+                                kyash.created_link, ownerKyash.link_uuid
+                            )
+                            asyncio.create_task(
+                                sendLog(ServiceEnum.KYASH, traceback.format_exc())
+                            )
                             embed = discord.Embed(
                                 title="オーナー側の受け取りに失敗しました",
                                 description=str(e),

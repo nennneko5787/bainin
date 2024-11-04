@@ -37,6 +37,7 @@ async def setup_hook():
     await bot.load_extension("cogs.jihanki_edit")
     await bot.load_extension("cogs.jihanki_panel")
     await bot.load_extension("cogs.send_money")
+    await bot.load_extension("cogs.claim_money")
 
 
 @asynccontextmanager
