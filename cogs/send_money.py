@@ -361,7 +361,7 @@ class SendMoneyCog(commands.Cog):
         embed = (
             discord.Embed(
                 title="送金しました！",
-                description="相手の方にDMが送信されていると思うので、トラブルになったらボット制作者の`nennneko5787`まで言ってくれればサポートします",
+                description="トラブルが発生した場合は[サポートサーバー](https://discord.gg/2TfFUuY3RG)までどうぞ",
                 colour=discord.Colour.green(),
             )
             .set_thumbnail(url=user.display_avatar)

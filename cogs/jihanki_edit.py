@@ -113,6 +113,17 @@ class JihankiEditCog(commands.Cog):
         )
         await interaction.followup.send(embed=embed)
 
+        commands = await self.bot.tree.fetch_commands()
+        for cmd in commands:
+            if cmd.name == "link":
+                commandId = cmd.id
+
+        embed = discord.Embed(
+            title="⚠️注意",
+            description=f"自販機を作るだけでは、実際に売上を上げることはできません！\n売上を上げたい場合、 </link:{commandId}> コマンドしてPayPayかKyashのアカウントをリンクする必要があります。\nわからないときはいつでも[サポートサーバー](https://discord.gg/2TfFUuY3RG)へどうぞ。",
+        )
+        await interaction.followup.send(embed=embed)
+
     async def getJihankiList(
         self,
         interaction: discord.Interaction,
