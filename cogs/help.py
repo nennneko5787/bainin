@@ -19,7 +19,7 @@ class HelpCog(commands.Cog):
                 description="自販機も作れて送金・請求もDiscordでできるボットです。説明をよく読んでご利用ください～！\nサポートサーバー: https://discord.gg/2TfFUuY3RG",
                 colour=random.choice(
                     [
-                        discord.Colour.from_rgb(195, 229, 231),
+                        discord.Colour.from_rgb(134, 206, 203),
                         discord.Colour.from_rgb(252, 245, 167),
                     ]
                 ),
