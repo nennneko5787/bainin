@@ -333,7 +333,7 @@ class JihankiPanelCog(commands.Cog):
                                 description="`/proxy` コマンドでプロキシを設定するか、[サポートサーバー](https://discord.gg/2TfFUuY3RG) で許可をもらってください。",
                                 colour=discord.Colour.red(),
                             )
-                            await interaction.followup.send(embed=embed)
+                            await interaction.followup.send(embed=embed, ephemeral=True)
                             return
 
                         if paypayAccount["proxy"]:
@@ -454,7 +454,7 @@ class JihankiPanelCog(commands.Cog):
                                 description="自販機のオーナーに「`/proxy` コマンドでプロキシを設定するか、[サポートサーバー](https://discord.gg/2TfFUuY3RG) で許可をもらってください。」と言ってあげてください。",
                                 colour=discord.Colour.red(),
                             )
-                            await interaction.followup.send(embed=embed)
+                            await interaction.followup.send(embed=embed, ephemeral=True)
                             return
 
                         if ownerKyash["proxy"]:
@@ -489,7 +489,7 @@ class JihankiPanelCog(commands.Cog):
                                 description="`/proxy` コマンドでプロキシを設定するか、[サポートサーバー](https://discord.gg/2TfFUuY3RG) で許可をもらってください。",
                                 colour=discord.Colour.red(),
                             )
-                            await interaction.followup.send(embed=embed)
+                            await interaction.followup.send(embed=embed, ephemeral=True)
                             return
 
                         if kyashAccount["proxy"]:
