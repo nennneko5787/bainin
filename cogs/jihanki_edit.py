@@ -7,8 +7,6 @@ import dotenv
 import orjson
 from discord.ext import commands
 from discord import app_commands
-from aiokyasher import Kyash
-from aiopaypaython import PayPay
 from cryptography.fernet import Fernet
 from snowflake import SnowflakeGenerator
 

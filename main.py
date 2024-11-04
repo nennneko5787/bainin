@@ -16,6 +16,24 @@ discord.utils.setup_logging()
 bot = commands.Bot("takoyaki#", intents=discord.Intents.default())
 
 
+@bot.command("dmsend")
+async def dmSendCommand(ctx: commands.Context, *, message: str):
+    if ctx.author.id != 1048448686914551879:
+        return
+
+    users = await Database.pool.fetch(
+        "SELECT * FROM kyash"
+    ) + await Database.pool.fetch("SELECT * FROM paypay")
+
+    for u in users:
+        user = await bot.fetch_user(u["id"])
+        try:
+            await user.send(message)
+        except:
+            pass
+    await ctx.reply("successful")
+
+
 @tasks.loop(seconds=20)
 async def precenseLoop():
     appInfo = await bot.application_info()

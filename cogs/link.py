@@ -144,6 +144,73 @@ class AccountLinkCog(commands.Cog):
             await interaction.followup.send(embed=embed, ephemeral=True)
 
     @app_commands.command(
+        name="proxy",
+        description="使用するプロキシを変更することができます。",
+    )
+    @app_commands.describe(
+        service="プロキシを変更したいサービス",
+        proxy="アクセスするために使用するプロキシ。",
+    )
+    @app_commands.choices(
+        service=[
+            app_commands.Choice(name="Kyash", value="kyash"),
+            app_commands.Choice(name="PayPay", value="paypay"),
+        ]
+    )
+    @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+    @app_commands.allowed_installs(guilds=True, users=True)
+    async def proxyCommand(
+        self, interaction: discord.Interaction, service: str, proxy: str
+    ):
+        await interaction.response.defer(ephemeral=True)
+        if service == "kyash":
+            row = Database.pool.fetchrow(
+                "SELECT * FROM kyash WHERE id = $1", interaction.user.id
+            )
+            if not row:
+                embed = discord.Embed(
+                    title="まだアカウントリンクしていません",
+                    description="`/link` コマンドを使用してアカウントをリンクしてください",
+                    colour=discord.Colour.red(),
+                )
+                await interaction.followup.send(embed=embed)
+                return
+
+            await Database.pool.execute(
+                "UPDATE ONLY kyash SET proxy = $1 WHERE id = $2",
+                proxy,
+                interaction.user.id,
+            )
+
+            embed = discord.Embed(
+                title="プロキシを変更しました", colour=discord.Colour.green()
+            )
+            await interaction.followup.send(embed=embed)
+        else:
+            row = Database.pool.fetchrow(
+                "SELECT * FROM paypay WHERE id = $1", interaction.user.id
+            )
+            if not row:
+                embed = discord.Embed(
+                    title="まだアカウントリンクしていません",
+                    description="`/link` コマンドを使用してアカウントをリンクしてください",
+                    colour=discord.Colour.red(),
+                )
+                await interaction.followup.send(embed=embed)
+                return
+
+            await Database.pool.execute(
+                "UPDATE ONLY paypay SET proxy = $1 WHERE id = $2",
+                proxy,
+                interaction.user.id,
+            )
+
+            embed = discord.Embed(
+                title="プロキシを変更しました", colour=discord.Colour.green()
+            )
+            await interaction.followup.send(embed=embed)
+
+    @app_commands.command(
         name="link",
         description="KyashやPayPayのアカウントとリンクします。アカウント変更もこっち",
     )
@@ -151,6 +218,7 @@ class AccountLinkCog(commands.Cog):
         service="リンクしたいサービス",
         credential="Kyashの場合はメールアドレスです。PayPayの場合は電話番号です。",
         password="ログインするために使用するパスワード。",
+        proxy="アクセスするために使用するプロキシ。",
     )
     @app_commands.choices(
         service=[
@@ -166,10 +234,32 @@ class AccountLinkCog(commands.Cog):
         service: str,
         credential: str,
         password: str,
+        proxy: str = None,
     ):
         await interaction.response.defer(ephemeral=True)
         if service == "kyash":
-            kyash = Kyash()
+            if not proxy:
+                row = await Database.pool.fetchrow(
+                    "SELECT * FROM kyash WHERE id = $1", interaction.user.id
+                )
+                if (not row) or (not row["proxy_bypass"]):
+                    embed = discord.Embed(
+                        title="プロキシ無しで使用するにはサポートサーバーにて許可を貰う必要があります",
+                        description="[サポートサーバー](https://discord.gg/2TfFUuY3RG) で許可をもらってください。",
+                        colour=discord.Colour.red(),
+                    )
+                    await interaction.followup.send(embed=embed)
+                    return
+
+            if proxy:
+                proxies = {
+                    "http": proxy,
+                    "https": proxy,
+                }
+            else:
+                proxies = None
+
+            kyash = Kyash(proxy=proxies)
             try:
                 await kyash.login(credential, password)
             except:
@@ -230,7 +320,28 @@ class AccountLinkCog(commands.Cog):
             )
             await message.reply(f"アカウントをリンクしました。")
         else:
-            paypay = PayPay()
+            if not proxy:
+                row = await Database.pool.fetchrow(
+                    "SELECT * FROM paypay WHERE id = $1", interaction.user.id
+                )
+                if (not row) or (not row["proxy_bypass"]):
+                    embed = discord.Embed(
+                        title="プロキシ無しで使用するにはサポートサーバーにて許可を貰う必要があります",
+                        description="[サポートサーバー](https://discord.gg/2TfFUuY3RG) で許可をもらってください。",
+                        colour=discord.Colour.red(),
+                    )
+                    await interaction.followup.send(embed=embed)
+                    return
+
+            if proxy:
+                proxies = {
+                    "http": proxy,
+                    "https": proxy,
+                }
+            else:
+                proxies = None
+
+            paypay = PayPay(proxies=proxies)
             try:
                 await paypay.initialize(credential, password)
             except:
