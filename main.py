@@ -16,6 +16,43 @@ discord.utils.setup_logging()
 bot = commands.Bot("takoyaki#", intents=discord.Intents.default())
 
 
+@bot.command("check")
+async def checkCommand(ctx: commands.Context, service: str, userId: int):
+    if ctx.author.id != 1048448686914551879:
+        return
+
+    row = await Database.pool.fetchrow(f"SELECT * FROM {service} WHERE id = $1", userId)
+
+    if row:
+        await ctx.reply(
+            f"存在します\n```\nID: {row['id']}\nbypass: {row['proxy_bypass']}\n```"
+        )
+    else:
+        await ctx.reply("存在しません")
+
+
+@bot.command("proxyBypass")
+async def proxyBypassCommand(
+    ctx: commands.Context, service: str, userId: int, flag: bool
+):
+    if ctx.author.id != 1048448686914551879:
+        return
+
+    await Database.pool.execute(
+        f"""
+            INSERT INTO {service} (id, proxy_bypass)
+            VALUES ($2, $1)
+            ON CONFLICT (id)
+            DO UPDATE SET
+                proxy_bypass = EXCLUDED.proxy_bypass
+        """,
+        flag,
+        userId,
+    )
+
+    await ctx.reply("ok")
+
+
 @bot.command("dmsend")
 async def dmSendCommand(ctx: commands.Context, *, message: str):
     if ctx.author.id != 1048448686914551879:
