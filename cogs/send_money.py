@@ -61,6 +61,14 @@ class SendMoneyCog(commands.Cog):
         amount: app_commands.Range[int, 1],
         user: discord.User,
     ):
+        if user.bot:
+            embed = discord.Embed(
+                title="エラーが発生しました",
+                description="ボットへは送金できません",
+                colour=discord.Colour.red(),
+            )
+            await interaction.response.send_message(embed=embed)
+
         async def sendLog(service: ServiceEnum, errorText: str):
             async with aiohttp.ClientSession() as session:
                 webhook = discord.Webhook.from_url(
