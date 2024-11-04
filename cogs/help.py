@@ -56,6 +56,12 @@ class HelpCog(commands.Cog):
                 name="/send",
                 value="自販機を現在のチャンネル、または特定のチャンネルに送信します。",
             )
+        else:
+            embed.add_field(
+                name="自販機機能はどこですか...?",
+                value="このボットを**サーバーにインストール**する必要があります。\n[ここをクリックしてサーバーに導入できます。](https://discord.com/oauth2/authorize?client_id=1289535525681627156&permissions=264192&integration_type=0&scope=bot)",
+                inline=False,
+            )
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
