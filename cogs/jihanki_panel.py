@@ -333,7 +333,7 @@ class JihankiPanelCog(commands.Cog):
                                 description="`/proxy` コマンドでプロキシを設定するか、[サポートサーバー](https://discord.gg/2TfFUuY3RG) で許可をもらってください。",
                                 colour=discord.Colour.red(),
                             )
-                            await interaction.followup.send(embed=embed)
+                            await interaction.followup.send(embed=embed, ephemeral=True)
                             return
 
                         if paypayAccount["proxy"]:
@@ -454,7 +454,7 @@ class JihankiPanelCog(commands.Cog):
                                 description="自販機のオーナーに「`/proxy` コマンドでプロキシを設定するか、[サポートサーバー](https://discord.gg/2TfFUuY3RG) で許可をもらってください。」と言ってあげてください。",
                                 colour=discord.Colour.red(),
                             )
-                            await interaction.followup.send(embed=embed)
+                            await interaction.followup.send(embed=embed, ephemeral=True)
                             return
 
                         if ownerKyash["proxy"]:
@@ -489,7 +489,7 @@ class JihankiPanelCog(commands.Cog):
                                 description="`/proxy` コマンドでプロキシを設定するか、[サポートサーバー](https://discord.gg/2TfFUuY3RG) で許可をもらってください。",
                                 colour=discord.Colour.red(),
                             )
-                            await interaction.followup.send(embed=embed)
+                            await interaction.followup.send(embed=embed, ephemeral=True)
                             return
 
                         if kyashAccount["proxy"]:
@@ -699,15 +699,6 @@ class JihankiPanelCog(commands.Cog):
         if jihanki["owner_id"] != interaction.user.id:
             embed = discord.Embed(
                 title="その自販機はあなたのものではありません",
-                colour=discord.Colour.red(),
-            )
-            await interaction.followup.send(embed=embed, ephemeral=True)
-            return
-
-        if not channel.permissions_for(interaction.client.user).send_messages:
-            embed = discord.Embed(
-                title="エラーが発生しました",
-                description="そのチャンネルに送信する権限がありません",
                 colour=discord.Colour.red(),
             )
             await interaction.followup.send(embed=embed, ephemeral=True)
