@@ -115,17 +115,6 @@ class SendMoneyCog(commands.Cog):
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
 
-            if (not ownerKyashAccount["proxy"]) and (
-                not ownerKyashAccount["proxy_bypass"]
-            ):
-                embed = discord.Embed(
-                    title="受け取り側がプロキシを設定していません！",
-                    description="受け取り側の人に「`/proxy` コマンドでプロキシを設定するか、[サポートサーバー](https://discord.gg/2TfFUuY3RG) で許可をもらってください。」と言ってあげてください。",
-                    colour=discord.Colour.red(),
-                )
-                await interaction.followup.send(embed=embed, ephemeral=True)
-                return
-
             if ownerKyash["proxy"]:
                 ownerProxies = {
                     "http": ownerKyashAccount["proxy"],
@@ -145,15 +134,6 @@ class SendMoneyCog(commands.Cog):
                 embed = discord.Embed(
                     title="Kyashのアカウントが紐づけされていません",
                     description=f"</link:{commandId}> コマンドを使用し、アカウントを紐づけしてください。",
-                    colour=discord.Colour.red(),
-                )
-                await interaction.followup.send(embed=embed, ephemeral=True)
-                return
-
-            if (not kyashAccount["proxy"]) and (not kyashAccount["proxy_bypass"]):
-                embed = discord.Embed(
-                    title="プロキシが設定されていません！",
-                    description="`/proxy` コマンドでプロキシを設定するか、[サポートサーバー](https://discord.gg/2TfFUuY3RG) で許可をもらってください。",
                     colour=discord.Colour.red(),
                 )
                 await interaction.followup.send(embed=embed, ephemeral=True)
@@ -277,15 +257,6 @@ class SendMoneyCog(commands.Cog):
                 embed = discord.Embed(
                     title="PayPayのアカウントが紐づけされていません",
                     description=f"</link:{commandId}> コマンドを使用し、アカウントを紐づけしてください。",
-                    colour=discord.Colour.red(),
-                )
-                await interaction.followup.send(embed=embed, ephemeral=True)
-                return
-
-            if (not paypayAccount["proxy"]) and (not paypayAccount["proxy_bypass"]):
-                embed = discord.Embed(
-                    title="プロキシが設定されていません！",
-                    description="`/proxy` コマンドでプロキシを設定するか、[サポートサーバー](https://discord.gg/2TfFUuY3RG) で許可をもらってください。",
                     colour=discord.Colour.red(),
                 )
                 await interaction.followup.send(embed=embed, ephemeral=True)
