@@ -238,19 +238,6 @@ class AccountLinkCog(commands.Cog):
     ):
         await interaction.response.defer(ephemeral=True)
         if service == "kyash":
-            if not proxy:
-                row = await Database.pool.fetchrow(
-                    "SELECT * FROM kyash WHERE id = $1", interaction.user.id
-                )
-                if (not row) or (not row["proxy_bypass"]):
-                    embed = discord.Embed(
-                        title="プロキシ無しで使用するにはサポートサーバーにて許可を貰う必要があります",
-                        description="[サポートサーバー](https://discord.gg/2TfFUuY3RG) で許可をもらってください。",
-                        colour=discord.Colour.red(),
-                    )
-                    await interaction.followup.send(embed=embed)
-                    return
-
             if proxy:
                 proxies = {
                     "http": proxy,
@@ -320,19 +307,6 @@ class AccountLinkCog(commands.Cog):
             )
             await message.reply(f"アカウントをリンクしました。")
         else:
-            if not proxy:
-                row = await Database.pool.fetchrow(
-                    "SELECT * FROM paypay WHERE id = $1", interaction.user.id
-                )
-                if (not row) or (not row["proxy_bypass"]):
-                    embed = discord.Embed(
-                        title="プロキシ無しで使用するにはサポートサーバーにて許可を貰う必要があります",
-                        description="[サポートサーバー](https://discord.gg/2TfFUuY3RG) で許可をもらってください。",
-                        colour=discord.Colour.red(),
-                    )
-                    await interaction.followup.send(embed=embed)
-                    return
-
             if proxy:
                 proxies = {
                     "http": proxy,
