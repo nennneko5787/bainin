@@ -30,7 +30,7 @@ class HelpCog(commands.Cog):
             )
             .add_field(
                 name="/link",
-                value="PayPayやKyashのアカウントとリンクできます。\nアカウントをリンクしないと本ボットをご利用いただくことはできません。\n(プロキシ無しで使いたい人はサポートサーバーまで来てください)",
+                value="PayPayやKyashのアカウントとリンクできます。\nアカウントをリンクしないと本ボットをご利用いただくことはできません。",
             )
             .add_field(
                 name="/check",
