@@ -105,7 +105,7 @@ class ClaimMoneyCog(commands.Cog):
                             await interaction.followup.send(embed=embed, ephemeral=True)
                             return
 
-                        if ownerKyash["proxy"]:
+                        if ownerKyashAccount["proxy"]:
                             ownerProxies = {
                                 "http": ownerKyashAccount["proxy"],
                                 "https": ownerKyashAccount["proxy"],
