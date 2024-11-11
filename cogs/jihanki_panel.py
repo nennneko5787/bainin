@@ -706,6 +706,9 @@ class JihankiPanelCog(commands.Cog):
         else:
             payPayProxies = None
 
+        paypay = False
+        kyash = False
+
         if ownerKyashAccount:
             kyashButton = discord.ui.Button(
                 style=discord.ButtonStyle.primary,
