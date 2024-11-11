@@ -264,7 +264,7 @@ class AccountLinkCog(commands.Cog):
             )
 
             def check(m: discord.Message) -> bool:
-                if (m.type == discord.ChannelType.private) and (m.author.id == interaction.user.id):
+                if (m.channel.type == discord.ChannelType.private) and (m.author.id == interaction.user.id):
                     return True
                 else:
                     return False
@@ -332,7 +332,7 @@ class AccountLinkCog(commands.Cog):
             )
 
             def check(m: discord.Message) -> bool:
-                if (m.type == discord.ChannelType.private) and (m.author.id == interaction.user.id):
+                if (m.channel.type == discord.ChannelType.private) and (m.author.id == interaction.user.id):
                     return True
                 else:
                     return False
