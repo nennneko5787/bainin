@@ -137,7 +137,7 @@ class JihankiPanelCog(commands.Cog):
                     value=serviceString(service),
                 )
             )
-            owner.send(embed=embed)
+            await owner.send(embed=embed)
         except:
             traceback.print_exc()
 
