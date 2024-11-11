@@ -911,7 +911,7 @@ class JihankiPanelCog(commands.Cog):
                 description="自販機のオーナーに「アカウントをリンクしてください！」と言ってあげてください。",
                 colour=discord.Colour.red(),
             )
-            await interaction.followup.send(embed=embed)
+            await interaction.followup.send(embed=embed, ephemeral=True)
             return
 
         embed = discord.Embed(
@@ -919,7 +919,7 @@ class JihankiPanelCog(commands.Cog):
             description=f'## {good["name"]}\n値段: **{good["price"]}円**\n5分以内に決済を完了してください。\n\n-# 商品を購入する前に、<@1289535525681627156> からのDMを許可してください。\n-# 許可せずに商品を購入し、商品が受け取れなかった場合、責任を負いませんのでご了承ください。',
         )
 
-        await interaction.followup.send(embed=embed, view=view)
+        await interaction.followup.send(embed=embed, view=view, ephemeral=True)
 
     @commands.Cog.listener()
     async def on_interaction(self, interaction: discord.Interaction):
