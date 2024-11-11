@@ -928,7 +928,7 @@ class JihankiPanelCog(commands.Cog):
                 customId = interaction.data["custom_id"]
                 customFields = customId.split(",")
                 if customFields[0] == "buy":
-                    self.buy(interaction, customFields)
+                    await self.buy(interaction, customFields)
         except KeyError:
             pass
 
