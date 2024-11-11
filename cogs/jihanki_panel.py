@@ -380,8 +380,6 @@ class JihankiPanelCog(commands.Cog):
             )
             await self.sendPurchaseMessage(interaction, self.jihanki, self.good)
 
-            await self.originalInteraction.delete_original_response()
-
             if not self.good.get("infinite", False):
                 self.goods.remove(self.good)
                 goodsJson = orjson.dumps(self.goods).decode()
@@ -567,8 +565,6 @@ class JihankiPanelCog(commands.Cog):
                 interaction, self.jihanki, self.good, ServiceEnum.KYASH
             )
             await self.sendPurchaseMessage(interaction, self.jihanki, self.good)
-
-            await self.originalInteraction.delete_original_response()
 
             if not self.good.get("infinite", False):
                 self.goods.remove(self.good)
@@ -830,8 +826,6 @@ class JihankiPanelCog(commands.Cog):
                     )
                     await self.sendPurchaseMessage(interaction, jihanki, good)
 
-                    await _interaction.delete_original_response()
-
                     if not good.get("infinite", False):
                         goods.remove(good)
                         goodsJson = orjson.dumps(goods).decode()
@@ -952,7 +946,6 @@ class JihankiPanelCog(commands.Cog):
                         interaction, jihanki, good, ServiceEnum.PAYPAY
                     )
                     await self.sendPurchaseMessage(interaction, jihanki, good)
-                    await _interaction.delete_original_response()
 
                     if not good.get("infinite", False):
                         goods.remove(good)
