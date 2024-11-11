@@ -4,11 +4,11 @@ import traceback
 
 import discord
 import dotenv
-from discord.ext import commands
-from discord import app_commands
 from aiokyasher import Kyash
 from aiopaypaython import PayPay
 from cryptography.fernet import Fernet
+from discord import app_commands
+from discord.ext import commands
 
 from .database import Database
 
@@ -324,8 +324,6 @@ class AccountLinkCog(commands.Cog):
                     "ログインに失敗しました。", ephemeral=True
                 )
                 return
-
-            await interaction.user.create_dm()
 
             await interaction.followup.send(
                 "**2分以内**に、SMSに届いた**URLのみ**を**このボットのダイレクトメッセージ**へ送信してください。",

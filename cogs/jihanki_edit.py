@@ -5,9 +5,9 @@ import traceback
 import discord
 import dotenv
 import orjson
-from discord.ext import commands
-from discord import app_commands
 from cryptography.fernet import Fernet
+from discord import app_commands
+from discord.ext import commands
 from snowflake import SnowflakeGenerator
 
 from .database import Database
@@ -88,21 +88,30 @@ class JihankiEditCog(commands.Cog):
         self.bot = bot
 
     @app_commands.command(name="make", description="自販機を作成します。")
-    @app_commands.describe(name="自販機の名前", description="自販機の説明")
+    @app_commands.describe(
+        name="自販機の名前",
+        description="自販機の説明",
+        achievement="実績チャンネル",
+    )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
     async def makeCommand(
-        self, interaction: discord.Interaction, name: str, description: str
+        self,
+        interaction: discord.Interaction,
+        name: str,
+        description: str,
+        achievement: discord.TextChannel = None,
     ):
         await interaction.response.defer(ephemeral=True)
         gen = SnowflakeGenerator(39)
         id = next(gen)
         await Database.pool.execute(
-            "INSERT INTO jihanki (id, name, description, owner_id) VALUES ($1, $2, $3, $4)",
+            "INSERT INTO jihanki (id, name, description, owner_id, achievement_channel_id) VALUES ($1, $2, $3, $4, $5)",
             id,
             name,
             description,
             interaction.user.id,
+            achievement.id,
         )
         embed = discord.Embed(
             title="自販機を作成しました",
@@ -144,7 +153,10 @@ class JihankiEditCog(commands.Cog):
     @app_commands.command(name="edit", description="自販機を編集します。")
     @app_commands.autocomplete(jihanki=getJihankiList)
     @app_commands.describe(
-        jihanki="編集したい自販機", name="自販機の名前", description="自販機の説明"
+        jihanki="編集したい自販機",
+        name="自販機の名前",
+        description="自販機の説明",
+        achievement="実績チャンネル",
     )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
@@ -154,6 +166,7 @@ class JihankiEditCog(commands.Cog):
         jihanki: str,
         name: str,
         description: str,
+        achievement: discord.TextChannel = None,
     ):
         await interaction.response.defer(ephemeral=True)
         jihanki = await Database.pool.fetchrow(
@@ -167,9 +180,10 @@ class JihankiEditCog(commands.Cog):
             await interaction.followup.send(embed=embed, ephemeral=True)
             return
         await Database.pool.execute(
-            "UPDATE ONLY jihanki SET name = $1, description = $2 WHERE id = $3",
+            "UPDATE ONLY jihanki SET name = $1, description = $2, achievement_channel_id = $3 WHERE id = $4",
             name,
             description,
+            achievement.id,
             jihanki["id"],
         )
         embed = discord.Embed(

@@ -1,8 +1,8 @@
 import random
 
 import discord
-from discord.ext import commands
 from discord import app_commands
+from discord.ext import commands
 
 
 class HelpCog(commands.Cog):
@@ -30,7 +30,7 @@ class HelpCog(commands.Cog):
             )
             .add_field(
                 name="/link",
-                value="PayPayやKyashのアカウントとリンクできます。\nアカウントをリンクしないと本ボットをご利用いただくことはできません。",
+                value="PayPayやKyashのアカウントとリンクできます。",
             )
             .add_field(
                 name="/check",
@@ -62,6 +62,11 @@ class HelpCog(commands.Cog):
                 value="このボットを**サーバーにインストール**する必要があります。\n[ここをクリックしてサーバーに導入できます。](https://discord.com/oauth2/authorize?client_id=1289535525681627156&permissions=264192&integration_type=0&scope=bot)",
                 inline=False,
             )
+
+        embed.add_field(
+            name="PayPayやKyashのリンクが必要なときはどんなときですか？",
+            value="PayPayやKyashのリンクが必要なときは、以下のようなときです。\n- 自販機を設置し、利益を得ようとするとき。\n- 本ボットを通じてPayPayやKyashを送金したり受け取ったりするとき。\n-# 自販機を利用する際には、アカウントのリンクは必要ありません(送金URLのみでできます)。",
+        )
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
