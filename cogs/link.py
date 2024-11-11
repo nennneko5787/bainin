@@ -281,6 +281,7 @@ class AccountLinkCog(commands.Cog):
                 await interaction.followup.send(
                     "エラーが発生しました。", ephemeral=True
                 )
+                return
 
             try:
                 await kyash.validate_otp(message.content)
