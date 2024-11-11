@@ -885,7 +885,7 @@ class JihankiPanelCog(commands.Cog):
             else:
 
                 async def buyWithPayPay(interaction: discord.Interaction):
-                    modal = self.KyashModal(
+                    modal = self.PayPayModal(
                         self.bot,
                         _interaction,
                         ownerPayPayAccount,
