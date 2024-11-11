@@ -298,7 +298,7 @@ class ClaimMoneyCog(commands.Cog):
                                 return
 
                         await paypay.get_balance()
-                        if (paypay.money + paypay.money_light) < amount:
+                        if ((paypay.money or 0) + (paypay.money_light or 0)) < amount:
                             embed = discord.Embed(
                                 title="残高が足りません",
                                 description="PayPayをチャージしてください",

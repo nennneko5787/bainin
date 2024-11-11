@@ -134,7 +134,7 @@ class AccountLinkCog(commands.Cog):
                 .add_field(name="すべての利用可能な残高", value=paypay.useable_balance)
                 .add_field(
                     name="自販機で利用可能な残高",
-                    value=(paypay.money + paypay.money_light),
+                    value=((paypay.money or 0) + (paypay.money_light or 0)),
                 )
                 .add_field(name="所持しているPayPayマネー", value=paypay.money)
                 .add_field(
