@@ -726,9 +726,7 @@ class JihankiPanelCog(commands.Cog):
                         await kyash.link_cancel(
                             kyash.created_link, ownerKyash.link_uuid
                         )
-                        asyncio.create_task(
-                            sendLog(ServiceEnum.KYASH, traceback.format_exc())
-                        )
+                        asyncio.create_task(sendLog(traceback.format_exc()))
                         embed = discord.Embed(
                             title="オーナー側の受け取りに失敗しました",
                             description=str(e),
