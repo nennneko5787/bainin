@@ -489,6 +489,7 @@ class JihankiPanelCog(commands.Cog):
                 )
             except:
                 try:
+                    print("token refresh")
                     await ownerPayPay.token_refresh(
                         cipherSuite.decrypt(
                             self.ownerPayPayAccount["refresh_token"]
@@ -890,6 +891,7 @@ class JihankiPanelCog(commands.Cog):
                             ).decode()
                         )
                     except:
+                        print("token refresh")
                         try:
                             await paypay.token_refresh(
                                 cipherSuite.decrypt(
