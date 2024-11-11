@@ -139,7 +139,7 @@ class JihankiPanelCog(commands.Cog):
             )
             owner.send(embed=embed)
         except:
-            pass
+            traceback.print_exc()
 
         if jihanki["achievement_channel_id"]:
             channel = self.bot.get_channel(jihanki["achievement_channel_id"])
@@ -224,7 +224,7 @@ class JihankiPanelCog(commands.Cog):
             )
             await interaction.user.send(embed=embed)
         except:
-            pass
+            traceback.print_exc()
 
     class KyashModal(discord.ui.Modal, title="Kyashで購入"):
         def __init__(
