@@ -348,12 +348,14 @@ class AccountLinkCog(commands.Cog):
                 await interaction.followup.send(
                     "エラーが発生しました。", ephemeral=True
                 )
+                return
 
             try:
                 await paypay.login(message.content)
             except:
                 traceback.print_exc()
                 await message.reply("OTPの検証に失敗しました。")
+                return
 
             await paypay.get_profile()
 
