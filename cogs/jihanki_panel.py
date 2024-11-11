@@ -575,13 +575,13 @@ class JihankiPanelCog(commands.Cog):
         view = discord.ui.View(timeout=300)
 
         ownerKyashAccount = await Database.pool.fetchrow(
-            "SELECT * FROM kyash WHERE id = $1", interaction.user.id
+            "SELECT * FROM kyash WHERE id = $1", jihanki["owner_id"]
         )
         kyashAccount = await Database.pool.fetchrow(
             "SELECT * FROM kyash WHERE id = $1", interaction.user.id
         )
 
-        if ownerKyashAccount["proxy"]:
+        if (ownerKyashAccount) and (ownerKyashAccount["proxy"]):
             ownerKyashProxies = {
                 "http": ownerKyashAccount["proxy"],
                 "https": ownerKyashAccount["proxy"],
@@ -589,7 +589,7 @@ class JihankiPanelCog(commands.Cog):
         else:
             ownerKyashProxies = None
 
-        if kyashAccount["proxy"]:
+        if (kyashAccount) and (kyashAccount["proxy"]):
             kyashProxies = {
                 "http": kyashAccount["proxy"],
                 "https": kyashAccount["proxy"],
@@ -598,13 +598,13 @@ class JihankiPanelCog(commands.Cog):
             kyashProxies = None
 
         ownerPayPayAccount = await Database.pool.fetchrow(
-            "SELECT * FROM paypay WHERE id = $1", interaction.user.id
+            "SELECT * FROM paypay WHERE id = $1", jihanki["owner_id"]
         )
         paypayAccount = await Database.pool.fetchrow(
             "SELECT * FROM paypay WHERE id = $1", interaction.user.id
         )
 
-        if ownerPayPayAccount["proxy"]:
+        if (ownerPayPayAccount) and (ownerPayPayAccount["proxy"]):
             ownerPayPayProxies = {
                 "http": ownerPayPayAccount["proxy"],
                 "https": ownerPayPayAccount["proxy"],
@@ -612,7 +612,7 @@ class JihankiPanelCog(commands.Cog):
         else:
             ownerPayPayProxies = None
 
-        if paypayAccount["proxy"]:
+        if (paypayAccount) and (paypayAccount["proxy"]):
             payPayProxies = {
                 "http": paypayAccount["proxy"],
                 "https": paypayAccount["proxy"],
