@@ -917,6 +917,7 @@ class JihankiPanelCog(commands.Cog):
         embed = discord.Embed(
             title="決済確認",
             description=f'## {good["name"]}\n値段: **{good["price"]}円**\n5分以内に決済を完了してください。\n\n-# 商品を購入する前に、<@1289535525681627156> からのDMを許可してください。\n-# 許可せずに商品を購入し、商品が受け取れなかった場合、責任を負いませんのでご了承ください。',
+            colour=discord.Colour.blurple(),
         )
 
         await interaction.followup.send(embed=embed, view=view, ephemeral=True)
