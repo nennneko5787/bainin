@@ -129,7 +129,7 @@ class JihankiEditCog(commands.Cog):
             title="⚠️注意",
             description=f"自販機を作るだけでは、実際に売上を上げることはできません！\n売上を上げたい場合、 </link:{commandId}> コマンドしてPayPayかKyashのアカウントをリンクする必要があります。\nわからないときはいつでも[サポートサーバー](https://discord.gg/2TfFUuY3RG)へどうぞ。",
         )
-        await interaction.followup.send(embed=embed)
+        await interaction.followup.send(embed=embed, ephemeral=True)
 
     async def getJihankiList(
         self,
