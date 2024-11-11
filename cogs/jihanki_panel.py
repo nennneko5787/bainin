@@ -321,7 +321,29 @@ class JihankiPanelCog(commands.Cog):
                 return
 
             try:
-                await ownerKyash.link_recieve(self.url.value)
+                await ownerKyash.link_check(self.url.value)
+            except Exception as e:
+                traceback.print_exc()
+                asyncio.create_task(self.sendLog(traceback.format_exc()))
+                embed = discord.Embed(
+                    title="リンクのチェックに失敗しました。",
+                    description=str(e),
+                    colour=discord.Colour.red(),
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                return
+
+            if ownerKyash.link_amount < self.good["price"]:
+                embed = discord.Embed(
+                    title="お金が足りません！！",
+                    description=f"送金リンクを作り直してください！！**{self.good['price']}円で！！**",
+                    colour=discord.Colour.red(),
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                return
+
+            try:
+                await ownerKyash.link_recieve(self.url.value, ownerKyash.link_uuid)
             except Exception as e:
                 traceback.print_exc()
                 asyncio.create_task(self.sendLog(traceback.format_exc()))
@@ -332,6 +354,26 @@ class JihankiPanelCog(commands.Cog):
                 )
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
+
+            try:
+                if ownerKyash.link_amount > self.good["price"]:
+                    amount = ownerKyash.link_amount - self.good["price"]
+                    await ownerKyash.create_link(amount)
+                    embed = discord.Embed(
+                        title="多く払った分をお返しします",
+                        description=ownerKyash.created_link,
+                    )
+                    await interaction.followup.send(embed=embed, ephemeral=True)
+                    await interaction.user.send(embed=embed)
+            except Exception as e:
+                traceback.print_exc()
+                asyncio.create_task(self.sendLog(traceback.format_exc()))
+                embed = discord.Embed(
+                    title="多く払った分を返金する処理に失敗しました",
+                    description=f"あとで返金してもらってください\n```\n{str(e)}\n```",
+                    colour=discord.Colour.red(),
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
 
             await self.sendSaleMessage(
                 interaction, self.jihanki, self.good, ServiceEnum.KYASH
@@ -464,6 +506,30 @@ class JihankiPanelCog(commands.Cog):
                     return
 
             try:
+                await ownerPayPay.link_check(self.url.value)
+            except Exception as e:
+                traceback.print_exc()
+                asyncio.create_task(self.sendLog(traceback.format_exc()))
+                embed = discord.Embed(
+                    title="リンクのチェックに失敗しました。",
+                    description=str(e),
+                    colour=discord.Colour.red(),
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                return
+
+            if ownerPayPay.link_amount < self.good["price"]:
+                embed = discord.Embed(
+                    title="お金が足りません！！",
+                    description=f"送金リンクを作り直してください！！**{self.good['price']}円で！！**",
+                    colour=discord.Colour.red(),
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                return
+
+            linkAmount: int = ownerPayPay.link_amount
+
+            try:
                 await ownerPayPay.link_receive(self.url.value, self.password.value)
             except Exception as e:
                 traceback.print_exc()
@@ -475,6 +541,26 @@ class JihankiPanelCog(commands.Cog):
                 )
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
+
+            try:
+                if linkAmount > self.good["price"]:
+                    amount: int = linkAmount - self.good["price"]
+                    await ownerPayPay.create_link(amount)
+                    embed = discord.Embed(
+                        title="多く払った分をお返しします",
+                        description=ownerPayPay.created_link,
+                    )
+                    await interaction.followup.send(embed=embed, ephemeral=True)
+                    await interaction.user.send(embed=embed)
+            except Exception as e:
+                traceback.print_exc()
+                asyncio.create_task(self.sendLog(traceback.format_exc()))
+                embed = discord.Embed(
+                    title="多く払った分を返金する処理に失敗しました",
+                    description=f"あとで返金してもらってください\n```\n{str(e)}\n```",
+                    colour=discord.Colour.red(),
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
 
             await self.sendSaleMessage(
                 interaction, self.jihanki, self.good, ServiceEnum.KYASH
