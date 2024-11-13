@@ -285,9 +285,8 @@ class JihankiEditCog(commands.Cog):
             )
 
             embed = discord.Embed(
-                title="エラーが発生しました",
-                description="価格は0以上の整数でなければなりません",
-                colour=discord.Colour.red(),
+                title="編集しました！",
+                colour=discord.Colour.green(),
             )
             await interaction.followup.send(embed=embed)
 
