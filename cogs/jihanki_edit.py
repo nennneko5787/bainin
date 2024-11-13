@@ -327,8 +327,9 @@ class JihankiEditCog(commands.Cog):
         )
 
         async def editGoodsOnSelect(interaction: discord.Interaction):
+            selectedValue = interaction.data["values"][0]
             await interaction.response.send_modal(
-                self.EditGoodModal(jihanki, goods, select.options[0].value)
+                self.EditGoodModal(jihanki, goods, int(selectedValue))
             )
 
         select.callback = editGoodsOnSelect
@@ -376,8 +377,9 @@ class JihankiEditCog(commands.Cog):
 
         async def removeGoodsOnSelect(interaction: discord.Interaction):
             await interaction.response.defer(ephemeral=True)
+            selectedValue = interaction.data["values"][0]
             try:
-                goods.remove(goods[select.options[0].value])
+                goods.remove(goods[int(selectedValue)])
                 await Database.pool.execute(
                     "UPDATE ONLY jihanki SET goods = $1 WHERE id = $2",
                     orjson.dumps(goods).decode(),
