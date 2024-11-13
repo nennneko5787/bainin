@@ -102,6 +102,7 @@ class JihankiEditCog(commands.Cog):
         description: str,
         achievement: discord.TextChannel = None,
     ):
+        achievement_channel_id = achievement.id if achievement is not None else None
         await interaction.response.defer(ephemeral=True)
         gen = SnowflakeGenerator(39)
         id = next(gen)
@@ -111,7 +112,7 @@ class JihankiEditCog(commands.Cog):
             name,
             description,
             interaction.user.id,
-            achievement.id,
+            achievement_channel_id,
         )
         embed = discord.Embed(
             title="自販機を作成しました",
@@ -168,6 +169,8 @@ class JihankiEditCog(commands.Cog):
         description: str,
         achievement: discord.TextChannel = None,
     ):
+        achievement_channel_id = achievement.id if achievement is not None else None
+    
         await interaction.response.defer(ephemeral=True)
         jihanki = await Database.pool.fetchrow(
             "SELECT * FROM jihanki WHERE id = $1", int(jihanki)
@@ -183,7 +186,7 @@ class JihankiEditCog(commands.Cog):
             "UPDATE ONLY jihanki SET name = $1, description = $2, achievement_channel_id = $3 WHERE id = $4",
             name,
             description,
-            achievement.id,
+            achievement_channel_id,
             jihanki["id"],
         )
         embed = discord.Embed(
