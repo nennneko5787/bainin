@@ -217,7 +217,7 @@ class JihankiEditCog(commands.Cog):
 
     class EditGoodModal(discord.ui.Modal):
         def __init__(self, jihanki: dict, goods: dict, select: int):
-            super().__init__(title=f'{self.goods[self.select]["name"]} を編集')
+            super().__init__(title=f'{goods[self.select]["name"]} を編集')
 
             self.jihanki: dict = jihanki
             self.goods: dict = goods
