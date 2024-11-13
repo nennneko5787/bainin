@@ -335,7 +335,7 @@ class JihankiEditCog(commands.Cog):
         select.callback = editGoodsOnSelect
         view.add_item(select)
         embed = discord.Embed(
-            title="削除する商品を選択してください", colour=discord.Colour.red()
+            title="確認・編集する商品を選択してください", colour=discord.Colour.pink()
         )
         await interaction.followup.send(embed=embed, view=view)
 
