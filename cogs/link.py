@@ -10,6 +10,7 @@ from cryptography.fernet import Fernet
 from discord import app_commands
 from discord.ext import commands
 
+from .account import AccountManager, AccountNotLinkedException, FailedToLoginException
 from .database import Database
 
 dotenv.load_dotenv()
@@ -39,10 +40,20 @@ class AccountLinkCog(commands.Cog):
     ):
         await interaction.response.defer(ephemeral=True)
         if service == "kyash":
-            kyashAccount = await Database.pool.fetchrow(
-                "SELECT * FROM kyash WHERE id = $1", interaction.user.id
-            )
-            if not kyashAccount:
+            try:
+                kyash: Kyash = AccountManager.loginKyash(interaction.user.id)
+
+                await kyash.get_profile()
+                await kyash.get_wallet()
+                embed = (
+                    discord.Embed(title="Kyashの情報", colour=discord.Colour.blue())
+                    .set_author(name=kyash.username, icon_url=kyash.icon)
+                    .add_field(name="すべての残高", value=kyash.all_balance)
+                    .add_field(name="所持しているKyashマネー", value=kyash.money)
+                    .add_field(name="所持しているKyashバリュー", value=kyash.value)
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+            except AccountNotLinkedException:
                 commands = await self.bot.tree.fetch_commands()
                 for cmd in commands:
                     if cmd.name == "link":
@@ -54,17 +65,7 @@ class AccountLinkCog(commands.Cog):
                 )
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
-            kyash = Kyash()
-            try:
-                await kyash.login(
-                    email=self.cipherSuite.decrypt(kyashAccount["email"]).decode(),
-                    password=self.cipherSuite.decrypt(
-                        kyashAccount["password"]
-                    ).decode(),
-                    client_uuid=str(kyashAccount["client_uuid"]),
-                    installation_uuid=str(kyashAccount["installation_uuid"]),
-                )
-            except:
+            except FailedToLoginException:
                 traceback.print_exc()
                 embed = discord.Embed(
                     title="Kyashでのログインに失敗しました。",
@@ -73,22 +74,38 @@ class AccountLinkCog(commands.Cog):
                 )
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
-
-            await kyash.get_profile()
-            await kyash.get_wallet()
-            embed = (
-                discord.Embed(title="Kyashの情報", colour=discord.Colour.blue())
-                .set_author(name=kyash.username, icon_url=kyash.icon)
-                .add_field(name="すべての残高", value=kyash.all_balance)
-                .add_field(name="所持しているKyashマネー", value=kyash.money)
-                .add_field(name="所持しているKyashバリュー", value=kyash.value)
-            )
-            await interaction.followup.send(embed=embed, ephemeral=True)
+            except:
+                traceback.print_exc()
+                embed = discord.Embed(
+                    title="不明なエラーが発生しました",
+                    description="[サポートサーバー](https://discord.gg/2TfFUuY3RG) へ報告することができます。",
+                    colour=discord.Colour.red(),
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                return
         else:
-            paypayAccount = await Database.pool.fetchrow(
-                "SELECT * FROM paypay WHERE id = $1", interaction.user.id
-            )
-            if not paypayAccount:
+            try:
+                paypay: PayPay = AccountManager.loginPayPay(interaction.user.id)
+                await paypay.get_profile()
+                await paypay.get_balance()
+                embed = (
+                    discord.Embed(title="PayPayの情報", colour=discord.Colour.red())
+                    .set_author(name=paypay.name, icon_url=paypay.icon)
+                    .add_field(name="すべての残高", value=paypay.all_balance)
+                    .add_field(
+                        name="すべての利用可能な残高", value=paypay.useable_balance
+                    )
+                    .add_field(
+                        name="自販機で利用可能な残高",
+                        value=((paypay.money or 0) + (paypay.money_light or 0)),
+                    )
+                    .add_field(name="所持しているPayPayマネー", value=paypay.money)
+                    .add_field(
+                        name="所持しているPayPayマネーライト", value=paypay.money_light
+                    )
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+            except AccountNotLinkedException:
                 commands = await self.bot.tree.fetch_commands()
                 for cmd in commands:
                     if cmd.name == "link":
@@ -100,48 +117,24 @@ class AccountLinkCog(commands.Cog):
                 )
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
-            paypay = PayPay()
-            try:
-                await paypay.initialize(
-                    access_token=self.cipherSuite.decrypt(
-                        paypayAccount["access_token"]
-                    ).decode()
-                )
-            except:
-                pass
+            except FailedToLoginException:
                 traceback.print_exc()
-                try:
-                    await paypay.token_refresh(
-                        self.cipherSuite.decrypt(
-                            paypayAccount["refresh_token"]
-                        ).decode()
-                    )
-                except:
-                    traceback.print_exc()
-                    embed = discord.Embed(
-                        title="PayPayでのログインに失敗しました。",
-                        description="アカウントが凍っているか、サーバー側でレートリミットがかかっている可能性があります",
-                        colour=discord.Colour.red(),
-                    )
-                    await interaction.followup.send(embed=embed, ephemeral=True)
-                    return
-            await paypay.get_profile()
-            await paypay.get_balance()
-            embed = (
-                discord.Embed(title="PayPayの情報", colour=discord.Colour.red())
-                .set_author(name=paypay.name, icon_url=paypay.icon)
-                .add_field(name="すべての残高", value=paypay.all_balance)
-                .add_field(name="すべての利用可能な残高", value=paypay.useable_balance)
-                .add_field(
-                    name="自販機で利用可能な残高",
-                    value=((paypay.money or 0) + (paypay.money_light or 0)),
+                embed = discord.Embed(
+                    title="PayPayでのログインに失敗しました。",
+                    description="アカウントが凍っているか、サーバー側でレートリミットがかかっている可能性があります",
+                    colour=discord.Colour.red(),
                 )
-                .add_field(name="所持しているPayPayマネー", value=paypay.money)
-                .add_field(
-                    name="所持しているPayPayマネーライト", value=paypay.money_light
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                return
+            except:
+                traceback.print_exc()
+                embed = discord.Embed(
+                    title="不明なエラーが発生しました",
+                    description="[サポートサーバー](https://discord.gg/2TfFUuY3RG) へ報告することができます。",
+                    colour=discord.Colour.red(),
                 )
-            )
-            await interaction.followup.send(embed=embed, ephemeral=True)
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                return
 
     @app_commands.command(
         name="proxy",
@@ -264,7 +257,9 @@ class AccountLinkCog(commands.Cog):
             )
 
             def check(m: discord.Message) -> bool:
-                if (m.channel.type == discord.ChannelType.private) and (m.author.id == interaction.user.id):
+                if (m.channel.type == discord.ChannelType.private) and (
+                    m.author.id == interaction.user.id
+                ):
                     return True
                 else:
                     return False
@@ -332,7 +327,9 @@ class AccountLinkCog(commands.Cog):
             )
 
             def check(m: discord.Message) -> bool:
-                if (m.channel.type == discord.ChannelType.private) and (m.author.id == interaction.user.id):
+                if (m.channel.type == discord.ChannelType.private) and (
+                    m.author.id == interaction.user.id
+                ):
                     return True
                 else:
                     return False

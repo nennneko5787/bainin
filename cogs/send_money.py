@@ -12,6 +12,8 @@ from cryptography.fernet import Fernet
 from discord import app_commands
 from discord.ext import commands
 
+from .account import (AccountManager, AccountNotLinkedException,
+                      FailedToLoginException)
 from .database import Database
 
 dotenv.load_dotenv()
@@ -103,10 +105,9 @@ class SendMoneyCog(commands.Cog):
 
         await interaction.response.defer(ephemeral=True)
         if service == "kyash":
-            ownerKyashAccount = await Database.pool.fetchrow(
-                "SELECT * FROM kyash WHERE id = $1", user.id
-            )
-            if not ownerKyashAccount:
+            try:
+                ownerKyash: Kyash = AccountManager.loginKyash(user.id)
+            except AccountNotLinkedException:
                 embed = discord.Embed(
                     title="送信先ユーザーがKyashのアカウントをリンクしていません",
                     description=f"{user.mention} さんに「PayPayのアカウントをリンクしてください！」と言ってあげてください。",
@@ -114,19 +115,19 @@ class SendMoneyCog(commands.Cog):
                 )
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
+            except:
+                traceback.print_exc()
+                embed = discord.Embed(
+                    title="エラーが発生しました",
+                    description="[サポートサーバー](https://discord.gg/2TfFUuY3RG) へ報告することができます。",
+                    colour=discord.Colour.red(),
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                return
 
-            if ownerKyashAccount["proxy"]:
-                ownerProxies = {
-                    "http": ownerKyashAccount["proxy"],
-                    "https": ownerKyashAccount["proxy"],
-                }
-            else:
-                ownerProxies = None
-
-            kyashAccount = await Database.pool.fetchrow(
-                "SELECT * FROM kyash WHERE id = $1", interaction.user.id
-            )
-            if not kyashAccount:
+            try:
+                kyash: Kyash = AccountManager.loginKyash(interaction.user.id)
+            except AccountNotLinkedException:
                 commands = await self.bot.tree.fetch_commands()
                 for cmd in commands:
                     if cmd.name == "link":
@@ -138,52 +139,11 @@ class SendMoneyCog(commands.Cog):
                 )
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
-
-            if kyashAccount["proxy"]:
-                proxies = {
-                    "http": kyashAccount["proxy"],
-                    "https": kyashAccount["proxy"],
-                }
-            else:
-                proxies = None
-
-            ownerKyash = Kyash(proxy=ownerProxies)
-            try:
-                await ownerKyash.login(
-                    email=self.cipherSuite.decrypt(ownerKyashAccount["email"]).decode(),
-                    password=self.cipherSuite.decrypt(
-                        ownerKyashAccount["password"]
-                    ).decode(),
-                    client_uuid=str(ownerKyashAccount["client_uuid"]),
-                    installation_uuid=str(ownerKyashAccount["installation_uuid"]),
-                )
-            except Exception as e:
+            except:
                 traceback.print_exc()
-                asyncio.create_task(sendLog(ServiceEnum.KYASH, traceback.format_exc()))
                 embed = discord.Embed(
-                    title="Kyashでのログインに失敗しました。",
-                    description=str(e),
-                    colour=discord.Colour.red(),
-                )
-                await interaction.followup.send(embed=embed, ephemeral=True)
-                return
-
-            kyash = Kyash(proxy=proxies)
-            try:
-                await kyash.login(
-                    email=self.cipherSuite.decrypt(kyashAccount["email"]).decode(),
-                    password=self.cipherSuite.decrypt(
-                        kyashAccount["password"]
-                    ).decode(),
-                    client_uuid=str(kyashAccount["client_uuid"]),
-                    installation_uuid=str(kyashAccount["installation_uuid"]),
-                )
-            except Exception as e:
-                traceback.print_exc()
-                asyncio.create_task(sendLog(ServiceEnum.KYASH, traceback.format_exc()))
-                embed = discord.Embed(
-                    title="Kyashでのログインに失敗しました。",
-                    description=str(e),
+                    title="エラーが発生しました",
+                    description="[サポートサーバー](https://discord.gg/2TfFUuY3RG) へ報告することができます。",
                     colour=discord.Colour.red(),
                 )
                 await interaction.followup.send(embed=embed, ephemeral=True)
@@ -234,10 +194,7 @@ class SendMoneyCog(commands.Cog):
 
             service = ServiceEnum.KYASH
         else:
-            ownerPaypayAccount = await Database.pool.fetchrow(
-                "SELECT * FROM paypay WHERE id = $1", user.id
-            )
-            if not ownerPaypayAccount:
+            if not AccountManager.paypayExists(user.id):
                 embed = discord.Embed(
                     title="送信先ユーザーがPayPayのアカウントをリンクしていません",
                     description=f"{user.mention} さんに「PayPayのアカウントをリンクしてください！」と言ってあげてください。",
@@ -246,10 +203,9 @@ class SendMoneyCog(commands.Cog):
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
 
-            paypayAccount = await Database.pool.fetchrow(
-                "SELECT * FROM paypay WHERE id = $1", interaction.user.id
-            )
-            if not paypayAccount:
+            try:
+                paypay: PayPay = AccountManager.loginPayPay(interaction.user.id)
+            except AccountNotLinkedException:
                 commands = await self.bot.tree.fetch_commands()
                 for cmd in commands:
                     if cmd.name == "link":
@@ -261,41 +217,15 @@ class SendMoneyCog(commands.Cog):
                 )
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
-
-            if paypayAccount["proxy"]:
-                proxies = {
-                    "http": paypayAccount["proxy"],
-                    "https": paypayAccount["proxy"],
-                }
-            else:
-                proxies = None
-
-            paypay = PayPay(proxies=proxies)
-            try:
-                await paypay.initialize(
-                    access_token=self.cipherSuite.decrypt(
-                        paypayAccount["access_token"]
-                    ).decode()
-                )
             except:
-                try:
-                    await paypay.token_refresh(
-                        self.cipherSuite.decrypt(
-                            paypayAccount["refresh_token"]
-                        ).decode()
-                    )
-                except Exception as e:
-                    traceback.print_exc()
-                    asyncio.create_task(
-                        sendLog(ServiceEnum.PAYPAY, traceback.format_exc())
-                    )
-                    embed = discord.Embed(
-                        title="PayPayでのログインに失敗しました。",
-                        description=str(e),
-                        colour=discord.Colour.red(),
-                    )
-                    await interaction.followup.send(embed=embed, ephemeral=True)
-                    return
+                traceback.print_exc()
+                embed = discord.Embed(
+                    title="エラーが発生しました",
+                    description="[サポートサーバー](https://discord.gg/2TfFUuY3RG) へ報告することができます。",
+                    colour=discord.Colour.red(),
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                return
 
             await paypay.get_balance()
             if ((paypay.money or 0) + (paypay.money_light or 0)) < amount:
@@ -308,7 +238,9 @@ class SendMoneyCog(commands.Cog):
                 return
 
             try:
-                await paypay.send_money(amount, ownerPaypayAccount["external_user_id"])
+                await paypay.send_money(
+                    amount, AccountManager.paypayExternalUserIds[user.id]
+                )
             except Exception as e:
                 traceback.print_exc()
                 asyncio.create_task(sendLog(ServiceEnum.PAYPAY, traceback.format_exc()))

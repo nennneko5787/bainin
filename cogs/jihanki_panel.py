@@ -1,19 +1,20 @@
 import asyncio
+import enum
 import os
 import traceback
-import enum
 from typing import Callable
 
 import aiohttp
 import discord
 import dotenv
 import orjson
-from discord.ext import commands
-from discord import app_commands
 from aiokyasher import Kyash
 from aiopaypaython import PayPay
 from cryptography.fernet import Fernet
+from discord import app_commands
+from discord.ext import commands
 
+from .account import AccountManager, AccountNotLinkedException, FailedToLoginException
 from .database import Database
 
 dotenv.load_dotenv()
@@ -231,8 +232,7 @@ class JihankiPanelCog(commands.Cog):
             self,
             bot: commands.Bot,
             interaction: discord.Interaction,
-            ownerKyashAccount: dict,
-            ownerKyashProxies: dict,
+            ownerKyash: Kyash,
             jihanki: dict,
             goods: list[dict],
             good: dict,
@@ -244,8 +244,7 @@ class JihankiPanelCog(commands.Cog):
 
             self.bot = bot
             self.originalInteraction = interaction
-            self.ownerKyashAccount = ownerKyashAccount
-            self.ownerKyashProxies = ownerKyashProxies
+            self.ownerKyash = ownerKyash
             self.jihanki = jihanki
             self.goods = goods
             self.good = good
@@ -298,30 +297,8 @@ class JihankiPanelCog(commands.Cog):
 
         async def on_submit(self, interaction: discord.Interaction) -> None:
             await interaction.response.defer(ephemeral=True)
-
-            ownerKyash = Kyash(proxy=self.ownerKyashProxies)
             try:
-                await ownerKyash.login(
-                    email=cipherSuite.decrypt(self.ownerKyashAccount["email"]).decode(),
-                    password=cipherSuite.decrypt(
-                        self.ownerKyashAccount["password"]
-                    ).decode(),
-                    client_uuid=str(self.ownerKyashAccount["client_uuid"]),
-                    installation_uuid=str(self.ownerKyashAccount["installation_uuid"]),
-                )
-            except Exception as e:
-                traceback.print_exc()
-                asyncio.create_task(self.sendLog(traceback.format_exc()))
-                embed = discord.Embed(
-                    title="Kyashでのログインに失敗しました。",
-                    description=str(e),
-                    colour=discord.Colour.red(),
-                )
-                await interaction.followup.send(embed=embed, ephemeral=True)
-                return
-
-            try:
-                await ownerKyash.link_check(self.url.value)
+                await self.ownerKyash.link_check(self.url.value)
             except Exception as e:
                 traceback.print_exc()
                 asyncio.create_task(self.sendLog(traceback.format_exc()))
@@ -333,7 +310,7 @@ class JihankiPanelCog(commands.Cog):
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
 
-            if ownerKyash.link_amount < self.good["price"]:
+            if self.ownerKyash.link_amount < self.good["price"]:
                 embed = discord.Embed(
                     title="お金が足りません！！",
                     description=f"送金リンクを作り直してください！！**{self.good['price']}円で！！**",
@@ -343,7 +320,9 @@ class JihankiPanelCog(commands.Cog):
                 return
 
             try:
-                await ownerKyash.link_recieve(self.url.value, ownerKyash.link_uuid)
+                await self.ownerKyash.link_recieve(
+                    self.url.value, self.ownerKyash.link_uuid
+                )
             except Exception as e:
                 traceback.print_exc()
                 asyncio.create_task(self.sendLog(traceback.format_exc()))
@@ -356,12 +335,12 @@ class JihankiPanelCog(commands.Cog):
                 return
 
             try:
-                if ownerKyash.link_amount > self.good["price"]:
-                    amount = ownerKyash.link_amount - self.good["price"]
-                    await ownerKyash.create_link(amount)
+                if self.ownerKyash.link_amount > self.good["price"]:
+                    amount = self.ownerKyash.link_amount - self.good["price"]
+                    await self.ownerKyash.create_link(amount)
                     embed = discord.Embed(
                         title="多く払った分をお返しします",
-                        description=ownerKyash.created_link,
+                        description=self.ownerKyash.created_link,
                     )
                     await interaction.followup.send(embed=embed, ephemeral=True)
                     await interaction.user.send(embed=embed)
@@ -404,8 +383,7 @@ class JihankiPanelCog(commands.Cog):
             self,
             bot: commands.Bot,
             interaction: discord.Interaction,
-            ownerPayPayAccount: dict,
-            ownerPayPayProxies: dict,
+            ownerPayPay: PayPay,
             jihanki: dict,
             goods: list[dict],
             good: dict,
@@ -417,8 +395,7 @@ class JihankiPanelCog(commands.Cog):
 
             self.bot = bot
             self.originalInteraction = interaction
-            self.ownerPayPayAccount = ownerPayPayAccount
-            self.ownerPayPayProxies = ownerPayPayProxies
+            self.ownerPayPay = ownerPayPay
             self.jihanki = jihanki
             self.goods = goods
             self.good = good
@@ -478,34 +455,8 @@ class JihankiPanelCog(commands.Cog):
         async def on_submit(self, interaction: discord.Interaction) -> None:
             await interaction.response.defer(ephemeral=True)
 
-            ownerPayPay = PayPay(proxies=self.ownerPayPayProxies)
             try:
-                await ownerPayPay.initialize(
-                    access_token=cipherSuite.decrypt(
-                        self.ownerPayPayAccount["access_token"]
-                    ).decode()
-                )
-            except:
-                try:
-                    print("token refresh")
-                    await ownerPayPay.token_refresh(
-                        cipherSuite.decrypt(
-                            self.ownerPayPayAccount["refresh_token"]
-                        ).decode()
-                    )
-                except Exception as e:
-                    traceback.print_exc()
-                    asyncio.create_task(self.sendLog(traceback.format_exc()))
-                    embed = discord.Embed(
-                        title="PayPayでのログインに失敗しました。",
-                        description=str(e),
-                        colour=discord.Colour.red(),
-                    )
-                    await interaction.followup.send(embed=embed, ephemeral=True)
-                    return
-
-            try:
-                await ownerPayPay.link_check(self.url.value)
+                await self.ownerPayPay.link_check(self.url.value)
             except Exception as e:
                 traceback.print_exc()
                 asyncio.create_task(self.sendLog(traceback.format_exc()))
@@ -517,7 +468,7 @@ class JihankiPanelCog(commands.Cog):
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
 
-            if ownerPayPay.link_amount < self.good["price"]:
+            if self.ownerPayPay.link_amount < self.good["price"]:
                 embed = discord.Embed(
                     title="お金が足りません！！",
                     description=f"送金リンクを作り直してください！！**{self.good['price']}円で！！**",
@@ -526,10 +477,10 @@ class JihankiPanelCog(commands.Cog):
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
 
-            linkAmount: int = ownerPayPay.link_amount
+            linkAmount: int = self.ownerPayPay.link_amount
 
             try:
-                await ownerPayPay.link_receive(self.url.value, self.password.value)
+                await self.ownerPayPay.link_receive(self.url.value, self.password.value)
             except Exception as e:
                 traceback.print_exc()
                 asyncio.create_task(self.sendLog(traceback.format_exc()))
@@ -544,10 +495,10 @@ class JihankiPanelCog(commands.Cog):
             try:
                 if linkAmount > self.good["price"]:
                     amount: int = linkAmount - self.good["price"]
-                    await ownerPayPay.create_link(amount)
+                    await self.ownerPayPay.create_link(amount)
                     embed = discord.Embed(
                         title="多く払った分をお返しします",
-                        description=ownerPayPay.created_link,
+                        description=self.ownerPayPay.created_link,
                     )
                     await interaction.followup.send(embed=embed, ephemeral=True)
                     await interaction.user.send(embed=embed)
@@ -657,111 +608,43 @@ class JihankiPanelCog(commands.Cog):
 
         view = discord.ui.View(timeout=300)
 
-        ownerKyashAccount = await Database.pool.fetchrow(
-            "SELECT * FROM kyash WHERE id = $1", jihanki["owner_id"]
-        )
-        kyashAccount = await Database.pool.fetchrow(
-            "SELECT * FROM kyash WHERE id = $1", interaction.user.id
-        )
+        try:
+            ownerPayPay: PayPay = AccountManager.loginPayPay(jihanki["owner_id"])
+        except:
+            traceback.print_exc()
+            ownerPayPay = None
 
-        if (ownerKyashAccount) and (ownerKyashAccount["proxy"]):
-            ownerKyashProxies = {
-                "http": ownerKyashAccount["proxy"],
-                "https": ownerKyashAccount["proxy"],
-            }
-        else:
-            ownerKyashProxies = None
+        try:
+            paypay: PayPay = AccountManager.loginPayPay(interaction.user.id)
+        except:
+            traceback.print_exc()
+            paypay = None
 
-        if (kyashAccount) and (kyashAccount["proxy"]):
-            kyashProxies = {
-                "http": kyashAccount["proxy"],
-                "https": kyashAccount["proxy"],
-            }
-        else:
-            kyashProxies = None
+        try:
+            ownerKyash: Kyash = AccountManager.loginKyash(jihanki["owner_id"])
+        except:
+            traceback.print_exc()
+            ownerKyash = None
 
-        ownerPayPayAccount = await Database.pool.fetchrow(
-            "SELECT * FROM paypay WHERE id = $1", jihanki["owner_id"]
-        )
-        paypayAccount = await Database.pool.fetchrow(
-            "SELECT * FROM paypay WHERE id = $1", interaction.user.id
-        )
+        try:
+            kyash: Kyash = AccountManager.loginKyash(interaction.user.id)
+        except:
+            traceback.print_exc()
+            kyash = None
 
-        if (ownerPayPayAccount) and (ownerPayPayAccount["proxy"]):
-            ownerPayPayProxies = {
-                "http": ownerPayPayAccount["proxy"],
-                "https": ownerPayPayAccount["proxy"],
-            }
-        else:
-            ownerPayPayProxies = None
+        isPayPay = False
+        isKyash = False
 
-        if (paypayAccount) and (paypayAccount["proxy"]):
-            payPayProxies = {
-                "http": paypayAccount["proxy"],
-                "https": paypayAccount["proxy"],
-            }
-        else:
-            payPayProxies = None
-
-        paypay = False
-        kyash = False
-
-        if ownerKyashAccount:
+        if ownerKyash:
             kyashButton = discord.ui.Button(
                 style=discord.ButtonStyle.primary,
                 label="Kyashで購入",
                 emoji=discord.PartialEmoji.from_str("<a:kyash:1301478014600609832>"),
             )
-            if kyashAccount:
+            if kyash:
 
                 async def buyWithKyash(interaction: discord.Interaction):
                     await interaction.response.defer(ephemeral=True)
-
-                    ownerKyash = Kyash(proxy=ownerKyashProxies)
-                    try:
-                        await ownerKyash.login(
-                            email=cipherSuite.decrypt(
-                                ownerKyashAccount["email"]
-                            ).decode(),
-                            password=cipherSuite.decrypt(
-                                ownerKyashAccount["password"]
-                            ).decode(),
-                            client_uuid=str(ownerKyashAccount["client_uuid"]),
-                            installation_uuid=str(
-                                ownerKyashAccount["installation_uuid"]
-                            ),
-                        )
-                    except Exception as e:
-                        traceback.print_exc()
-                        asyncio.create_task(sendLog(traceback.format_exc()))
-                        embed = discord.Embed(
-                            title="Kyashでのログインに失敗しました。",
-                            description=str(e),
-                            colour=discord.Colour.red(),
-                        )
-                        await interaction.followup.send(embed=embed, ephemeral=True)
-                        return
-
-                    kyash = Kyash(proxy=kyashProxies)
-                    try:
-                        await kyash.login(
-                            email=cipherSuite.decrypt(kyashAccount["email"]).decode(),
-                            password=cipherSuite.decrypt(
-                                kyashAccount["password"]
-                            ).decode(),
-                            client_uuid=str(kyashAccount["client_uuid"]),
-                            installation_uuid=str(kyashAccount["installation_uuid"]),
-                        )
-                    except Exception as e:
-                        traceback.print_exc()
-                        asyncio.create_task(sendLog(traceback.format_exc()))
-                        embed = discord.Embed(
-                            title="Kyashでのログインに失敗しました。",
-                            description=str(e),
-                            colour=discord.Colour.red(),
-                        )
-                        await interaction.followup.send(embed=embed, ephemeral=True)
-                        return
 
                     try:
                         await kyash.get_wallet()
@@ -851,8 +734,7 @@ class JihankiPanelCog(commands.Cog):
                     modal = self.KyashModal(
                         self.bot,
                         _interaction,
-                        ownerKyashAccount,
-                        ownerKyashProxies,
+                        ownerKyash,
                         jihanki,
                         goods,
                         good,
@@ -866,42 +748,17 @@ class JihankiPanelCog(commands.Cog):
             view.add_item(kyashButton)
             kyash = True
 
-        if ownerPayPayAccount:
+        if ownerPayPay:
             paypayButton = discord.ui.Button(
                 style=discord.ButtonStyle.danger,
                 label="PayPayで購入",
                 emoji=discord.PartialEmoji.from_str("<paypay:1301478001430626348>"),
             )
 
-            if paypayAccount:
+            if paypay:
 
                 async def buyWithPayPay(interaction: discord.Interaction):
                     await interaction.response.defer(ephemeral=True)
-                    paypay = PayPay(proxies=payPayProxies)
-                    try:
-                        await paypay.initialize(
-                            access_token=cipherSuite.decrypt(
-                                paypayAccount["access_token"]
-                            ).decode()
-                        )
-                    except:
-                        print("token refresh")
-                        try:
-                            await paypay.token_refresh(
-                                cipherSuite.decrypt(
-                                    paypayAccount["refresh_token"]
-                                ).decode()
-                            )
-                        except Exception as e:
-                            traceback.print_exc()
-                            asyncio.create_task(sendLog(traceback.format_exc()))
-                            embed = discord.Embed(
-                                title="PayPayでのログインに失敗しました。",
-                                description=str(e),
-                                colour=discord.Colour.red(),
-                            )
-                            await interaction.followup.send(embed=embed, ephemeral=True)
-                            return
 
                     try:
                         await paypay.get_balance()
@@ -929,7 +786,8 @@ class JihankiPanelCog(commands.Cog):
 
                     try:
                         await paypay.send_money(
-                            good["price"], ownerPayPayAccount["external_user_id"]
+                            good["price"],
+                            AccountManager.paypayExternalUserIds[jihanki["owner_id"]],
                         )
                     except Exception as e:
                         traceback.print_exc()
@@ -972,8 +830,7 @@ class JihankiPanelCog(commands.Cog):
                     modal = self.PayPayModal(
                         self.bot,
                         _interaction,
-                        ownerPayPayAccount,
-                        ownerPayPayProxies,
+                        ownerPayPay,
                         jihanki,
                         goods,
                         good,
