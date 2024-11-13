@@ -609,25 +609,25 @@ class JihankiPanelCog(commands.Cog):
         view = discord.ui.View(timeout=300)
 
         try:
-            ownerPayPay: PayPay = AccountManager.loginPayPay(jihanki["owner_id"])
+            ownerPayPay: PayPay = await AccountManager.loginPayPay(jihanki["owner_id"])
         except:
             traceback.print_exc()
             ownerPayPay = None
 
         try:
-            paypay: PayPay = AccountManager.loginPayPay(interaction.user.id)
+            paypay: PayPay = await AccountManager.loginPayPay(interaction.user.id)
         except:
             traceback.print_exc()
             paypay = None
 
         try:
-            ownerKyash: Kyash = AccountManager.loginKyash(jihanki["owner_id"])
+            ownerKyash: Kyash = await AccountManager.loginKyash(jihanki["owner_id"])
         except:
             traceback.print_exc()
             ownerKyash = None
 
         try:
-            kyash: Kyash = AccountManager.loginKyash(interaction.user.id)
+            kyash: Kyash = await AccountManager.loginKyash(interaction.user.id)
         except:
             traceback.print_exc()
             kyash = None

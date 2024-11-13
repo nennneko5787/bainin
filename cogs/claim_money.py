@@ -12,8 +12,7 @@ from cryptography.fernet import Fernet
 from discord import app_commands
 from discord.ext import commands
 
-from .account import (AccountManager, AccountNotLinkedException,
-                      FailedToLoginException)
+from .account import AccountManager, AccountNotLinkedException, FailedToLoginException
 from .database import Database
 
 dotenv.load_dotenv()
@@ -96,7 +95,7 @@ class ClaimMoneyCog(commands.Cog):
 
                     if service == ServiceEnum.KYASH:
                         try:
-                            ownerKyash: Kyash = AccountManager.loginKyash(user.id)
+                            ownerKyash: Kyash = await AccountManager.loginKyash(user.id)
                         except AccountNotLinkedException:
                             embed = discord.Embed(
                                 title="送信先ユーザーがKyashのアカウントをリンクしていません",
@@ -116,7 +115,7 @@ class ClaimMoneyCog(commands.Cog):
                             return
 
                         try:
-                            kyash: Kyash = AccountManager.loginKyash(
+                            kyash: Kyash = await AccountManager.loginKyash(
                                 interaction.user.id
                             )
                         except AccountNotLinkedException:
@@ -188,7 +187,7 @@ class ClaimMoneyCog(commands.Cog):
                             await interaction.followup.send(embed=embed, ephemeral=True)
                             return
                     else:
-                        if not AccountManager.paypayExists(user.id):
+                        if not await AccountManager.paypayExists(user.id):
                             embed = discord.Embed(
                                 title="送信先ユーザーがPayPayのアカウントをリンクしていません",
                                 description=f"{user.mention} さんに「PayPayのアカウントをリンクしてください！」と言ってあげてください。",
@@ -198,7 +197,7 @@ class ClaimMoneyCog(commands.Cog):
                             return
 
                         try:
-                            paypay: PayPay = AccountManager.loginPayPay(
+                            paypay: PayPay = await AccountManager.loginPayPay(
                                 interaction.user.id
                             )
                         except AccountNotLinkedException:

@@ -12,8 +12,7 @@ from cryptography.fernet import Fernet
 from discord import app_commands
 from discord.ext import commands
 
-from .account import (AccountManager, AccountNotLinkedException,
-                      FailedToLoginException)
+from .account import AccountManager, AccountNotLinkedException, FailedToLoginException
 from .database import Database
 
 dotenv.load_dotenv()
@@ -106,7 +105,7 @@ class SendMoneyCog(commands.Cog):
         await interaction.response.defer(ephemeral=True)
         if service == "kyash":
             try:
-                ownerKyash: Kyash = AccountManager.loginKyash(user.id)
+                ownerKyash: Kyash = await AccountManager.loginKyash(user.id)
             except AccountNotLinkedException:
                 embed = discord.Embed(
                     title="送信先ユーザーがKyashのアカウントをリンクしていません",
@@ -126,7 +125,7 @@ class SendMoneyCog(commands.Cog):
                 return
 
             try:
-                kyash: Kyash = AccountManager.loginKyash(interaction.user.id)
+                kyash: Kyash = await AccountManager.loginKyash(interaction.user.id)
             except AccountNotLinkedException:
                 commands = await self.bot.tree.fetch_commands()
                 for cmd in commands:
@@ -194,7 +193,7 @@ class SendMoneyCog(commands.Cog):
 
             service = ServiceEnum.KYASH
         else:
-            if not AccountManager.paypayExists(user.id):
+            if not await AccountManager.paypayExists(user.id):
                 embed = discord.Embed(
                     title="送信先ユーザーがPayPayのアカウントをリンクしていません",
                     description=f"{user.mention} さんに「PayPayのアカウントをリンクしてください！」と言ってあげてください。",
@@ -204,7 +203,7 @@ class SendMoneyCog(commands.Cog):
                 return
 
             try:
-                paypay: PayPay = AccountManager.loginPayPay(interaction.user.id)
+                paypay: PayPay = await AccountManager.loginPayPay(interaction.user.id)
             except AccountNotLinkedException:
                 commands = await self.bot.tree.fetch_commands()
                 for cmd in commands:

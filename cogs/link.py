@@ -41,7 +41,7 @@ class AccountLinkCog(commands.Cog):
         await interaction.response.defer(ephemeral=True)
         if service == "kyash":
             try:
-                kyash: Kyash = AccountManager.loginKyash(interaction.user.id)
+                kyash: Kyash = await AccountManager.loginKyash(interaction.user.id)
 
                 await kyash.get_profile()
                 await kyash.get_wallet()
@@ -85,7 +85,7 @@ class AccountLinkCog(commands.Cog):
                 return
         else:
             try:
-                paypay: PayPay = AccountManager.loginPayPay(interaction.user.id)
+                paypay: PayPay = await AccountManager.loginPayPay(interaction.user.id)
                 await paypay.get_profile()
                 await paypay.get_balance()
                 embed = (
