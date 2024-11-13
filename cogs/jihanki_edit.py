@@ -215,6 +215,130 @@ class JihankiEditCog(commands.Cog):
             AddGoodsModal(int(jihanki), name, description, price, infinite)
         )
 
+    class EditGoodModal(discord.ui.Modal, title="Kyashで購入"):
+        def __init__(self, jihanki: dict, goods: dict, select: int):
+            super().__init__()
+
+            self.jihanki: dict = jihanki
+            self.goods: dict = goods
+            self.select: int = select
+
+            self.name = discord.ui.TextInput(
+                label="商品の名前",
+                placeholder="愛情",
+                default=self.goods[self.select]["name"],
+            )
+            self.add_item(self.name)
+
+            self.description = discord.ui.TextInput(
+                label="商品の説明",
+                placeholder="私の愛情を受け取ることができます",
+                default=self.goods[self.select]["description"],
+            )
+            self.add_item(self.description)
+
+            self.price = discord.ui.TextInput(
+                label="価格",
+                placeholder="数字以外受け付けません",
+                default=self.goods[self.select]["price"],
+            )
+            self.add_item(self.price)
+
+            self.value = discord.ui.TextInput(
+                label="内容",
+                placeholder="Chu!😘",
+                default=cipherSuite.decrypt(self.goods[self.select]["value"]).decode(),
+            )
+            self.add_item(self.value)
+
+        def convertToInteger(self, numeric: str) -> str | bool:
+            try:
+                return int(numeric)
+            except ValueError:
+                return False
+
+        async def on_submit(self, interaction: discord.Interaction):
+            await interaction.response.defer(ephemeral=True)
+            self.goods[self.select]["name"] = self.name.value
+            self.goods[self.select]["description"] = self.description.value
+            price = self.convertToInteger(self.price.value)
+
+            if (price is False) or (price < 0):
+                embed = discord.Embed(
+                    title="エラーが発生しました",
+                    description="価格は0以上の整数でなければなりません",
+                    colour=discord.Colour.red(),
+                )
+                await interaction.followup.send(embed=embed)
+                return
+
+            self.goods[self.select]["price"] = price
+            self.goods[self.select]["value"] = cipherSuite.encrypt(
+                self.value.value
+            ).decode()
+
+            goodsJson = orjson.dumps(self.goods).decode()
+            await Database.pool.execute(
+                "UPDATE ONLY jihanki SET goods = $1 WHERE id = $2",
+                goodsJson,
+                self.jihanki["id"],
+            )
+
+            embed = discord.Embed(
+                title="エラーが発生しました",
+                description="価格は0以上の整数でなければなりません",
+                colour=discord.Colour.red(),
+            )
+            await interaction.followup.send(embed=embed)
+
+    @app_commands.command(
+        name="editgoods", description="自販機の商品を編集・確認します。"
+    )
+    @app_commands.autocomplete(jihanki=getJihankiList)
+    @app_commands.describe(jihanki="商品を編集したい自販機")
+    @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+    @app_commands.allowed_installs(guilds=True, users=False)
+    async def editGoodsCommand(
+        self,
+        interaction: discord.Interaction,
+        jihanki: str,
+    ):
+        await interaction.response.defer(ephemeral=True)
+        jihanki = await Database.pool.fetchrow(
+            "SELECT * FROM jihanki WHERE id = $1", int(jihanki)
+        )
+        if jihanki["owner_id"] != interaction.user.id:
+            embed = discord.Embed(
+                title="その自販機はあなたのものではありません",
+                colour=discord.Colour.red(),
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            return
+        goods: list[dict[str, str]] = orjson.loads(jihanki["goods"])
+        view = discord.ui.View(timeout=None)
+        select = discord.ui.Select(
+            options=[
+                discord.SelectOption(
+                    label=f'{good["name"]} ({good["price"]}円) {"(在庫無限)" if good.get("infinite", False) else ""}',
+                    description=good["description"],
+                    value=index,
+                )
+                for index, good in enumerate(goods)
+            ]
+        )
+
+        async def editGoodsOnSelect(interaction: discord.Interaction):
+            await interaction.response.send_modal(
+                self.EditGoodModal(jihanki, goods, select.options[0].value)
+            )
+
+        select.callback = editGoodsOnSelect
+        view.add_item(select)
+        embed = discord.Embed(
+            title="削除する商品を選択してください", colour=discord.Colour.red()
+        )
+        await interaction.followup.send(embed=embed, view=view)
+
     @app_commands.command(
         name="removegoods", description="自販機から商品を削除します。"
     )
@@ -256,7 +380,9 @@ class JihankiEditCog(commands.Cog):
             try:
                 goods.remove(goods[select.options[0].value])
                 await Database.pool.execute(
-                    "UPDATE ONLY jihanki SET goods = $1", orjson.dumps(goods).decode()
+                    "UPDATE ONLY jihanki SET goods = $1 WHERE id = $2",
+                    orjson.dumps(goods).decode(),
+                    jihanki["id"],
                 )
                 embed = discord.Embed(
                     title="自販機から商品を削除しました",
