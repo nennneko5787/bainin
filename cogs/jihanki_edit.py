@@ -274,7 +274,7 @@ class JihankiEditCog(commands.Cog):
 
             self.goods[self.select]["price"] = price
             self.goods[self.select]["value"] = cipherSuite.encrypt(
-                self.value.value
+                self.value.value.encode()
             ).decode()
 
             goodsJson = orjson.dumps(self.goods).decode()
