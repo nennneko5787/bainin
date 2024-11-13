@@ -288,7 +288,7 @@ class JihankiEditCog(commands.Cog):
                 title="編集しました！",
                 colour=discord.Colour.green(),
             )
-            await interaction.followup.send(embed=embed)
+            await interaction.followup.send(embed=embed, ephemeral=True)
 
     @app_commands.command(
         name="editgoods", description="自販機の商品を編集・確認します。"
