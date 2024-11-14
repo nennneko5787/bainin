@@ -32,6 +32,7 @@ class HelpCog(commands.Cog):
                 name="/link",
                 value="PayPayやKyashのアカウントとリンクできます。",
             )
+            .add_field(name="/proxy", value="使用するプロキシを設定・編集します。")
             .add_field(
                 name="/check",
                 value="PayPayやKyashを開かずとも、所持金を確認することができます。(本ボットではPayPayポイントはご利用いただけないため、所持していても表示されません。)",
@@ -51,6 +52,8 @@ class HelpCog(commands.Cog):
             embed.add_field(name="/make", value="自販機を作成します。").add_field(
                 name="/edit", value="自販機を編集します。"
             ).add_field(name="/addgoods", value="自販機に商品を追加します。").add_field(
+                name="/editgoods", value="自販機の商品の中身を確認・修正します。"
+            ).add_field(
                 name="/removegoods", value="自販機から商品を削除します。"
             ).add_field(
                 name="/send",
