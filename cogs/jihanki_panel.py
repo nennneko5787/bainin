@@ -943,6 +943,15 @@ class JihankiPanelCog(commands.Cog):
             await interaction.followup.send(embed=embed, ephemeral=True)
             return
 
+        if not channel.permissions_for(interaction.guild.me).send_messages:
+            embed = discord.Embed(
+                title="エラーが発生しました",
+                description=f"このボットがそのチャンネルに送信する権限がありません。\n{interaction.guild.me.mention} に`メッセージを送信`する権限を与えてください。",
+                colour=discord.Colour.red(),
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            return
+
         if not channel.permissions_for(interaction.user).send_messages:
             embed = discord.Embed(
                 title="エラーが発生しました",
