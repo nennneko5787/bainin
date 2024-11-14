@@ -47,7 +47,7 @@ async def dmSendCommand(ctx: commands.Context, *, message: str):
     users = list(set(_users))
 
     for u in users:
-        user = await bot.fetch_user(u["id"])
+        user = await bot.fetch_user(u)
         try:
             await user.send(message)
         except:
@@ -65,7 +65,7 @@ async def jSendCommand(ctx: commands.Context, *, message: str):
     users = list(set([user["owner_id"] for user in _users]))
 
     for u in users:
-        user = await bot.fetch_user(u["owner_id"])
+        user = await bot.fetch_user(u)
         try:
             await user.send(message)
         except:
