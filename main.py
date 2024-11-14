@@ -34,9 +34,15 @@ async def dmSendCommand(ctx: commands.Context, *, message: str):
     if ctx.author.id != 1048448686914551879:
         return
 
-    _users = await Database.pool.fetch(
-        "SELECT * FROM kyash"
-    ) + await Database.pool.fetch("SELECT * FROM paypay")
+    _users = await Database.pool.fetch("SELECT owner_id FROM jihanki")
+
+    jUsers = [user["owner_id"] for user in _users]
+
+    _users = (
+        await Database.pool.fetch("SELECT * FROM kyash")
+        + await Database.pool.fetch("SELECT * FROM paypay")
+        + jUsers
+    )
 
     users = list(set([user["id"] for user in _users]))
 
