@@ -111,7 +111,7 @@ class JihankiEditCog(commands.Cog):
             name,
             description,
             interaction.user.id,
-            achievement.id,
+            achievement.id if achievement else None,
         )
         embed = discord.Embed(
             title="自販機を作成しました",
@@ -183,7 +183,7 @@ class JihankiEditCog(commands.Cog):
             "UPDATE ONLY jihanki SET name = $1, description = $2, achievement_channel_id = $3 WHERE id = $4",
             name,
             description,
-            achievement.id,
+            achievement.id if achievement else None,
             jihanki["id"],
         )
         embed = discord.Embed(
