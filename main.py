@@ -38,13 +38,13 @@ async def dmSendCommand(ctx: commands.Context, *, message: str):
 
     jUsers = [user["owner_id"] for user in _users]
 
-    _users = (
-        await Database.pool.fetch("SELECT * FROM kyash")
-        + await Database.pool.fetch("SELECT * FROM paypay")
-        + jUsers
-    )
+    _users = await Database.pool.fetch(
+        "SELECT * FROM kyash"
+    ) + await Database.pool.fetch("SELECT * FROM paypay")
 
-    users = list(set([user["id"] for user in _users]))
+    _users = [user["id"] for user in _users] + jUsers
+
+    users = list(set(_users))
 
     for u in users:
         user = await bot.fetch_user(u["id"])
