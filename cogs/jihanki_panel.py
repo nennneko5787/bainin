@@ -371,6 +371,8 @@ class JihankiPanelCog(commands.Cog):
                     self.jihanki, self.originalInteraction.message, goods=self.goods
                 )
 
+            await interaction.delete_original_response()
+
             embed = discord.Embed(
                 title="購入しました！",
                 description="DMにて購入明細書及び商品の内容を送信しました",
@@ -528,6 +530,8 @@ class JihankiPanelCog(commands.Cog):
                 await self.updateJihanki(
                     self.jihanki, self.originalInteraction.message, goods=self.goods
                 )
+
+            await interaction.delete_original_response()
 
             embed = discord.Embed(
                 title="購入しました！",
@@ -721,6 +725,8 @@ class JihankiPanelCog(commands.Cog):
                             jihanki, _interaction.message, goods=goods
                         )
 
+                    await interaction.delete_original_response()
+
                     embed = discord.Embed(
                         title="購入しました！",
                         description="DMにて購入明細書及び商品の内容を送信しました",
@@ -816,6 +822,8 @@ class JihankiPanelCog(commands.Cog):
                         await self.updateJihanki(
                             jihanki, _interaction.message, goods=goods
                         )
+
+                    await interaction.delete_original_response()
 
                     embed = discord.Embed(
                         title="購入しました！",

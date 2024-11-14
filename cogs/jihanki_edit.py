@@ -102,7 +102,6 @@ class JihankiEditCog(commands.Cog):
         description: str,
         achievement: discord.TextChannel = None,
     ):
-        achievement_channel_id = achievement.id if achievement is not None else None
         await interaction.response.defer(ephemeral=True)
         gen = SnowflakeGenerator(39)
         id = next(gen)
@@ -112,7 +111,7 @@ class JihankiEditCog(commands.Cog):
             name,
             description,
             interaction.user.id,
-            achievement_channel_id,
+            achievement.id,
         )
         embed = discord.Embed(
             title="自販機を作成しました",
@@ -169,8 +168,6 @@ class JihankiEditCog(commands.Cog):
         description: str,
         achievement: discord.TextChannel = None,
     ):
-        achievement_channel_id = achievement.id if achievement is not None else None
-    
         await interaction.response.defer(ephemeral=True)
         jihanki = await Database.pool.fetchrow(
             "SELECT * FROM jihanki WHERE id = $1", int(jihanki)
@@ -186,7 +183,7 @@ class JihankiEditCog(commands.Cog):
             "UPDATE ONLY jihanki SET name = $1, description = $2, achievement_channel_id = $3 WHERE id = $4",
             name,
             description,
-            achievement_channel_id,
+            achievement.id,
             jihanki["id"],
         )
         embed = discord.Embed(
@@ -219,12 +216,19 @@ class JihankiEditCog(commands.Cog):
         )
 
     class EditGoodModal(discord.ui.Modal):
-        def __init__(self, jihanki: dict, goods: dict, select: int):
+        def __init__(
+            self,
+            jihanki: dict,
+            goods: dict,
+            select: int,
+            interaction: discord.Interaction,
+        ):
             super().__init__(title=f'{goods[select]["name"]} を編集')
 
             self.jihanki: dict = jihanki
             self.goods: dict = goods
             self.select: int = select
+            self.interaction: discord.Interaction = interaction
 
             self.name = discord.ui.TextInput(
                 label="商品の名前",
@@ -287,6 +291,8 @@ class JihankiEditCog(commands.Cog):
                 self.jihanki["id"],
             )
 
+            await self.interaction.delete_original_response()
+
             embed = discord.Embed(
                 title="編集しました！",
                 colour=discord.Colour.green(),
@@ -329,10 +335,11 @@ class JihankiEditCog(commands.Cog):
             ]
         )
 
-        async def editGoodsOnSelect(interaction: discord.Interaction):
-            selectedValue = interaction.data["values"][0]
-            await interaction.response.send_modal(
-                self.EditGoodModal(jihanki, goods, int(selectedValue))
+        async def editGoodsOnSelect(_interaction: discord.Interaction):
+            await _interaction.response.send_modal(
+                self.EditGoodModal(
+                    jihanki, goods, int(_interaction.data["values"][0]), interaction
+                )
             )
 
         select.callback = editGoodsOnSelect
@@ -380,14 +387,16 @@ class JihankiEditCog(commands.Cog):
 
         async def removeGoodsOnSelect(interaction: discord.Interaction):
             await interaction.response.defer(ephemeral=True)
-            selectedValue = interaction.data["values"][0]
             try:
-                goods.remove(goods[int(selectedValue)])
+                goods.remove(goods[int(interaction.data["values"][0])])
                 await Database.pool.execute(
                     "UPDATE ONLY jihanki SET goods = $1 WHERE id = $2",
                     orjson.dumps(goods).decode(),
                     jihanki["id"],
                 )
+
+                await interaction.delete_original_response()
+
                 embed = discord.Embed(
                     title="自販機から商品を削除しました",
                     colour=discord.Colour.green(),
