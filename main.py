@@ -34,9 +34,11 @@ async def dmSendCommand(ctx: commands.Context, *, message: str):
     if ctx.author.id != 1048448686914551879:
         return
 
-    users = await Database.pool.fetch(
+    _users = await Database.pool.fetch(
         "SELECT * FROM kyash"
     ) + await Database.pool.fetch("SELECT * FROM paypay")
+
+    users = list(set([user["id"] for user in _users]))
 
     for u in users:
         user = await bot.fetch_user(u["id"])
@@ -54,9 +56,7 @@ async def jSendCommand(ctx: commands.Context, *, message: str):
 
     _users = await Database.pool.fetch("SELECT owner_id FROM jihanki")
 
-    users = [user["owner_id"] for user in _users]
-
-    users = list(set(users))
+    users = list(set([user["owner_id"] for user in _users]))
 
     for u in users:
         user = await bot.fetch_user(u["owner_id"])
