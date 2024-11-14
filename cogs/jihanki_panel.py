@@ -78,7 +78,7 @@ class JihankiPanelCog(commands.Cog):
     ):
         embed = discord.Embed(
             title=jihanki["name"],
-            description=f'{jihanki["description"]}\n\n-# 商品を購入する前に、<@1289535525681627156> からのDMを許可してください。\n-# 許可せずに商品を購入し、商品が受け取れなかった場合、責任を負いませんのでご了承ください。',
+            description=f'{jihanki["description"]}\n最終更新: {discord.utils.format_dt(discord.utils.utcnow())}\n\n-# 商品を購入する前に、<@1289535525681627156> からのDMを許可してください。\n-# 許可せずに商品を購入し、商品が受け取れなかった場合、責任を負いませんのでご了承ください。',
             colour=discord.Colour.og_blurple(),
         )
 
