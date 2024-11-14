@@ -49,6 +49,9 @@ async def dmSendCommand(ctx: commands.Context, *, message: str):
 
     for u in users:
         user = await bot.fetch_user(u)
+        print(
+            f"username: {user.name} / userid: {user.id} / displayname: {user.display_name}"
+        )
         try:
             await user.send(message)
         except:
@@ -67,6 +70,9 @@ async def jSendCommand(ctx: commands.Context, *, message: str):
 
     for u in users:
         user = await bot.fetch_user(u)
+        print(
+            f"username: {user.name} / userid: {user.id} / displayname: {user.display_name}"
+        )
         try:
             await user.send(message)
         except:
