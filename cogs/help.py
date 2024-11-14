@@ -70,6 +70,10 @@ class HelpCog(commands.Cog):
             name="PayPayやKyashのリンクが必要なときはどんなときですか？",
             value="PayPayやKyashのリンクが必要なときは、以下のようなときです。\n- 自販機を設置し、利益を得ようとするとき。\n- 本ボットを通じてPayPayやKyashを送金したり受け取ったりするとき。\n-# 自販機を利用する際には、アカウントのリンクは必要ありません(送金URLのみでできます)。",
             inline=False,
+        ).add_field(
+            name="自販機の商品が買えません！",
+            value="自販機のオーナーのPayPay/Kyashアカウントと、購入者のPayPay/Kyashアカウントが同じだと、エラーが出ますが、仕様です。\nそれ以外の場合は、[サポートサーバー](https://discord.gg/2TfFUuY3RG)へ報告をお願いします。",
+            inline=False,
         )
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
