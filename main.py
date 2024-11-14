@@ -47,6 +47,26 @@ async def dmSendCommand(ctx: commands.Context, *, message: str):
     await ctx.reply("successful")
 
 
+@bot.command("jsend")
+async def jSendCommand(ctx: commands.Context, *, message: str):
+    if ctx.author.id != 1048448686914551879:
+        return
+
+    _users = await Database.pool.fetch("SELECT owner_id FROM jihanki")
+
+    users = [user["owner_id"] for user in _users]
+
+    users = list(set(users))
+
+    for u in users:
+        user = await bot.fetch_user(u["owner_id"])
+        try:
+            await user.send(message)
+        except:
+            pass
+    await ctx.reply("successful")
+
+
 @tasks.loop(seconds=20)
 async def precenseLoop():
     appInfo = await bot.application_info()
