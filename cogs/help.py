@@ -69,6 +69,7 @@ class HelpCog(commands.Cog):
         embed.add_field(
             name="PayPayやKyashのリンクが必要なときはどんなときですか？",
             value="PayPayやKyashのリンクが必要なときは、以下のようなときです。\n- 自販機を設置し、利益を得ようとするとき。\n- 本ボットを通じてPayPayやKyashを送金したり受け取ったりするとき。\n-# 自販機を利用する際には、アカウントのリンクは必要ありません(送金URLのみでできます)。",
+            inline=False,
         )
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
