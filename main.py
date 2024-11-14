@@ -1,5 +1,6 @@
 import asyncio
 import os
+import traceback
 from contextlib import asynccontextmanager
 
 import discord
@@ -51,7 +52,7 @@ async def dmSendCommand(ctx: commands.Context, *, message: str):
         try:
             await user.send(message)
         except:
-            pass
+            traceback.print_exc()
     await ctx.reply("successful")
 
 
@@ -69,7 +70,7 @@ async def jSendCommand(ctx: commands.Context, *, message: str):
         try:
             await user.send(message)
         except:
-            pass
+            traceback.print_exc()
     await ctx.reply("successful")
 
 
