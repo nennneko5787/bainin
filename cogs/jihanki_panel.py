@@ -548,8 +548,15 @@ class JihankiPanelCog(commands.Cog):
         jihanki = await Database.pool.fetchrow(
             "SELECT * FROM jihanki WHERE id = $1", int(customFields[1])
         )
+        
         goods: list[dict[str, str]] = orjson.loads(jihanki["goods"])
         good = goods[int(interaction.data["values"][0])]
+
+        asyncio.create_task(
+            self.updateJihanki(
+                jihanki, _interaction.message, goods=goods
+            )
+        )
 
         async def sendLog(errorText: str):
             async with aiohttp.ClientSession() as session:
