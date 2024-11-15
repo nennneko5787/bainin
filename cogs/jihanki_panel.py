@@ -620,7 +620,6 @@ class JihankiPanelCog(commands.Cog):
 
         try:
             paypay: PayPay = await AccountManager.loginPayPay(interaction.user.id)
-            print(paypay)
         except:
             traceback.print_exc()
             paypay = None
@@ -633,7 +632,6 @@ class JihankiPanelCog(commands.Cog):
 
         try:
             kyash: Kyash = await AccountManager.loginKyash(interaction.user.id)
-            print(kyash)
         except:
             traceback.print_exc()
             kyash = None
@@ -754,7 +752,7 @@ class JihankiPanelCog(commands.Cog):
 
             kyashButton.callback = buyWithKyash
             view.add_item(kyashButton)
-            kyash = True
+            isKyash = True
 
         if ownerPayPay:
             paypayButton = discord.ui.Button(
@@ -852,9 +850,9 @@ class JihankiPanelCog(commands.Cog):
 
             paypayButton.callback = buyWithPayPay
             view.add_item(paypayButton)
-            paypay = True
+            isPayPay = True
 
-        if (not kyash) and (not paypay):
+        if (not isKyash) and (not isPayPay):
             embed = discord.Embed(
                 title="自販機のオーナーがPayPay・Kyashの両方のアカウントをリンクしていません",
                 description="自販機のオーナーに「アカウントをリンクしてください！」と言ってあげてください。",
