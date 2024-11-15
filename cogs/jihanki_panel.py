@@ -145,22 +145,26 @@ class JihankiPanelCog(commands.Cog):
         if jihanki["achievement_channel_id"]:
             channel = self.bot.get_channel(jihanki["achievement_channel_id"])
             if channel:
-                embed = (
-                    discord.Embed(title="販売実績", colour=discord.Colour.gold())
-                    .set_author(name=owner.display_name, icon_url=owner.display_avatar)
-                    .set_thumbnail(url=interaction.user.display_avatar)
-                    .add_field(
-                        name="ユーザー",
-                        value=f"{interaction.user.mention}",
+                if channel.permissions_for(channel.guild.me).send_messages:
+                    embed = (
+                        discord.Embed(title="販売実績", colour=discord.Colour.gold())
+                        .set_author(name=owner.display_name, icon_url=owner.display_avatar)
+                        .set_thumbnail(url=interaction.user.display_avatar)
+                        .add_field(
+                            name="ユーザー",
+                            value=f"{interaction.user.mention}",
+                        )
+                        .add_field(
+                            name="商品",
+                            value=f'{good["name"]} ({good["price"]}円)',
+                        )
+                        .set_footer(text=jihanki["name"])
                     )
-                    .add_field(
-                        name="商品",
-                        value=f'{good["name"]} ({good["price"]}円)',
-                    )
-                    .set_footer(text=jihanki["name"])
-                )
-                await channel.send(embed=embed)
-
+                    await channel.send(embed=embed)
+                else:
+                    embed = discord.Embed(title="実績チャンネルの権限を確認してください", description="このボットに、実績チャンネルへメッセージを送信する権限を与えてください。", colour=discord.Colour.red())
+                    await owner.send(embed=embed)
+    
         async def sendLog():
             async with aiohttp.ClientSession() as session:
                 webhook = discord.Webhook.from_url(
