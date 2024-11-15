@@ -620,6 +620,7 @@ class JihankiPanelCog(commands.Cog):
 
         try:
             paypay: PayPay = await AccountManager.loginPayPay(interaction.user.id)
+            print(paypay)
         except:
             traceback.print_exc()
             paypay = None
@@ -632,6 +633,7 @@ class JihankiPanelCog(commands.Cog):
 
         try:
             kyash: Kyash = await AccountManager.loginKyash(interaction.user.id)
+            print(kyash)
         except:
             traceback.print_exc()
             kyash = None
