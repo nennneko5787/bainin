@@ -102,6 +102,11 @@ class JihankiEditCog(commands.Cog):
         description: str,
         achievement: discord.TextChannel = None,
     ):
+        if not achievement.permissions_for(interaction.guild.me).send_messages:
+            embed = discord.Embed(title="エラーが発生しました", description="実績チャンネルにこのボットがメッセージを送信する権限がありません。", colour=discord.Colour.red())
+            await interaction.response.send_message(embed=embed)
+            return
+    
         await interaction.response.defer(ephemeral=True)
         gen = SnowflakeGenerator(39)
         id = next(gen)
@@ -168,6 +173,11 @@ class JihankiEditCog(commands.Cog):
         description: str,
         achievement: discord.TextChannel = None,
     ):
+        if not achievement.permissions_for(interaction.guild.me).send_messages:
+            embed = discord.Embed(title="エラーが発生しました", description="実績チャンネルにこのボットがメッセージを送信する権限がありません。", colour=discord.Colour.red())
+            await interaction.response.send_message(embed=embed)
+            return
+    
         await interaction.response.defer(ephemeral=True)
         jihanki = await Database.pool.fetchrow(
             "SELECT * FROM jihanki WHERE id = $1", int(jihanki)
