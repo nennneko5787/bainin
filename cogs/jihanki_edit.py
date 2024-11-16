@@ -161,13 +161,10 @@ class JihankiEditCog(commands.Cog):
                     )
         return jihankis
 
-    @app_commands.command(name="edit", description="自販機を編集します。")
+    @app_commands.command(name="delete", description="自販機を削除します。")
     @app_commands.autocomplete(jihanki=getJihankiList)
     @app_commands.describe(
         jihanki="編集したい自販機",
-        name="自販機の名前",
-        description="自販機の説明",
-        achievement="実績チャンネル",
     )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
