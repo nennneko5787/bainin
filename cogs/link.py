@@ -286,20 +286,22 @@ class AccountLinkCog(commands.Cog):
 
             await Database.pool.execute(
                 """
-                    INSERT INTO kyash (id, email, password, client_uuid, installation_uuid)
-                    VALUES ($1, $2, $3, $4, $5)
+                    INSERT INTO kyash (id, email, password, client_uuid, installation_uuid, proxy)
+                    VALUES ($1, $2, $3, $4, $5, $6)
                     ON CONFLICT (id)
                     DO UPDATE SET
                         email = EXCLUDED.email,
                         password = EXCLUDED.password,
                         client_uuid = EXCLUDED.client_uuid,
-                        installation_uuid = EXCLUDED.installation_uuid
+                        installation_uuid = EXCLUDED.installation_uuid,
+                        proxy = EXCLUDED.proxy
                 """,
                 interaction.user.id,
                 self.cipherSuite.encrypt(kyash.email.encode()).decode(),
                 self.cipherSuite.encrypt(kyash.password.encode()).decode(),
                 kyash.client_uuid,
                 kyash.installation_uuid,
+                proxy,
             )
             await message.reply(f"アカウントをリンクしました。")
         else:
@@ -359,8 +361,8 @@ class AccountLinkCog(commands.Cog):
 
             await Database.pool.execute(
                 """
-                    INSERT INTO paypay (id, external_user_id, access_token, refresh_token, device_uuid, client_uuid, phone, password)
-                    VALUES ($1, $2, $3, $4)
+                    INSERT INTO paypay (id, external_user_id, access_token, refresh_token, device_uuid, client_uuid, phone, password, proxy)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                     ON CONFLICT (id)
                     DO UPDATE SET
                         external_user_id = EXCLUDED.external_user_id,
@@ -369,7 +371,8 @@ class AccountLinkCog(commands.Cog):
                         device_uuid = EXCLUDED.device_uuid,
                         client_uuid = EXCLUDED.client_uuid,
                         phone = EXCLUDED.phone,
-                        password = EXCLUDED.password
+                        password = EXCLUDED.password,
+                        proxy = EXCLUDED.proxy
                 """,
                 interaction.user.id,
                 paypay.external_user_id,
@@ -379,6 +382,7 @@ class AccountLinkCog(commands.Cog):
                 paypay.client_uuid,
                 self.cipherSuite.encrypt(credential.encode()).decode(),
                 self.cipherSuite.encrypt(password.encode()).decode(),
+                proxy,
             )
             await message.reply(f"アカウントをリンクしました。")
 

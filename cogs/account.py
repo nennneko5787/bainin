@@ -76,6 +76,13 @@ class AccountManager:
                     await paypay.token_refresh(
                         cls.cipherSuite.decrypt(paypayAccount["refresh_token"]).decode()
                     )
+
+                    await Database.pool.execute(
+                        "UPDATE ONLY paypay SET access_token = $1, refresh_token = $2 WHERE id = $3",
+                        paypay.access_token,
+                        paypay.refresh_token,
+                        userId,
+                    )
                 except:
                     if (
                         paypayAccount["device_uuid"]
@@ -94,6 +101,13 @@ class AccountManager:
                                 ).decode(),
                                 device_uuid=str(paypayAccount["device_uuid"]).upper(),
                                 client_uuid=str(paypayAccount["client_uuid"]).upper(),
+                            )
+
+                            await Database.pool.execute(
+                                "UPDATE ONLY paypay SET access_token = $1, refresh_token = $2 WHERE id = $3",
+                                paypay.access_token,
+                                paypay.refresh_token,
+                                userId,
                             )
                         except:
                             raise FailedToLoginException()

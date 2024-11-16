@@ -140,7 +140,16 @@ class ClaimMoneyCog(commands.Cog):
                             await interaction.followup.send(embed=embed, ephemeral=True)
                             return
 
-                        await kyash.get_wallet()
+                        try:
+                            await kyash.get_wallet()
+                        except Exception as e:
+                            embed = discord.Embed(
+                                title="エラーが発生しました。",
+                                description=str(e),
+                                colour=discord.Colour.red(),
+                            )
+                            await interaction.followup.send(embed=embed, ephemeral=True)
+                            return
                         if kyash.all_balance < amount:
                             embed = discord.Embed(
                                 title="残高が足りません",
@@ -222,7 +231,17 @@ class ClaimMoneyCog(commands.Cog):
                             await interaction.followup.send(embed=embed, ephemeral=True)
                             return
 
-                        await paypay.get_balance()
+                        try:
+                            await paypay.get_balance()
+                        except Exception as e:
+                            embed = discord.Embed(
+                                title="エラーが発生しました。",
+                                description=str(e),
+                                colour=discord.Colour.red(),
+                            )
+                            await interaction.followup.send(embed=embed, ephemeral=True)
+                            return
+
                         if ((paypay.money or 0) + (paypay.money_light or 0)) < amount:
                             embed = discord.Embed(
                                 title="残高が足りません",
