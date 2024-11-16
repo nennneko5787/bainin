@@ -521,6 +521,15 @@ class JihankiPanelCog(commands.Cog):
             "SELECT * FROM jihanki WHERE id = $1", int(customFields[1])
         )
 
+        if not jihanki:
+            embed = discord.Embed(
+                title="エラーが発生しました。",
+                description="自販機が存在しません。\n自販機がすでに削除されている可能性があります",
+                colour=discord.Colour.red(),
+            )
+            await interaction.followup.send(embed=embed)
+            return
+
         goods: list[dict[str, str]] = orjson.loads(jihanki["goods"])
         good = goods[int(interaction.data["values"][0])]
 

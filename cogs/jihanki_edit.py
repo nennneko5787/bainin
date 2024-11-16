@@ -102,11 +102,17 @@ class JihankiEditCog(commands.Cog):
         description: str,
         achievement: discord.TextChannel = None,
     ):
-        if achievement and (achievement.permissions_for(interaction.guild.me).send_messages):
-            embed = discord.Embed(title="エラーが発生しました", description="実績チャンネルにこのボットがメッセージを送信する権限がありません。", colour=discord.Colour.red())
+        if achievement and (
+            achievement.permissions_for(interaction.guild.me).send_messages
+        ):
+            embed = discord.Embed(
+                title="エラーが発生しました",
+                description="実績チャンネルにこのボットがメッセージを送信する権限がありません。",
+                colour=discord.Colour.red(),
+            )
             await interaction.response.send_message(embed=embed)
             return
-    
+
         await interaction.response.defer(ephemeral=True)
         gen = SnowflakeGenerator(39)
         id = next(gen)
@@ -169,15 +175,54 @@ class JihankiEditCog(commands.Cog):
         self,
         interaction: discord.Interaction,
         jihanki: str,
+    ):
+        await interaction.response.defer(ephemeral=True)
+        jihanki = await Database.pool.fetchrow(
+            "SELECT * FROM jihanki WHERE id = $1", int(jihanki)
+        )
+        if jihanki["owner_id"] != interaction.user.id:
+            embed = discord.Embed(
+                title="その自販機はあなたのものではありません",
+                colour=discord.Colour.red(),
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            return
+        await Database.pool.execute(
+            "DELETE FROM jihanki WHERE id = $1",
+            jihanki["id"],
+        )
+        embed = discord.Embed(title="自販機を削除しました", colour=discord.Colour.red())
+        await interaction.followup.send(embed=embed, ephemeral=True)
+
+    @app_commands.command(name="edit", description="自販機を編集します。")
+    @app_commands.autocomplete(jihanki=getJihankiList)
+    @app_commands.describe(
+        jihanki="編集したい自販機",
+        name="自販機の名前",
+        description="自販機の説明",
+        achievement="実績チャンネル",
+    )
+    @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+    @app_commands.allowed_installs(guilds=True, users=False)
+    async def editCommand(
+        self,
+        interaction: discord.Interaction,
+        jihanki: str,
         name: str,
         description: str,
         achievement: discord.TextChannel = None,
     ):
-        if achievement and (not achievement.permissions_for(interaction.guild.me).send_messages):
-            embed = discord.Embed(title="エラーが発生しました", description="実績チャンネルにこのボットがメッセージを送信する権限がありません。", colour=discord.Colour.red())
+        if achievement and (
+            not achievement.permissions_for(interaction.guild.me).send_messages
+        ):
+            embed = discord.Embed(
+                title="エラーが発生しました",
+                description="実績チャンネルにこのボットがメッセージを送信する権限がありません。",
+                colour=discord.Colour.red(),
+            )
             await interaction.response.send_message(embed=embed)
             return
-    
+
         await interaction.response.defer(ephemeral=True)
         jihanki = await Database.pool.fetchrow(
             "SELECT * FROM jihanki WHERE id = $1", int(jihanki)
@@ -199,7 +244,7 @@ class JihankiEditCog(commands.Cog):
         embed = discord.Embed(
             title="自販機を編集しました", colour=discord.Colour.green()
         )
-        await interaction.followup.send(embed=embed)
+        await interaction.followup.send(embed=embed, ephemeral=True)
 
     @app_commands.command(name="addgoods", description="自販機に商品を追加します。")
     @app_commands.autocomplete(jihanki=getJihankiList)
