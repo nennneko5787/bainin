@@ -38,7 +38,7 @@ class HelpCog(commands.Cog):
                 value="PayPayやKyashを開かずとも、所持金を確認することができます。(本ボットではPayPayポイントはご利用いただけないため、所持していても表示されません。)",
             )
             .add_field(
-                name="/remittance",
+                name="/sendmoney",
                 value="Discordのユーザーを指定するだけで簡単に送金することができます。\n送信先のユーザーがPayPayかKyashのアカウントをリンクしている必要があります。",
             )
             .add_field(
