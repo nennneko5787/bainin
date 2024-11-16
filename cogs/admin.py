@@ -77,7 +77,7 @@ class AdminCog(commands.Cog):
                 f"username: {user.name} / userid: {user.id} / displayname: {user.display_name}"
             )
             try:
-                await user.send(message)
+                await user.send(message, silent=True)
                 successCount += 1
             except:
                 traceback.print_exc()
@@ -108,7 +108,7 @@ class AdminCog(commands.Cog):
                 f"username: {user.name} / userid: {user.id} / displayname: {user.display_name}"
             )
             try:
-                await user.send(message)
+                await user.send(message, silent=True)
                 successCount += 1
             except:
                 traceback.print_exc()
