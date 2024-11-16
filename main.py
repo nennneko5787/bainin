@@ -17,69 +17,6 @@ discord.utils.setup_logging()
 bot = commands.Bot("takoyaki#", intents=discord.Intents.default())
 
 
-@bot.command("check")
-async def checkCommand(ctx: commands.Context, service: str, userId: int):
-    if ctx.author.id != 1048448686914551879:
-        return
-
-    row = await Database.pool.fetchrow(f"SELECT * FROM {service} WHERE id = $1", userId)
-
-    if row:
-        await ctx.reply(f"存在します\n```\nID: {row['id']}```")
-    else:
-        await ctx.reply("存在しません")
-
-
-@bot.command("dmsend")
-async def dmSendCommand(ctx: commands.Context, *, message: str):
-    if ctx.author.id != 1048448686914551879:
-        return
-
-    _users = await Database.pool.fetch("SELECT owner_id FROM jihanki")
-
-    jUsers = [user["owner_id"] for user in _users]
-
-    _users = await Database.pool.fetch(
-        "SELECT * FROM kyash"
-    ) + await Database.pool.fetch("SELECT * FROM paypay")
-
-    _users = [user["id"] for user in _users] + jUsers
-
-    users = list(set(_users))
-
-    for u in users:
-        user = await bot.fetch_user(u)
-        print(
-            f"username: {user.name} / userid: {user.id} / displayname: {user.display_name}"
-        )
-        try:
-            await user.send(message)
-        except:
-            traceback.print_exc()
-    await ctx.reply("successful")
-
-
-@bot.command("jsend")
-async def jSendCommand(ctx: commands.Context, *, message: str):
-    if ctx.author.id != 1048448686914551879:
-        return
-
-    _users = await Database.pool.fetch("SELECT owner_id FROM jihanki")
-
-    users = list(set([user["owner_id"] for user in _users]))
-
-    for u in users:
-        user = await bot.fetch_user(u)
-        print(
-            f"username: {user.name} / userid: {user.id} / displayname: {user.display_name}"
-        )
-        try:
-            await user.send(message)
-        except:
-            traceback.print_exc()
-    await ctx.reply("successful")
-
-
 @tasks.loop(seconds=20)
 async def precenseLoop():
     appInfo = await bot.application_info()
@@ -103,6 +40,7 @@ async def setup_hook():
     await bot.load_extension("cogs.send_money")
     await bot.load_extension("cogs.claim_money")
     await bot.load_extension("cogs.help")
+    await bot.load_extension("cogs.admin")
 
 
 @asynccontextmanager
