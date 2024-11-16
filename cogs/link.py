@@ -359,18 +359,26 @@ class AccountLinkCog(commands.Cog):
 
             await Database.pool.execute(
                 """
-                    INSERT INTO paypay (id, external_user_id, access_token, refresh_token)
+                    INSERT INTO paypay (id, external_user_id, access_token, refresh_token, device_uuid, client_uuid, phone, password)
                     VALUES ($1, $2, $3, $4)
                     ON CONFLICT (id)
                     DO UPDATE SET
                         external_user_id = EXCLUDED.external_user_id,
                         access_token = EXCLUDED.access_token,
-                        refresh_token = EXCLUDED.refresh_token
+                        refresh_token = EXCLUDED.refresh_token,
+                        device_uuid = EXCLUDED.device_uuid,
+                        client_uuid = EXCLUDED.client_uuid,
+                        phone = EXCLUDED.phone,
+                        password = EXCLUDED.password
                 """,
                 interaction.user.id,
                 paypay.external_user_id,
                 self.cipherSuite.encrypt(paypay.access_token.encode()).decode(),
                 self.cipherSuite.encrypt(paypay.refresh_token.encode()).decode(),
+                paypay.device_uuid,
+                paypay.client_uuid,
+                self.cipherSuite.encrypt(credential.encode()).decode(),
+                self.cipherSuite.encrypt(password.encode()).decode(),
             )
             await message.reply(f"アカウントをリンクしました。")
 

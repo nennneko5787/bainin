@@ -77,7 +77,28 @@ class AccountManager:
                         cls.cipherSuite.decrypt(paypayAccount["refresh_token"]).decode()
                     )
                 except:
-                    raise FailedToLoginException()
+                    if (
+                        paypayAccount["device_uuid"]
+                        and paypayAccount["client_uuid"]
+                        and paypayAccount["phone"]
+                        and paypayAccount["password"]
+                    ):
+                        try:
+                            paypay = PayPay(proxies=proxies)
+                            await paypay.initialize(
+                                phone=cls.cipherSuite.decrypt(
+                                    paypayAccount["phone"]
+                                ).decode(),
+                                password=cls.cipherSuite.decrypt(
+                                    paypayAccount["password"]
+                                ).decode(),
+                                device_uuid=str(paypayAccount["device_uuid"]).upper(),
+                                client_uuid=str(paypayAccount["client_uuid"]).upper(),
+                            )
+                        except:
+                            raise FailedToLoginException()
+                    else:
+                        raise FailedToLoginException()
             cls.paypayCache[userId] = paypay
             return paypay
 
