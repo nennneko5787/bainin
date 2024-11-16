@@ -28,7 +28,6 @@ async def precenseLoop():
 
 @bot.event
 async def on_ready():
-    await bot.tree.sync()
     precenseLoop.start()
 
 

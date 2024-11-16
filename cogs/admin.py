@@ -11,6 +11,14 @@ class AdminCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
+    @commands.command("sync")
+    async def syncCommand(self, ctx: commands.Context):
+        try:
+            await self.bot.tree.sync()
+            await ctx.reply("success")
+        except:
+            await ctx.reply("failed")
+
     @commands.command("git_pull")
     async def gitPullCommand(self, ctx: commands.Context):
         cp = subprocess.run(["git", "pull"])
