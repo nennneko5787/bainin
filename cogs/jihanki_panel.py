@@ -148,7 +148,9 @@ class JihankiPanelCog(commands.Cog):
                 if channel.permissions_for(channel.guild.me).send_messages:
                     embed = (
                         discord.Embed(title="販売実績", colour=discord.Colour.gold())
-                        .set_author(name=owner.display_name, icon_url=owner.display_avatar)
+                        .set_author(
+                            name=owner.display_name, icon_url=owner.display_avatar
+                        )
                         .set_thumbnail(url=interaction.user.display_avatar)
                         .add_field(
                             name="ユーザー",
@@ -162,46 +164,12 @@ class JihankiPanelCog(commands.Cog):
                     )
                     await channel.send(embed=embed)
                 else:
-                    embed = discord.Embed(title="実績チャンネルの権限を確認してください", description="このボットに、実績チャンネルへメッセージを送信する権限を与えてください。", colour=discord.Colour.red())
+                    embed = discord.Embed(
+                        title="実績チャンネルの権限を確認してください",
+                        description="このボットに、実績チャンネルへメッセージを送信する権限を与えてください。",
+                        colour=discord.Colour.red(),
+                    )
                     await owner.send(embed=embed)
-    
-        async def sendLog():
-            async with aiohttp.ClientSession() as session:
-                webhook = discord.Webhook.from_url(
-                    os.getenv("sale_webhook"), session=session
-                )
-
-                owner = await self.bot.fetch_user(jihanki["owner_id"])
-                embed = (
-                    discord.Embed(
-                        title="商品が購入されました", colour=discord.Colour.green()
-                    )
-                    .set_thumbnail(url=interaction.user.display_avatar.url)
-                    .add_field(
-                        name="自販機",
-                        value=f"{jihanki['name']}",
-                    )
-                    .add_field(
-                        name="自販機のオーナー",
-                        value=f"{owner.display_name} (ID: `{owner.name}`) (UID: {jihanki['owner_id']})",
-                    )
-                    .add_field(
-                        name="購入したユーザー",
-                        value=f"{interaction.user.mention} (ID: `{interaction.user.name}`) (UID: {interaction.user.id})",
-                    )
-                    .add_field(
-                        name="商品",
-                        value=f'{good["name"]} ({good["price"]}円)',
-                    )
-                    .add_field(
-                        name="種別",
-                        value=serviceString(service),
-                    )
-                )
-
-                await webhook.send(embed=embed)
-
-        asyncio.create_task(sendLog())
 
     async def sendPurchaseMessage(
         self, interaction: discord.Interaction, jihanki: dict, good: dict
@@ -552,14 +520,12 @@ class JihankiPanelCog(commands.Cog):
         jihanki = await Database.pool.fetchrow(
             "SELECT * FROM jihanki WHERE id = $1", int(customFields[1])
         )
-        
+
         goods: list[dict[str, str]] = orjson.loads(jihanki["goods"])
         good = goods[int(interaction.data["values"][0])]
 
         asyncio.create_task(
-            self.updateJihanki(
-                jihanki, _interaction.message, goods=goods
-            )
+            self.updateJihanki(jihanki, _interaction.message, goods=goods)
         )
 
         async def sendLog(errorText: str):

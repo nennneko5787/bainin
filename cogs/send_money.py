@@ -271,31 +271,6 @@ class SendMoneyCog(commands.Cog):
 
             service = ServiceEnum.PAYPAY
 
-        async with aiohttp.ClientSession() as session:
-            webhook = discord.Webhook.from_url(
-                os.getenv("money_webhook"), session=session
-            )
-
-            embed = (
-                discord.Embed(title="送金されました", colour=discord.Colour.green())
-                .set_thumbnail(url=interaction.user.display_avatar.url)
-                .add_field(
-                    name="送金元ユーザー",
-                    value=f"{interaction.user.mention} (ID: `{interaction.user.name}`) (UID: {interaction.user.id})",
-                )
-                .add_field(
-                    name="送金先ユーザー",
-                    value=f"{user.mention} (ID: `{user.name}`) (UID: {user.id})",
-                )
-                .add_field(name="金額", value=f"{amount}円")
-                .add_field(
-                    name="種別",
-                    value=serviceString(service),
-                )
-            )
-
-            await webhook.send(embed=embed)
-
         try:
             embed = (
                 discord.Embed(
