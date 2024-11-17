@@ -45,7 +45,85 @@ class AccountManager:
     @classmethod
     async def loginPayPay(cls, userId: int) -> PayPay:
         if userId in cls.paypayCache:
-            return cls.paypayCache[userId]
+            paypay = cls.paypayCache[userId]
+            try:
+                await paypay.alive()
+                return cls.paypayCache[userId]
+            except:
+                paypayAccount = await Database.pool.fetchrow(
+                    "SELECT * FROM paypay WHERE id = $1", userId
+                )
+                if not paypayAccount:
+                    raise AccountNotLinkedException()
+
+                if paypayAccount["proxy"]:
+                    proxies = {
+                        "http": paypayAccount["proxy"],
+                        "https": paypayAccount["proxy"],
+                    }
+                else:
+                    proxies = None
+
+                cls.paypayExternalUserIds[userId] = paypayAccount["external_user_id"]
+
+                paypay = PayPay(proxies=proxies)
+                try:
+                    await paypay.initialize(
+                        access_token=cls.cipherSuite.decrypt(
+                            paypayAccount["access_token"]
+                        ).decode()
+                    )
+                except:
+                    try:
+                        paypay = PayPay(proxies=proxies)
+                        await paypay.token_refresh(
+                            cls.cipherSuite.decrypt(
+                                paypayAccount["refresh_token"]
+                            ).decode()
+                        )
+
+                        await Database.pool.execute(
+                            "UPDATE ONLY paypay SET access_token = $1, refresh_token = $2 WHERE id = $3",
+                            paypay.access_token,
+                            paypay.refresh_token,
+                            userId,
+                        )
+                    except:
+                        if (
+                            paypayAccount["device_uuid"]
+                            and paypayAccount["client_uuid"]
+                            and paypayAccount["phone"]
+                            and paypayAccount["password"]
+                        ):
+                            try:
+                                paypay = PayPay(proxies=proxies)
+                                await paypay.initialize(
+                                    phone=cls.cipherSuite.decrypt(
+                                        paypayAccount["phone"]
+                                    ).decode(),
+                                    password=cls.cipherSuite.decrypt(
+                                        paypayAccount["password"]
+                                    ).decode(),
+                                    device_uuid=str(
+                                        paypayAccount["device_uuid"]
+                                    ).upper(),
+                                    client_uuid=str(
+                                        paypayAccount["client_uuid"]
+                                    ).upper(),
+                                )
+
+                                await Database.pool.execute(
+                                    "UPDATE ONLY paypay SET access_token = $1, refresh_token = $2 WHERE id = $3",
+                                    paypay.access_token,
+                                    paypay.refresh_token,
+                                    userId,
+                                )
+                            except:
+                                raise FailedToLoginException()
+                        else:
+                            raise FailedToLoginException()
+                cls.paypayCache[userId] = paypay
+                return paypay
         else:
             paypayAccount = await Database.pool.fetchrow(
                 "SELECT * FROM paypay WHERE id = $1", userId
