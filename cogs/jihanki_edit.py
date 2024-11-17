@@ -102,16 +102,15 @@ class JihankiEditCog(commands.Cog):
         description: str,
         achievement: discord.TextChannel = None,
     ):
-        if achievement and (
-            achievement.permissions_for(interaction.guild.me).send_messages
-        ):
-            embed = discord.Embed(
-                title="エラーが発生しました",
-                description="実績チャンネルにこのボットがメッセージを送信する権限がありません。",
-                colour=discord.Colour.red(),
-            )
-            await interaction.response.send_message(embed=embed)
-            return
+        if achievement:
+            if achievement.permissions_for(interaction.guild.me).send_messages:
+                embed = discord.Embed(
+                    title="エラーが発生しました",
+                    description="実績チャンネルにこのボットがメッセージを送信する権限がありません。",
+                    colour=discord.Colour.red(),
+                )
+                await interaction.response.send_message(embed=embed)
+                return
 
         await interaction.response.defer(ephemeral=True)
         gen = SnowflakeGenerator(39)
@@ -174,9 +173,16 @@ class JihankiEditCog(commands.Cog):
         jihanki: str,
     ):
         await interaction.response.defer(ephemeral=True)
-        jihanki = await Database.pool.fetchrow(
-            "SELECT * FROM jihanki WHERE id = $1", int(jihanki)
-        )
+        try:
+            jihanki = await Database.pool.fetchrow(
+                "SELECT * FROM jihanki WHERE id = $1", int(jihanki)
+            )
+        except:
+            jihanki = await Database.pool.fetchrow(
+                "SELECT * FROM jihanki WHERE name LIKE $1 AND owner_id = $2 LIMIT 1",
+                jihanki,
+                interaction.user.id,
+            )
         if jihanki["owner_id"] != interaction.user.id:
             embed = discord.Embed(
                 title="その自販機はあなたのものではありません",
@@ -209,21 +215,27 @@ class JihankiEditCog(commands.Cog):
         description: str,
         achievement: discord.TextChannel = None,
     ):
-        if achievement and (
-            not achievement.permissions_for(interaction.guild.me).send_messages
-        ):
-            embed = discord.Embed(
-                title="エラーが発生しました",
-                description="実績チャンネルにこのボットがメッセージを送信する権限がありません。",
-                colour=discord.Colour.red(),
-            )
-            await interaction.response.send_message(embed=embed)
-            return
+        if achievement:
+            if achievement.permissions_for(interaction.guild.me).send_messages:
+                embed = discord.Embed(
+                    title="エラーが発生しました",
+                    description="実績チャンネルにこのボットがメッセージを送信する権限がありません。",
+                    colour=discord.Colour.red(),
+                )
+                await interaction.response.send_message(embed=embed)
+                return
 
         await interaction.response.defer(ephemeral=True)
-        jihanki = await Database.pool.fetchrow(
-            "SELECT * FROM jihanki WHERE id = $1", int(jihanki)
-        )
+        try:
+            jihanki = await Database.pool.fetchrow(
+                "SELECT * FROM jihanki WHERE id = $1", int(jihanki)
+            )
+        except:
+            jihanki = await Database.pool.fetchrow(
+                "SELECT * FROM jihanki WHERE name LIKE $1 AND owner_id = $2 LIMIT 1",
+                jihanki,
+                interaction.user.id,
+            )
         if jihanki["owner_id"] != interaction.user.id:
             embed = discord.Embed(
                 title="その自販機はあなたのものではありません",
@@ -364,9 +376,16 @@ class JihankiEditCog(commands.Cog):
         jihanki: str,
     ):
         await interaction.response.defer(ephemeral=True)
-        jihanki = await Database.pool.fetchrow(
-            "SELECT * FROM jihanki WHERE id = $1", int(jihanki)
-        )
+        try:
+            jihanki = await Database.pool.fetchrow(
+                "SELECT * FROM jihanki WHERE id = $1", int(jihanki)
+            )
+        except:
+            jihanki = await Database.pool.fetchrow(
+                "SELECT * FROM jihanki WHERE name LIKE $1 AND owner_id = $2 LIMIT 1",
+                jihanki,
+                interaction.user.id,
+            )
         if jihanki["owner_id"] != interaction.user.id:
             embed = discord.Embed(
                 title="その自販機はあなたのものではありません",
@@ -414,9 +433,16 @@ class JihankiEditCog(commands.Cog):
         jihanki: str,
     ):
         await interaction.response.defer(ephemeral=True)
-        jihanki = await Database.pool.fetchrow(
-            "SELECT * FROM jihanki WHERE id = $1", int(jihanki)
-        )
+        try:
+            jihanki = await Database.pool.fetchrow(
+                "SELECT * FROM jihanki WHERE id = $1", int(jihanki)
+            )
+        except:
+            jihanki = await Database.pool.fetchrow(
+                "SELECT * FROM jihanki WHERE name LIKE $1 AND owner_id = $2 LIMIT 1",
+                jihanki,
+                interaction.user.id,
+            )
         if jihanki["owner_id"] != interaction.user.id:
             embed = discord.Embed(
                 title="その自販機はあなたのものではありません",
