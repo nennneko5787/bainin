@@ -42,9 +42,16 @@ class AddGoodsModal(discord.ui.Modal, title="商品を追加"):
 
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
-        jihanki = await Database.pool.fetchrow(
-            "SELECT * FROM jihanki WHERE id = $1", self.jihanki
-        )
+        try:
+            jihanki = await Database.pool.fetchrow(
+                "SELECT * FROM jihanki WHERE id = $1", int(jihanki)
+            )
+        except:
+            jihanki = await Database.pool.fetchrow(
+                "SELECT * FROM jihanki WHERE name LIKE $1 AND owner_id = $2 LIMIT 1",
+                jihanki,
+                interaction.user.id,
+            )
         if jihanki["owner_id"] != interaction.user.id:
             embed = discord.Embed(
                 title="その自販機はあなたのものではありません",
@@ -276,7 +283,7 @@ class JihankiEditCog(commands.Cog):
         infinite: bool = False,
     ):
         await interaction.response.send_modal(
-            AddGoodsModal(int(jihanki), name, description, price, infinite)
+            AddGoodsModal(jihanki, name, description, price, infinite)
         )
 
     class EditGoodModal(discord.ui.Modal):
