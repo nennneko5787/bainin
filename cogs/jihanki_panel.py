@@ -76,9 +76,11 @@ class JihankiPanelCog(commands.Cog):
     async def updateJihanki(
         self, jihanki: dict, message: discord.Message, *, goods: dict = None
     ):
+        owner = await self.bot.fetch_user(jihanki["owner_id"])
+
         embed = discord.Embed(
             title=jihanki["name"],
-            description=f'{jihanki["description"]}\n最終更新: {discord.utils.format_dt(discord.utils.utcnow())}\n\n-# 商品を購入する前に、<@1289535525681627156> からのDMを許可してください。\n-# 許可せずに商品を購入し、商品が受け取れなかった場合、責任を負いませんのでご了承ください。',
+            description=f'{jihanki["description"]}\nオーナー: {owner.mention} (`{owner.name}`)\n最終更新: {discord.utils.format_dt(discord.utils.utcnow())}\n\n-# 商品を購入する前に、<@1289535525681627156> からのDMを許可してください。\n-# 許可せずに商品を購入し、商品が受け取れなかった場合、責任を負いませんのでご了承ください。',
             colour=discord.Colour.og_blurple(),
         )
 
@@ -531,7 +533,16 @@ class JihankiPanelCog(commands.Cog):
             return
 
         goods: list[dict[str, str]] = orjson.loads(jihanki["goods"])
-        good = goods[int(interaction.data["values"][0])]
+        try:
+            good = goods[int(interaction.data["values"][0])]
+        except:
+            embed = discord.Embed(
+                title="エラーが発生しました。",
+                description="商品が存在しません。\n**メッセージを長押し、または右クリック**し、「**アプリ**」を選択し、「**自販機を再読み込み**」を選択してみてください。\n購入しようとしていた商品が存在しない場合は、オーナーに連絡してみてください。",
+                colour=discord.Colour.red(),
+            )
+            await interaction.followup.send(embed=embed)
+            return
 
         asyncio.create_task(
             self.updateJihanki(jihanki, _interaction.message, goods=goods)

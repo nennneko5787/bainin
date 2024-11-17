@@ -51,6 +51,14 @@ async def setup_hook():
         include_in_schema=False,
     )
     app.add_api_route(
+        "/api/bot",
+        bot.cogs.get("SiteCog").getBotStatus,
+    )
+    app.add_api_route(
+        "/api/payment/me",
+        bot.cogs.get("SiteCog").getUserData,
+    )
+    app.add_api_route(
         "/api/payment/history",
         bot.cogs.get("SiteCog").getPaymentHistory,
     )

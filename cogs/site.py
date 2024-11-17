@@ -95,9 +95,11 @@ class SiteCog(commands.Cog):
     async def getBotStatus(self):
         appInfo = await self.bot.application_info()
         return {
-            "guildsCount": len(self.bot.guilds),
-            "usersCount": appInfo.approximate_user_install_count,
+            "status": f"{len(self.bot.guilds)}サーバーと{appInfo.approximate_user_install_count}ユーザーが利用中<br>{await Database.pool.fetchval('SELECT COUNT(*) FROM jihanki')}つの自販機が作成されました",
         }
+
+    async def getUserData(self, userData: dict = Depends(loadUserData)):
+        return userData
 
     async def getPaymentHistory(self, userData: dict = Depends(loadUserData)):
         histories = [

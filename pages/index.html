@@ -1,20 +1,408 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Hello Bulma!</title>
+    <title>自販機</title>
+    <!-- Bulma CSS -->
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"
     />
+    <!-- Font Awesome -->
+    <script
+      src="https://kit.fontawesome.com/a076d05399.js"
+      crossorigin="anonymous"
+    ></script>
+    <style>
+      /* Google Fonts */
+      @import url("https://fonts.googleapis.com/css2?family=Yusei+Magic&display=swap");
+
+      /* Smooth scrolling */
+      html {
+        scroll-behavior: smooth;
+      }
+
+      /* Global font styles */
+      body {
+        font-family: "Yusei Magic", serif;
+        font-weight: 400;
+        font-style: normal;
+      }
+
+      /* Bot icon */
+      .bot-icon {
+        background: url("/path-to-your-icon.png") no-repeat center center;
+        background-size: contain;
+        width: 150px;
+        height: 150px;
+        margin: auto;
+      }
+
+      /* Dark mode styles */
+      @media (prefers-color-scheme: dark) {
+        .discord-background {
+          background-color: #424549;
+          color: #ffffff;
+        }
+      }
+
+      /* Light mode styles */
+      @media (prefers-color-scheme: light) {
+        .discord-background {
+          background-color: #ffffff;
+          color: #23272a;
+        }
+      }
+
+      /* Discord embed styles */
+      .embed {
+        border-left: solid 5px #5865f2;
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+      }
+
+      .embed-green {
+        border-left: solid 5px #2ecc71;
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+      }
+
+      .embed-content {
+        padding: 10px;
+        background-color: #23272a;
+        color: #ffffff;
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+      }
+
+      .discord-name {
+        padding: 3px;
+      }
+
+      .uis {
+        padding-top: 5px;
+      }
+    </style>
   </head>
   <body>
-    <section class="section">
-      <div class="container">
-        <h1 class="title">自販機</h1>
-        <p class="subtitle">My first website with <strong>Bulma</strong>!</p>
+    <!-- Hero Section -->
+    <section class="hero is-primary is-bold">
+      <div class="hero-body">
+        <div class="container has-text-centered">
+          <h1 class="title">自販機</h1>
+          <p class="subtitle">Discordで商品の販売を簡単にするボット</p>
+          <p id="bot-status" class="subtitle is-6"></p>
+          <a
+            href="https://discord.com/oauth2/authorize?client_id=1289535525681627156"
+            class="button is-link is-large"
+            >導入する</a
+          >
+          <a
+            href="https://discord.com/oauth2/authorize?client_id=1289535525681627156&response_type=code&redirect_uri=http%3A%2F%2Fbainin.nennneko5787.net%2Fcallback&scope=identify"
+            class="button is-link is-large"
+            >購入履歴を確認</a
+          >
+        </div>
       </div>
     </section>
+
+    <!-- Features Section -->
+    <section class="section">
+      <div class="container">
+        <h2 class="title has-text-centered">機能</h2>
+        <div class="columns is-multiline">
+          <div class="column has-text-centered">
+            <span class="icon is-large">
+              <i class="fas fa-cart-plus fa-2x"></i>
+            </span>
+            <h3 class="title is-4">簡単な販売</h3>
+            <p>商品を簡単に管理して販売することができます。</p>
+          </div>
+          <div class="column has-text-centered">
+            <span class="icon is-large">
+              <i class="fas fa-cogs fa-2x"></i>
+            </span>
+            <h3 class="title is-4">実績チャンネル</h3>
+            <p>
+              自販機に実績チャンネルをセットして、利用者が商品を購入した際にそのチャンネルに実績を送信することができます。
+            </p>
+          </div>
+          <div class="column has-text-centered">
+            <span class="icon is-large">
+              <i class="fas fa-users fa-2x"></i>
+            </span>
+            <h3 class="title is-4">購入履歴</h3>
+            <p>自分が購入した商品を後で確認することができます。</p>
+          </div>
+          <div class="column has-text-centered">
+            <span class="icon is-large">
+              <i class="fas fa-cogs fa-2x"></i>
+            </span>
+            <h3 class="title is-4">ユーザーインストール</h3>
+            <p>
+              ユーザーインストールして、いつでもどこでも送金機能や請求機能などを利用できます。
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Try Section -->
+    <section class="section">
+      <div class="container">
+        <h2 class="title has-text-centered">試してみる</h2>
+        <div class="box discord-background">
+          <!-- Discord Embed -->
+          <article class="media">
+            <figure class="media-left">
+              <figure class="image is-64x64">
+                <img
+                  class="is-rounded"
+                  src="https://cdn.discordapp.com/avatars/1289535525681627156/b1c0be7deb3c6bb17210e0695e7e6618.png?size=64"
+                />
+              </figure>
+            </figure>
+            <div class="embed-container">
+              <div class="discord-name">
+                自販機
+                <span
+                  style="
+                    background-color: #8b98f2;
+                    color: #ffffff;
+                    border-radius: 2px;
+                    padding: 1px;
+                  "
+                  >✓ APP</span
+                >
+                <small style="color: #898989">今日 12:00</small>
+              </div>
+              <div class="embed">
+                <div class="embed-content">
+                  <div>
+                    <div style="padding-bottom: 10px; font-weight: bold">
+                      猫の喫茶店
+                    </div>
+                    飲み物を買えます<br />
+                    最終更新:
+                    <span style="background-color: #34383b; padding: 2px"
+                      >November 17, 2024 12:11 PM</span
+                    >
+                  </div>
+                  <br />
+                  <small style="color: #565656">
+                    商品を購入する前に、<span
+                      style="
+                        background-color: #8b98f2;
+                        color: #ffffff;
+                        border-radius: 2px;
+                        padding: 2px;
+                      "
+                      >@自販機</span
+                    >
+                    からのDMを許可してください。<br />
+                    許可せずに商品を購入し、商品が受け取れなかった場合、責任を負いませんのでご了承ください。
+                  </small>
+                </div>
+              </div>
+              <div class="uis">
+                <div class="select">
+                  <select style="width: 40vw" id="embedSelect">
+                    <option>選択してください</option>
+                    <option>商品 (1円)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Discord Embed -->
+          <article class="media" id="buyui" style="display: none">
+            <figure class="media-left">
+              <figure class="image is-64x64">
+                <img
+                  class="is-rounded"
+                  src="https://cdn.discordapp.com/avatars/1289535525681627156/b1c0be7deb3c6bb17210e0695e7e6618.png?size=64"
+                />
+              </figure>
+            </figure>
+            <div class="embed-container">
+              <div class="discord-name">
+                自販機
+                <span
+                  style="
+                    background-color: #8b98f2;
+                    color: #ffffff;
+                    border-radius: 2px;
+                    padding: 1px;
+                  "
+                  >✓ APP</span
+                >
+                <small style="color: #898989">今日 12:00</small>
+              </div>
+              <div class="embed">
+                <div class="embed-content">
+                  <div>
+                    <div style="padding-bottom: 10px; font-weight: bold">
+                      決済確認
+                    </div>
+                    <div style="padding-bottom: 10px; font-weight: bold">
+                      商品
+                    </div>
+                    値段: <b>1円</b><br />
+                    5分以内に決済を完了してください。
+                  </div>
+                  <br />
+                  <small style="color: #565656">
+                    商品を購入する前に、<span
+                      style="
+                        background-color: #8b98f2;
+                        color: #ffffff;
+                        border-radius: 2px;
+                        padding: 2px;
+                      "
+                      >@自販機</span
+                    >
+                    からのDMを許可してください。<br />
+                    許可せずに商品を購入し、商品が受け取れなかった場合、責任を負いませんのでご了承ください。
+                  </small>
+                </div>
+              </div>
+              <div class="uis">
+                <button
+                  style="
+                    background-color: #5865f2;
+                    border-radius: 2px;
+                    padding: 5px;
+                  "
+                  id="buy1"
+                >
+                  <img
+                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzj-aceSC-AZiGIU9Ums_5ItlCvoGm2BJMZw&s"
+                    width="16"
+                    height="16"
+                  />
+                  Kyashで購入
+                </button>
+
+                <button
+                  style="
+                    background-color: #ff2750;
+                    border-radius: 2px;
+                    padding: 5px;
+                  "
+                  id="buy2"
+                >
+                  <img
+                    src="https://ascii.jp/img/2024/05/15/3732336/l/a6719443ef16b445.png"
+                    width="16"
+                    height="16"
+                  />
+                  PayPayで購入
+                </button>
+              </div>
+              <small style="color: #898989"
+                >これらはあなただけに表示されています・<a
+                  onclick="document.getElementById('buyui').style.display = 'none';"
+                  >これらのメッセージを削除する</a
+                ></small
+              >
+            </div>
+          </article>
+
+          <!-- Discord Embed -->
+          <article class="media" id="boughtui" style="display: none">
+            <figure class="media-left">
+              <figure class="image is-64x64">
+                <img
+                  class="is-rounded"
+                  src="https://cdn.discordapp.com/avatars/1289535525681627156/b1c0be7deb3c6bb17210e0695e7e6618.png?size=64"
+                />
+              </figure>
+            </figure>
+            <div class="embed-container">
+              <div class="discord-name">
+                自販機
+                <span
+                  style="
+                    background-color: #8b98f2;
+                    color: #ffffff;
+                    border-radius: 2px;
+                    padding: 1px;
+                  "
+                  >✓ APP</span
+                >
+                <small style="color: #898989">今日 12:00</small>
+              </div>
+              <div class="embed-green">
+                <div class="embed-content">
+                  <div>
+                    <div style="padding-bottom: 10px; font-weight: bold">
+                      購入しました！
+                    </div>
+                    DMにて購入明細書及び商品の内容を送信しました
+                  </div>
+                </div>
+              </div>
+              <small style="color: #898989"
+                >これらはあなただけに表示されています・<a
+                  onclick="document.getElementById('boughtui').style.display = 'none';"
+                  >これらのメッセージを削除する</a
+                ></small
+              >
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="content has-text-centered">
+        <p>
+          <strong>自販機</strong>は<a href="https://nennneko5787.net"
+            >nennneko5787</a
+          >が運営しています。
+        </p>
+      </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          const response = await fetch("/api/bot");
+          const data = await response.json();
+          document.getElementById("bot-status").innerHTML =
+            data.status || "取得できませんでした。";
+        } catch (error) {
+          console.error("Error fetching bot data:", error);
+        }
+
+        document.getElementById("embedSelect").onchange = function (e) {
+          const selectedValue = event.target.value;
+          if (selectedValue != "選択してください") {
+            document.getElementById("embedSelect").selectedIndex = 0;
+            document.getElementById("buyui").style.display = "";
+            document.getElementById("boughtui").style.display = "none";
+          } else {
+            document.getElementById("buyui").style.display = "none";
+            document.getElementById("boughtui").style.display = "none";
+          }
+        };
+
+        function buy() {
+          document.getElementById("buyui").style.display = "none";
+          document.getElementById("boughtui").style.display = "";
+        }
+
+        document.getElementById("buy1").onclick = () => {
+          buy();
+        };
+        document.getElementById("buy2").onclick = () => {
+          buy();
+        };
+      });
+    </script>
   </body>
 </html>
