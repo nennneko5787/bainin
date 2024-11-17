@@ -44,12 +44,12 @@ class AddGoodsModal(discord.ui.Modal, title="商品を追加"):
         await interaction.response.defer(ephemeral=True)
         try:
             jihanki = await Database.pool.fetchrow(
-                "SELECT * FROM jihanki WHERE id = $1", int(jihanki)
+                "SELECT * FROM jihanki WHERE id = $1", int(self.jihanki)
             )
         except:
             jihanki = await Database.pool.fetchrow(
                 "SELECT * FROM jihanki WHERE name LIKE $1 AND owner_id = $2 LIMIT 1",
-                jihanki,
+                self.jihanki,
                 interaction.user.id,
             )
         if jihanki["owner_id"] != interaction.user.id:
