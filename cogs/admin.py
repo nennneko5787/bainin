@@ -59,6 +59,16 @@ class AdminCog(commands.Cog):
         else:
             await ctx.reply("存在しません")
 
+    @commands.command("channel")
+    async def channelCommand(self, ctx: commands.Context, channelId: int):
+        channel = self.bot.get_channel(channelId)
+        embed = discord.Embed(
+            title=channel.name,
+            description=f"`{channel.id}`\n`SEND_MESSAGES`: `{channel.permissions_for(channel.guild.me).send_messages}`",
+            colour=discord.Colour.blurple(),
+        )
+        await ctx.reply(embed=embed)
+
     @commands.command("dmsend")
     async def dmSendCommand(self, ctx: commands.Context, *, message: str):
         if ctx.author.id != 1048448686914551879:
