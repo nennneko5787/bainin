@@ -8,7 +8,10 @@ import orjson
 from discord.ext import commands
 from cryptography.fernet import Fernet
 from fastapi import Request, Depends, Cookie, HTTPException
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+
+from .database import Database
 
 dotenv.load_dotenv()
 
@@ -53,9 +56,7 @@ class SiteCog(commands.Cog):
                 )
             accessTokenResponse = response.json()
             print(accessTokenResponse)
-            if ("guilds.join" in accessTokenResponse["scope"]) and (
-                "identify" in accessTokenResponse["scope"]
-            ):
+            if "identify" in accessTokenResponse["scope"]:
                 accessToken = accessTokenResponse["access_token"]
 
                 response = await self.client.get(
@@ -72,45 +73,15 @@ class SiteCog(commands.Cog):
                         status_code=403,
                     )
                 userData = response.json()
-                user = await guild.fetch_member(int(userData["id"]))
-                await user.add_roles(role, reason="認証に成功したため。")
-                refreshToken = accessTokenResponse["refresh_token"]
-                expiresAt = datetime.now() + timedelta(
-                    seconds=accessTokenResponse["expires_in"]
-                )
-                await Database.pool.execute(
-                    """
-                        INSERT INTO users (id, token, refresh_token, expires_at)
-                        VALUES ($1, $2, $3, $4)
-                        ON CONFLICT (id) 
-                        DO UPDATE SET 
-                            token = EXCLUDED.token,
-                            refresh_token = EXCLUDED.refresh_token,
-                            expires_at = EXCLUDED.expires_at;
-                    """,
-                    user.id,
-                    accessToken,
-                    refreshToken,
-                    expiresAt,
-                )
+                userData["ipaddr"] = request.client.host
 
-                await Database.pool.execute(
-                    """
-                        UPDATE guilds
-                        SET authorized_members = ARRAY(SELECT DISTINCT unnest(authorized_members) UNION ALL SELECT $2),
-                            authorized_count = authorized_count + 1
-                        WHERE id = $1
-                        AND NOT ($2 = ANY(authorized_members));
-                    """,
-                    guild.id,
-                    user.id,
+                response = RedirectResponse("/mypage")
+                response.set_cookie(
+                    "data",
+                    cipherSuite.encrypt(orjson.dumps(userData)).decode(),
+                    max_age=60 * 60 * 60 * 24 * 365,
                 )
-
-                return templates.TemplateResponse(
-                    request=request,
-                    name="authorized.html",
-                    context={"user": user, "guild": guild},
-                )
+                return response
             else:
                 raise HTTPException(status_code=403)
         except Exception as e:
@@ -121,7 +92,23 @@ class SiteCog(commands.Cog):
                 context={"message": str(e)},
             )
 
-    async def jihankiList(
-        self, request: Request, userData: dict = Depends(loadUserData)
-    ):
-        return {"a": "b"}
+    async def getBotStatus(self):
+        appInfo = await self.bot.application_info()
+        return {
+            "guildsCount": len(self.bot.guilds),
+            "usersCount": appInfo.approximate_user_install_count,
+        }
+
+    async def getPaymentHistory(self, userData: dict = Depends(loadUserData)):
+        histories = [
+            dict(history)
+            for history in await Database.pool.fetch(
+                "SELECT * FROM history WHERE user_id = $1", int(userData["id"])
+            )
+        ]
+
+        return histories
+
+
+async def setup(bot: commands.Bot):
+    await bot.add_cog(SiteCog(bot))

@@ -110,7 +110,7 @@ class JihankiEditCog(commands.Cog):
         achievement: discord.TextChannel = None,
     ):
         if achievement:
-            if achievement.permissions_for(interaction.guild.me).send_messages:
+            if not achievement.permissions_for(interaction.guild.me).send_messages:
                 embed = discord.Embed(
                     title="エラーが発生しました",
                     description="実績チャンネルにこのボットがメッセージを送信する権限がありません。",
@@ -223,7 +223,7 @@ class JihankiEditCog(commands.Cog):
         achievement: discord.TextChannel = None,
     ):
         if achievement:
-            if achievement.permissions_for(interaction.guild.me).send_messages:
+            if not achievement.permissions_for(interaction.guild.me).send_messages:
                 embed = discord.Embed(
                     title="エラーが発生しました",
                     description="実績チャンネルにこのボットがメッセージを送信する権限がありません。",

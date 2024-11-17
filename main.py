@@ -1,12 +1,13 @@
 import asyncio
 import os
-import traceback
 from contextlib import asynccontextmanager
 
 import discord
 import dotenv
 from discord.ext import commands, tasks
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, ORJSONResponse
+from fastapi.templating import Jinja2Templates
 
 from cogs.database import Database
 
@@ -33,13 +34,26 @@ async def on_ready():
 
 @bot.event
 async def setup_hook():
-    await bot.load_extension("cogs.link")
-    await bot.load_extension("cogs.jihanki_edit")
-    await bot.load_extension("cogs.jihanki_panel")
-    await bot.load_extension("cogs.send_money")
-    await bot.load_extension("cogs.claim_money")
-    await bot.load_extension("cogs.help")
-    await bot.load_extension("cogs.admin")
+    if os.getenv("site_test") != "a":
+        await bot.load_extension("cogs.link")
+        await bot.load_extension("cogs.jihanki_edit")
+        await bot.load_extension("cogs.jihanki_panel")
+        await bot.load_extension("cogs.send_money")
+        await bot.load_extension("cogs.claim_money")
+        await bot.load_extension("cogs.help")
+        await bot.load_extension("cogs.admin")
+    await bot.load_extension("cogs.site")
+
+    app.add_api_route(
+        "/callback",
+        bot.cogs.get("SiteCog").discordCallback,
+        response_class=HTMLResponse,
+        include_in_schema=False,
+    )
+    app.add_api_route(
+        "/api/payment/history",
+        bot.cogs.get("SiteCog").getPaymentHistory,
+    )
 
 
 @asynccontextmanager
@@ -51,4 +65,10 @@ async def lifespan(app: FastAPI):
         await Database.pool.close()
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, default_response_class=ORJSONResponse)
+templates = Jinja2Templates(directory="pages")
+
+
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    return templates.TemplateResponse(request, "index.html")
