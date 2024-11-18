@@ -352,7 +352,7 @@ class JihankiPanelCog(commands.Cog):
             gen = SnowflakeGenerator(15)
             paymentId = next(gen)
 
-            _jihanki = self.jihanki
+            _jihanki = dict(self.jihanki)
             del _jihanki["goods"]
 
             await Database.pool.execute(
@@ -541,7 +541,7 @@ class JihankiPanelCog(commands.Cog):
             gen = SnowflakeGenerator(15)
             paymentId = next(gen)
 
-            _jihanki = self.jihanki
+            _jihanki = dict(self.jihanki)
             del _jihanki["goods"]
 
             await Database.pool.execute(
@@ -661,7 +661,7 @@ class JihankiPanelCog(commands.Cog):
             gen = SnowflakeGenerator(15)
             paymentId = next(gen)
 
-            _jihanki = jihanki
+            _jihanki = dict(jihanki)
             del _jihanki["goods"]
 
             await Database.pool.execute(
@@ -815,7 +815,7 @@ class JihankiPanelCog(commands.Cog):
                     gen = SnowflakeGenerator(15)
                     paymentId = next(gen)
 
-                    _jihanki = jihanki
+                    _jihanki = dict(jihanki)
                     del _jihanki["goods"]
 
                     await Database.pool.execute(
@@ -942,7 +942,7 @@ class JihankiPanelCog(commands.Cog):
                     gen = SnowflakeGenerator(15)
                     paymentId = next(gen)
 
-                    _jihanki = jihanki
+                    _jihanki = dict(jihanki)
                     del _jihanki["goods"]
 
                     await Database.pool.execute(
