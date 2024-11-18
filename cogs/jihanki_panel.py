@@ -658,33 +658,33 @@ class JihankiPanelCog(commands.Cog):
 
                 await self.updateJihanki(jihanki, interaction.message, goods=goods)
 
-                gen = SnowflakeGenerator(15)
-                paymentId = next(gen)
+            gen = SnowflakeGenerator(15)
+            paymentId = next(gen)
 
-                _jihanki = jihanki
-                del _jihanki["goods"]
+            _jihanki = jihanki
+            del _jihanki["goods"]
 
-                await Database.pool.execute(
-                    "INSERT INTO history (id, jihanki, good, user_id, to_id, type, amount) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-                    paymentId,
-                    _jihanki,
-                    good,
-                    interaction.user.id,
-                    _jihanki["owner_id"],
-                    "BUY",
-                    -good["price"],
-                )
+            await Database.pool.execute(
+                "INSERT INTO history (id, jihanki, good, user_id, to_id, type, amount) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+                paymentId,
+                _jihanki,
+                good,
+                interaction.user.id,
+                _jihanki["owner_id"],
+                "BUY",
+                -good["price"],
+            )
 
-                await Database.pool.execute(
-                    "INSERT INTO history (id, jihanki, good, user_id, to_id, type, amount) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-                    paymentId,
-                    _jihanki,
-                    good,
-                    _jihanki["owner_id"],
-                    interaction.user.id,
-                    "GOT_BUY",
-                    good["price"],
-                )
+            await Database.pool.execute(
+                "INSERT INTO history (id, jihanki, good, user_id, to_id, type, amount) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+                paymentId,
+                _jihanki,
+                good,
+                _jihanki["owner_id"],
+                interaction.user.id,
+                "GOT_BUY",
+                good["price"],
+            )
 
             embed = discord.Embed(
                 title="購入しました！",
