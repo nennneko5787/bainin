@@ -1,5 +1,6 @@
 import os
 import traceback
+import math
 
 import dotenv
 import httpx
@@ -73,7 +74,6 @@ class SiteCog(commands.Cog):
                         status_code=403,
                     )
                 userData = response.json()
-                userData["ipaddr"] = request.client.host
 
                 response = RedirectResponse("/mypage")
                 response.set_cookie(
@@ -132,19 +132,62 @@ class SiteCog(commands.Cog):
             "SELECT COUNT(*) FROM history WHERE user_id = $1", int(userData["id"])
         )
 
-        histories = [
-            dict(history)
-            for history in await Database.pool.fetch(
-                "SELECT * FROM history WHERE user_id = $1 OFFSET $2 LIMIT $3",
-                int(userData["id"]),
-                page * limit,
-                limit,
-            )
-        ]
+        histories = []
 
-        data = {"total": count, "pages": count / limit, "histories": histories}
+        for history in await Database.pool.fetch(
+            "SELECT * FROM history WHERE user_id = $1 ORDER BY bought_at DESC OFFSET $2 LIMIT $3",
+            int(userData["id"]),
+            page * limit,
+            limit,
+        ):
+            history = dict(history)
+            history["id_str"] = str(history["id"])
+            if history["jihanki"]:
+                history["jihanki"] = orjson.loads(history["jihanki"])
+            if history["good"]:
+                history["good"] = orjson.loads(history["good"])
+            user = await self.bot.fetch_user(history["to_id"])
+            history["to"] = f"{user.display_name} (ID: {user.name})"
+            histories.append(history)
 
-        return histories
+        data = {
+            "total": count,
+            "pages": math.ceil(count / limit),
+            "histories": histories,
+        }
+
+        return data
+
+    async def getPayment(self, paymentId: int, userData: dict = Depends(loadUserData)):
+        """ユーザーの購入履歴の詳細を取得します。"""
+        if not userData:
+            raise HTTPException(401)
+
+        payment = await Database.pool.fetchrow(
+            "SELECT * FROM history WHERE id = $1", paymentId
+        )
+
+        if not payment:
+            raise HTTPException(404)
+
+        if payment["user_id"] != int(userData["id"]):
+            raise HTTPException(403)
+
+        payment = dict(payment)
+
+        payment["id_str"] = str(payment["id"])
+
+        if payment["jihanki"]:
+            payment["jihanki"] = orjson.loads(payment["jihanki"])
+        if payment["good"]:
+            payment["good"] = orjson.loads(payment["good"])
+            payment["good"]["value"] = cipherSuite.decrypt(
+                payment["good"]["value"].encode()
+            ).decode()
+        user = await self.bot.fetch_user(payment["to_id"])
+        payment["to"] = f"{user.display_name} (ID: {user.name})"
+
+        return payment
 
     async def myPage(self, request: Request, userData: dict = Depends(loadUserData)):
         if not userData:

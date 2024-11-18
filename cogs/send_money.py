@@ -327,7 +327,7 @@ class SendMoneyCog(commands.Cog):
             paymentId,
             user.id,
             interaction.user.id,
-            "GOT_PAYAPY" if service == ServiceEnum.PAYPAY else "GOT_KYASH",
+            "GOT_PAYPAY" if service == ServiceEnum.PAYPAY else "GOT_KYASH",
             amount,
         )
 

@@ -71,6 +71,10 @@ async def setup_hook():
         "/api/payment/history",
         bot.cogs.get("SiteCog").getPaymentHistory,
     )
+    app.add_api_route(
+        "/api/payment/{paymentId:int}",
+        bot.cogs.get("SiteCog").getPayment,
+    )
 
 
 @asynccontextmanager

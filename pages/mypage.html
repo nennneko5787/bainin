@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>支払い履歴 | 自販機</title>
+    <title>取引履歴 | 自販機</title>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"
@@ -58,34 +58,277 @@
 
     <section class="section">
       <div class="container">
-        <h1 class="title">支払い履歴</h1>
-        <table class="table is-fullwidth">
-          <thead>
-            <tr>
-              <th>取引ID</th>
-              <th>購入日時</th>
-              <th>自販機</th>
-              <th>商品</th>
-            </tr>
-          </thead>
-          <tfoot>
-            <tr>
-              <th>取引ID</th>
-              <th>購入日時</th>
-              <th>自販機</th>
-              <th>商品</th>
-            </tr>
-          </tfoot>
-          <tbody>
-            <tr>
-              <th>1</th>
-              <td>2024/11/18</td>
-              <td>自販機の見本</td>
-              <td>商品</td>
-            </tr>
-          </tbody>
-        </table>
+        <h1 class="title">取引履歴</h1>
+
+        <div class="table-container">
+          <table class="table is-fullwidth">
+            <thead>
+              <tr>
+                <th>取引ID</th>
+                <th>取引日時</th>
+                <th>種別</th>
+                <th>金額</th>
+                <th>取引先</th>
+                <th>詳細</th>
+              </tr>
+            </thead>
+            <tbody id="items"></tbody>
+          </table>
+        </div>
       </div>
     </section>
+
+    <nav
+      class="pagination is-centered"
+      role="navigation"
+      aria-label="pagination"
+    >
+      <ul class="pagination-list"></ul>
+    </nav>
+
+    <div class="modal" id="detail">
+      <div class="modal-background"></div>
+      <div class="modal-card">
+        <header class="modal-card-head">
+          <p class="modal-card-title"></p>
+          <button class="delete" aria-label="close"></button>
+        </header>
+        <section class="modal-card-body">
+          <!-- Content ... -->
+        </section>
+        <footer class="modal-card-foot">
+          <div class="buttons">
+            <button class="button is-success">OK</button>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <script>
+      types = {
+        GOT_BUY: "利益",
+        BUY: "購入",
+        GOT_BUY_PAYPAY: "PayPayでの利益",
+        BUY_PAYPAY: "PayPayで購入",
+        GOT_BUY_KYASH: "Kyashでの利益",
+        BUY_KYASH: "Kyashで購入",
+        GOT_PAYPAY: "PayPayを受け取り",
+        SEND_PAYPAY: "PayPayを送金",
+        GOT_KYASH: "Kyashを受け取り",
+        SEND_KYASH: "Kyashを送金",
+      };
+
+      function escapeHTML(string) {
+        if (typeof string !== "string") {
+          return string;
+        }
+        return string.replace(/[&'`"<>]/g, function (match) {
+          return {
+            "&": "&amp;",
+            "'": "&#x27;",
+            "`": "&#x60;",
+            '"': "&quot;",
+            "<": "&lt;",
+            ">": "&gt;",
+          }[match];
+        });
+      }
+
+      async function openServerDetail(id) {
+        let response = await fetch(`/api/payment/${id}`);
+        let jsonData = await response.json();
+
+        document.querySelector(".modal-card-title").textContent = "取引の詳細";
+
+        document.querySelector(".modal-card-body").innerHTML = "";
+
+        document.querySelector(
+          ".modal-card-body"
+        ).innerHTML += `<h2 class="title is-5">通常の情報</h2>`;
+
+        document.querySelector(
+          ".modal-card-body"
+        ).innerHTML += `<li>取引先: ${jsonData.to}</li>`;
+
+        if (jsonData.amount > 0) {
+          document.querySelector(
+            ".modal-card-body"
+          ).innerHTML += `<li>金額: +${jsonData.amount}</li>`;
+        } else {
+          document.querySelector(
+            ".modal-card-body"
+          ).innerHTML += `<li>金額: ${jsonData.amount}</li>`;
+        }
+
+        document.querySelector(".modal-card-body").innerHTML += `<li>種別: ${
+          types[jsonData.type]
+        }</li>`;
+
+        if (jsonData.good != null) {
+          document.querySelector(".modal-card-body").innerHTML += `
+            <h2 class="title is-5">商品の内容</h2>
+            <li>名前: ${escapeHTML(jsonData.good.name)}</li>
+            <li>説明: ${escapeHTML(jsonData.good.description)}</li>
+            <li>内容: <br><pre><code>${jsonData.good.value}</code></pre></li>
+          `;
+        }
+
+        if (jsonData.jihanki != null) {
+          document.querySelector(".modal-card-body").innerHTML += `
+            <h2 class="title is-5">自販機の内容</h2>
+            <li>名前: ${escapeHTML(jsonData.jihanki.name)}</li>
+            <li>説明: ${escapeHTML(jsonData.jihanki.description)}</li>
+          `;
+        }
+
+        document.querySelector(".modal").classList.add("is-active");
+      }
+
+      async function getHistory(page) {
+        let response = await fetch(`/api/payment/history?page=${page}`);
+        let jsonData = await response.json();
+
+        const itemsElement = document.getElementById("items");
+        itemsElement.innerHTML = "";
+
+        const paginationList = document.querySelector(".pagination-list");
+        paginationList.innerHTML = "";
+
+        for (let i = 1; i <= jsonData.pages; i++) {
+          let pageLink = document.createElement("a");
+          pageLink.href = "#";
+          pageLink.className = "pagination-link";
+          pageLink.textContent = i;
+
+          if (i - 1 === page) {
+            pageLink.classList.add("is-current");
+            pageLink.setAttribute("aria-current", "page");
+          }
+
+          pageLink.addEventListener("click", async (event) => {
+            event.preventDefault();
+            await getHistory(i - 1);
+          });
+
+          let listItem = document.createElement("li");
+          listItem.appendChild(pageLink);
+          paginationList.appendChild(listItem);
+        }
+
+        jsonData.histories.forEach((item) => {
+          let table = document.createElement("tr");
+
+          let paymentId = document.createElement("th");
+          paymentId.textContent = item.id_str;
+
+          let boughtAt = document.createElement("td");
+          let date = new Date(item.bought_at);
+          boughtAt.textContent = date.toLocaleDateString("ja-JP", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          });
+
+          let type = document.createElement("td");
+          type.textContent = types[item.type];
+
+          let amount = document.createElement("td");
+          if (item.amount > 0) {
+            amount.textContent = `+${item.amount}`;
+          } else {
+            amount.textContent = item.amount;
+          }
+
+          let to = document.createElement("td");
+          to.textContent = item.to;
+
+          let detail = document.createElement("td");
+          let openDetailButton = document.createElement("button");
+          openDetailButton.className = "button is-primary";
+          openDetailButton.textContent = "詳細";
+          openDetailButton.onclick = async () => {
+            document.querySelectorAll(".button").forEach((element) => {
+              element.disabled = true;
+            });
+            await openServerDetail(item.id_str);
+            document.querySelectorAll(".button").forEach((element) => {
+              element.disabled = false;
+            });
+          };
+          detail.append(openDetailButton);
+
+          table.append(paymentId);
+          table.append(boughtAt);
+          table.append(type);
+          table.append(amount);
+          table.append(to);
+          table.append(detail);
+
+          itemsElement.append(table);
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        await getHistory(0);
+      });
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        await getHistory(0);
+      });
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // Functions to open and close a modal
+        function openModal($el) {
+          $el.classList.add("is-active");
+        }
+
+        function closeModal($el) {
+          $el.classList.remove("is-active");
+        }
+
+        function closeAllModals() {
+          (document.querySelectorAll(".modal") || []).forEach(($modal) => {
+            closeModal($modal);
+          });
+        }
+
+        // Add a click event on buttons to open a specific modal
+        (document.querySelectorAll(".js-modal-trigger") || []).forEach(
+          ($trigger) => {
+            const modal = $trigger.dataset.target;
+            const $target = document.getElementById(modal);
+
+            $trigger.addEventListener("click", () => {
+              openModal($target);
+            });
+          }
+        );
+
+        // Add a click event on various child elements to close the parent modal
+        (
+          document.querySelectorAll(
+            ".modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button"
+          ) || []
+        ).forEach(($close) => {
+          const $target = $close.closest(".modal");
+
+          $close.addEventListener("click", () => {
+            closeModal($target);
+          });
+        });
+
+        // Add a keyboard event to close all modals
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") {
+            closeAllModals();
+          }
+        });
+      });
+    </script>
   </body>
 </html>

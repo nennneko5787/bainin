@@ -38,7 +38,7 @@ class AccountManager:
                 "SELECT * FROM paypay WHERE id = $1", userId
             )
             if not paypayAccount:
-                raise AccountNotLinkedException()
+                return False
             cls.paypayExternalUserIds[userId] = paypayAccount["external_user_id"]
             return True
 
