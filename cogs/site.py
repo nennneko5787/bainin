@@ -192,7 +192,7 @@ class SiteCog(commands.Cog):
     async def myPage(self, request: Request, userData: dict = Depends(loadUserData)):
         if not userData:
             return RedirectResponse(
-                "https://discord.com/oauth2/authorize?client_id=1289535525681627156&response_type=code&redirect_uri=http%3A%2F%2Fbainin.nennneko5787.net%2Fcallback&scope=identify"
+                "https://discord.com/oauth2/authorize?client_id=1289535525681627156&response_type=code&redirect_uri=https%3A%2F%2Fbainin.nennneko5787.net%2Fcallback&scope=identify"
             )
         return templates.TemplateResponse(request, "mypage.html")
 
