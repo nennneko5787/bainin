@@ -11,8 +11,9 @@ from aiopaypaython import PayPay
 from cryptography.fernet import Fernet
 from discord import app_commands
 from discord.ext import commands
+from snowflake import SnowflakeGenerator
 
-from .account import AccountManager, AccountNotLinkedException, FailedToLoginException
+from .account import AccountManager, AccountNotLinkedException
 from .database import Database
 
 dotenv.load_dotenv()
@@ -306,6 +307,27 @@ class SendMoneyCog(commands.Cog):
             await interaction.followup.send(embed=embed, ephemeral=True)
         except:
             pass
+
+        gen = SnowflakeGenerator(15)
+        paymentId = next(gen)
+
+        await Database.pool.execute(
+            "INSERT INTO history (id, user_id, to_id, type, amount) VALUES ($1, $2, $3, $4, $5)",
+            paymentId,
+            interaction.user.id,
+            user.id,
+            "SEND_PAYPAY" if service == ServiceEnum.PAYPAY else "SEND_KYASH",
+            -amount,
+        )
+
+        await Database.pool.execute(
+            "INSERT INTO history (id, user_id, to_id, type, amount) VALUES ($1, $2, $3, $4, $5)",
+            paymentId,
+            user.id,
+            interaction.user.id,
+            "GOT_PAYAPY" if service == ServiceEnum.PAYPAY else "GOT_KYASH",
+            amount,
+        )
 
         embed = (
             discord.Embed(

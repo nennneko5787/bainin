@@ -48,7 +48,7 @@ class AccountManager:
             paypay = cls.paypayCache[userId]
             try:
                 await paypay.alive()
-                return cls.paypayCache[userId]
+                return paypay
             except:
                 paypayAccount = await Database.pool.fetchrow(
                     "SELECT * FROM paypay WHERE id = $1", userId

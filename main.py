@@ -51,6 +51,15 @@ async def setup_hook():
         include_in_schema=False,
     )
     app.add_api_route(
+        "/mypage",
+        bot.cogs.get("SiteCog").myPage,
+        response_class=HTMLResponse,
+        include_in_schema=False,
+    )
+    app.add_api_route(
+        "/logout", bot.cogs.get("SiteCog").logout, include_in_schema=False
+    )
+    app.add_api_route(
         "/api/bot",
         bot.cogs.get("SiteCog").getBotStatus,
     )

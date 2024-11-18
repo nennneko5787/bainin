@@ -304,6 +304,8 @@ class AccountLinkCog(commands.Cog):
                 proxy,
             )
             await message.reply(f"アカウントをリンクしました。")
+
+            AccountManager.kyashCache[interaction.user.id] = kyash
         else:
             if proxy:
                 proxies = {
@@ -385,6 +387,11 @@ class AccountLinkCog(commands.Cog):
                 proxy,
             )
             await message.reply(f"アカウントをリンクしました。")
+
+            AccountManager.paypayCache[interaction.user.id] = paypay
+            AccountManager.paypayExternalUserIds[interaction.user.id] = (
+                paypay.external_user_id
+            )
 
 
 async def setup(bot: commands.Bot):

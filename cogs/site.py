@@ -20,10 +20,10 @@ cipherSuite = Fernet(os.getenv("fernet_key").encode())
 templates = Jinja2Templates(directory="pages")
 
 
-async def loadUserData(request: Request, data: str = Cookie(...)):
+async def loadUserData(data: str = Cookie(None)):
+    if not data:
+        return None
     data: dict = orjson.loads(cipherSuite.decrypt(data.encode()))
-    if data.get("ipaddr") != request.client.host:
-        raise HTTPException(status_code=401)
     return data
 
 
@@ -92,24 +92,66 @@ class SiteCog(commands.Cog):
                 context={"message": str(e)},
             )
 
+    async def logout(self, userData: dict = Depends(loadUserData)):
+        if not userData:
+            raise HTTPException(401)
+
+        response = RedirectResponse("/")
+        response.set_cookie(
+            "data",
+            "",
+            max_age=-1,
+        )
+        return response
+
     async def getBotStatus(self):
+        """ボットのステータスを取得します。現時点ではカスなレスポンスが返ります。"""
+
         appInfo = await self.bot.application_info()
         return {
-            "status": f"{len(self.bot.guilds)}サーバーと{appInfo.approximate_user_install_count}ユーザーが利用中<br>{await Database.pool.fetchval('SELECT COUNT(*) FROM jihanki')}つの自販機が作成されました",
+            "status": f"{len(self.bot.guilds)}サーバーと{appInfo.approximate_user_install_count}ユーザーが利用中<br>{await Database.pool.fetchval('SELECT COUNT(*) FROM jihanki')}台の自販機が作成されました",
         }
 
     async def getUserData(self, userData: dict = Depends(loadUserData)):
+        """ユーザーのデータを取得します。"""
+        if not userData:
+            raise HTTPException(401)
+
         return userData
 
-    async def getPaymentHistory(self, userData: dict = Depends(loadUserData)):
+    async def getPaymentHistory(
+        self, userData: dict = Depends(loadUserData), page: int = 0
+    ):
+        """ユーザーの購入履歴を取得します。"""
+        limit: int = 30
+
+        if not userData:
+            raise HTTPException(401)
+
+        count = await Database.pool.fetchval(
+            "SELECT COUNT(*) FROM history WHERE user_id = $1", int(userData["id"])
+        )
+
         histories = [
             dict(history)
             for history in await Database.pool.fetch(
-                "SELECT * FROM history WHERE user_id = $1", int(userData["id"])
+                "SELECT * FROM history WHERE user_id = $1 OFFSET $2 LIMIT $3",
+                int(userData["id"]),
+                page * limit,
+                limit,
             )
         ]
 
+        data = {"total": count, "pages": count / limit, "histories": histories}
+
         return histories
+
+    async def myPage(self, request: Request, userData: dict = Depends(loadUserData)):
+        if not userData:
+            return RedirectResponse(
+                "https://discord.com/oauth2/authorize?client_id=1289535525681627156&response_type=code&redirect_uri=http%3A%2F%2Fbainin.nennneko5787.net%2Fcallback&scope=identify"
+            )
+        return templates.TemplateResponse(request, "mypage.html")
 
 
 async def setup(bot: commands.Bot):

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>支払い履歴 | 自販機</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"
+    />
+  </head>
+  <body>
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+      <div class="navbar-brand">
+        <a class="navbar-item" href="/">
+          <img
+            src="https://cdn.discordapp.com/avatars/1289535525681627156/b1c0be7deb3c6bb17210e0695e7e6618.png?size=64"
+            alt=""
+          />
+          <strong>自販機</strong>
+        </a>
+
+        <a
+          role="button"
+          class="navbar-burger"
+          aria-label="menu"
+          aria-expanded="false"
+          data-target="navbarBasicExample"
+        >
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+
+      <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-start">
+          <a
+            class="navbar-item"
+            href="https://discord.com/oauth2/authorize?client_id=1289535525681627156"
+          >
+            導入する
+          </a>
+        </div>
+
+        <div class="navbar-end">
+          <div class="navbar-item">
+            <div class="buttons">
+              <a class="button is-danger" href="/logout">
+                <strong>ログアウト</strong>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <section class="section">
+      <div class="container">
+        <h1 class="title">支払い履歴</h1>
+        <table class="table is-fullwidth">
+          <thead>
+            <tr>
+              <th>取引ID</th>
+              <th>購入日時</th>
+              <th>自販機</th>
+              <th>商品</th>
+            </tr>
+          </thead>
+          <tfoot>
+            <tr>
+              <th>取引ID</th>
+              <th>購入日時</th>
+              <th>自販機</th>
+              <th>商品</th>
+            </tr>
+          </tfoot>
+          <tbody>
+            <tr>
+              <th>1</th>
+              <td>2024/11/18</td>
+              <td>自販機の見本</td>
+              <td>商品</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </body>
+</html>
