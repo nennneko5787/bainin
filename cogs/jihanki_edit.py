@@ -362,8 +362,6 @@ class JihankiEditCog(commands.Cog):
                 self.jihanki["id"],
             )
 
-            await self.interaction.delete_original_response()
-
             embed = discord.Embed(
                 title="編集しました！",
                 colour=discord.Colour.green(),
@@ -479,8 +477,6 @@ class JihankiEditCog(commands.Cog):
                     orjson.dumps(goods).decode(),
                     jihanki["id"],
                 )
-
-                await interaction.delete_original_response()
 
                 embed = discord.Embed(
                     title="自販機から商品を削除しました",

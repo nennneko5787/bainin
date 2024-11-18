@@ -338,8 +338,9 @@ class JihankiPanelCog(commands.Cog):
                 self.goods.remove(self.good)
                 goodsJson = orjson.dumps(self.goods).decode()
                 await Database.pool.execute(
-                    "UPDATE ONLY jihanki SET goods = $1",
+                    "UPDATE ONLY jihanki SET goods = $1 WHERE id = $2",
                     goodsJson,
+                    self.jihanki["id"],
                 )
 
                 await self.updateJihanki(
@@ -526,8 +527,9 @@ class JihankiPanelCog(commands.Cog):
                 self.goods.remove(self.good)
                 goodsJson = orjson.dumps(self.goods).decode()
                 await Database.pool.execute(
-                    "UPDATE ONLY jihanki SET goods = $1",
+                    "UPDATE ONLY jihanki SET goods = $1 WHERE id = $2",
                     goodsJson,
+                    self.jihanki["id"],
                 )
 
                 await self.updateJihanki(
@@ -771,8 +773,9 @@ class JihankiPanelCog(commands.Cog):
                         goods.remove(good)
                         goodsJson = orjson.dumps(goods).decode()
                         await Database.pool.execute(
-                            "UPDATE ONLY jihanki SET goods = $1",
+                            "UPDATE ONLY jihanki SET goods = $1 WHERE id = $2",
                             goodsJson,
+                            jihanki["id"],
                         )
 
                         await self.updateJihanki(
@@ -897,8 +900,9 @@ class JihankiPanelCog(commands.Cog):
                         goods.remove(good)
                         goodsJson = orjson.dumps(goods).decode()
                         await Database.pool.execute(
-                            "UPDATE ONLY jihanki SET goods = $1",
+                            "UPDATE ONLY jihanki SET goods = $1 WHERE id = $2",
                             goodsJson,
+                            jihanki["id"],
                         )
 
                         await self.updateJihanki(
