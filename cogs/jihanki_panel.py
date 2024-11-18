@@ -366,6 +366,8 @@ class JihankiPanelCog(commands.Cog):
                 -self.good["price"],
             )
 
+            paymentId = next(gen)
+
             await Database.pool.execute(
                 "INSERT INTO history (id, jihanki, good, user_id, to_id, type, amount) VALUES ($1, $2, $3, $4, $5, $6, $7)",
                 paymentId,
@@ -555,6 +557,8 @@ class JihankiPanelCog(commands.Cog):
                 -self.good["price"],
             )
 
+            paymentId = next(gen)
+
             await Database.pool.execute(
                 "INSERT INTO history (id, jihanki, good, user_id, to_id, type, amount) VALUES ($1, $2, $3, $4, $5, $6, $7)",
                 paymentId,
@@ -674,6 +678,8 @@ class JihankiPanelCog(commands.Cog):
                 "BUY",
                 -good["price"],
             )
+
+            paymentId = next(gen)
 
             await Database.pool.execute(
                 "INSERT INTO history (id, jihanki, good, user_id, to_id, type, amount) VALUES ($1, $2, $3, $4, $5, $6, $7)",
@@ -829,6 +835,8 @@ class JihankiPanelCog(commands.Cog):
                         -good["price"],
                     )
 
+                    paymentId = next(gen)
+
                     await Database.pool.execute(
                         "INSERT INTO history (id, jihanki, good, user_id, to_id, type, amount) VALUES ($1, $2, $3, $4, $5, $6, $7)",
                         paymentId,
@@ -955,6 +963,8 @@ class JihankiPanelCog(commands.Cog):
                         "BUY_PAYPAY",
                         -good["price"],
                     )
+
+                    paymentId = next(gen)
 
                     await Database.pool.execute(
                         "INSERT INTO history (id, jihanki, good, user_id, to_id, type, amount) VALUES ($1, $2, $3, $4, $5, $6, $7)",

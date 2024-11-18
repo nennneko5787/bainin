@@ -320,6 +320,8 @@ class SendMoneyCog(commands.Cog):
             -amount,
         )
 
+        paymentId = next(gen)
+
         await Database.pool.execute(
             "INSERT INTO history (id, user_id, to_id, type, amount) VALUES ($1, $2, $3, $4, $5)",
             paymentId,
