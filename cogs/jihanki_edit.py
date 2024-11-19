@@ -120,7 +120,7 @@ class JihankiEditCog(commands.Cog):
         interaction: discord.Interaction,
         name: str,
         description: str,
-        nsfw: int,
+        nsfw: app_commands.Choice[int],
         achievement: discord.TextChannel = None,
     ):
         if achievement:
@@ -143,7 +143,7 @@ class JihankiEditCog(commands.Cog):
             description,
             interaction.user.id,
             achievement.id if achievement else None,
-            nsfw,
+            nsfw.value,
         )
         embed = discord.Embed(
             title="自販機を作成しました",
@@ -286,7 +286,7 @@ class JihankiEditCog(commands.Cog):
             name,
             description,
             achievement.id if achievement else None,
-            nsfw,
+            nsfw.value,
             jihanki["id"],
         )
         embed = discord.Embed(
@@ -325,10 +325,10 @@ class JihankiEditCog(commands.Cog):
         name: str,
         description: str,
         price: app_commands.Range[int, 0],
-        infinite: int = 0,
+        infinite: app_commands.Choice[int] = app_commands.Choice(name="いいえ", value=False)
     ):
         await interaction.response.send_modal(
-            AddGoodsModal(jihanki, name, description, price, infinite)
+            AddGoodsModal(jihanki, name, description, price, infinite.value)
         )
 
     class EditGoodModal(discord.ui.Modal):
