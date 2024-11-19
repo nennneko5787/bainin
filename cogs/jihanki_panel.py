@@ -1087,7 +1087,7 @@ class JihankiPanelCog(commands.Cog):
 
     @app_commands.command(name="send", description="自販機を送信します。")
     @app_commands.autocomplete(jihanki=getJihankiList)
-    @app_commands.rename(jihanki="自販機", channel="チャンネル（省略可）")
+    @app_commands.rename(jihanki="自販機", channel="チャンネル")
     @app_commands.describe(
         jihanki="送信したい自販機",
         channel="送信先チャンネル（デフォルトは現在のチャンネル）",

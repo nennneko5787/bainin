@@ -98,7 +98,7 @@ class JihankiEditCog(commands.Cog):
     @app_commands.rename(
         name="名前",
         description="説明",
-        achievement="実績チャンネル（省略可）",
+        achievement="実績チャンネル",
         nsfw="18歳以上対象かどうか",
     )
     @app_commands.describe(
@@ -226,7 +226,7 @@ class JihankiEditCog(commands.Cog):
         jihanki="自販機",
         name="名前",
         description="説明",
-        achievement="実績チャンネル（省略可）",
+        achievement="実績チャンネル",
         nsfw="18歳以上対象かどうか",
     )
     @app_commands.describe(
@@ -301,7 +301,7 @@ class JihankiEditCog(commands.Cog):
         name="名前",
         description="説明",
         price="価格",
-        infinite="在庫無限（省略可）",
+        infinite="在庫無限",
     )
     @app_commands.describe(
         jihanki="商品を追加したい自販機",
