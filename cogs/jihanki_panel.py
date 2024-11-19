@@ -599,7 +599,7 @@ class JihankiPanelCog(commands.Cog):
             (not interaction.channel.is_nsfw())
             or (
                 (interaction.channel.guild.nsfw_level != 1)
-                or (interaction.channel.guild.nsfw_level != 3)
+                and (interaction.channel.guild.nsfw_level != 3)
             )
         ):
             embed = discord.Embed(
