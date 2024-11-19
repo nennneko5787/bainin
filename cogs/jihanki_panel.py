@@ -673,6 +673,7 @@ class JihankiPanelCog(commands.Cog):
                 await Database.pool.execute(
                     "UPDATE ONLY jihanki SET goods = $1 WHERE id = $2",
                     goodsJson,
+                    jihanki["id"],
                 )
 
                 await self.updateJihanki(jihanki, interaction.message, goods=goods)
