@@ -597,7 +597,7 @@ class JihankiPanelCog(commands.Cog):
 
         if (jihanki["nsfw"]) and (
             (not interaction.channel.is_nsfw())
-            or (
+            and (
                 (interaction.channel.guild.nsfw_level != 1)
                 and (interaction.channel.guild.nsfw_level != 3)
             )
@@ -1130,7 +1130,7 @@ class JihankiPanelCog(commands.Cog):
 
         if (jihanki["nsfw"]) and (
             (not channel.is_nsfw())
-            or ((channel.guild.nsfw_level != 1) and (channel.guild.nsfw_level != 3))
+            and ((channel.guild.nsfw_level != 1) and (channel.guild.nsfw_level != 3))
         ):
             embed = discord.Embed(
                 title="エラーが発生しました",
