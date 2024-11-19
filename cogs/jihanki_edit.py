@@ -120,7 +120,7 @@ class JihankiEditCog(commands.Cog):
         interaction: discord.Interaction,
         name: str,
         description: str,
-        nsfw: app_commands.Choice[bool],
+        nsfw: app_commands.Choice[int],
         achievement: discord.TextChannel = None,
     ):
         if achievement:
@@ -250,7 +250,7 @@ class JihankiEditCog(commands.Cog):
         jihanki: str,
         name: str,
         description: str,
-        nsfw: app_commands.Choice[bool],
+        nsfw: app_commands.Choice[int],
         achievement: discord.TextChannel = None,
     ):
         if achievement:
@@ -325,7 +325,7 @@ class JihankiEditCog(commands.Cog):
         name: str,
         description: str,
         price: app_commands.Range[int, 0],
-        infinite: app_commands.Choice[bool] = False,
+        infinite: app_commands.Choice[int] = False,
     ):
         await interaction.response.send_modal(
             AddGoodsModal(jihanki, name, description, price, infinite)
