@@ -572,7 +572,7 @@ class JihankiPanelCog(commands.Cog):
 
             embed = discord.Embed(
                 title="購入しました！",
-                description="DMにて購入明細書及び商品の内容を送信しました。\n-# [購入明細はウェブサイトでも閲覧することができます](https://bainin.nennneko5787.net/mypage",
+                description="DMにて購入明細書及び商品の内容を送信しました。\n-# [購入明細はウェブサイトでも閲覧することができます](https://bainin.nennneko5787.net/mypage)",
                 colour=discord.Colour.green(),
             )
             await interaction.followup.send(embed=embed, ephemeral=True)
@@ -710,7 +710,7 @@ class JihankiPanelCog(commands.Cog):
 
             embed = discord.Embed(
                 title="購入しました！",
-                description="DMにて購入明細書及び商品の内容を送信しました。\n-# [購入明細はウェブサイトでも閲覧することができます](https://bainin.nennneko5787.net/mypage",
+                description="DMにて購入明細書及び商品の内容を送信しました。\n-# [購入明細はウェブサイトでも閲覧することができます](https://bainin.nennneko5787.net/mypage)",
                 colour=discord.Colour.green(),
             )
             await interaction.followup.send(embed=embed, ephemeral=True)
@@ -866,7 +866,7 @@ class JihankiPanelCog(commands.Cog):
 
                     embed = discord.Embed(
                         title="購入しました！",
-                        description="DMにて購入明細書及び商品の内容を送信しました。\n-# [購入明細はウェブサイトでも閲覧することができます](https://bainin.nennneko5787.net/mypage",
+                        description="DMにて購入明細書及び商品の内容を送信しました。\n-# [購入明細はウェブサイトでも閲覧することができます](https://bainin.nennneko5787.net/mypage)",
                         colour=discord.Colour.green(),
                     )
                     await interaction.followup.send(embed=embed, ephemeral=True)
@@ -995,7 +995,7 @@ class JihankiPanelCog(commands.Cog):
 
                     embed = discord.Embed(
                         title="購入しました！",
-                        description="DMにて購入明細書及び商品の内容を送信しました。\n-# [購入明細はウェブサイトでも閲覧することができます](https://bainin.nennneko5787.net/mypage",
+                        description="DMにて購入明細書及び商品の内容を送信しました。\n-# [購入明細はウェブサイトでも閲覧することができます](https://bainin.nennneko5787.net/mypage)",
                         colour=discord.Colour.green(),
                     )
                     await interaction.followup.send(embed=embed, ephemeral=True)
