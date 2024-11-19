@@ -169,7 +169,7 @@ class JihankiPanelCog(commands.Cog):
                 else:
                     embed = discord.Embed(
                         title="実績チャンネルの権限を確認してください",
-                        description="このボットに、実績チャンネルへメッセージを送信する権限を与えてください。",
+                        description=f"このボットに、**{jihanki['name']}**にセットされている実績チャンネルへメッセージを送信する権限を与えてください。",
                         colour=discord.Colour.red(),
                     )
                     await owner.send(embed=embed)
@@ -381,7 +381,7 @@ class JihankiPanelCog(commands.Cog):
 
             embed = discord.Embed(
                 title="購入しました！",
-                description="DMにて購入明細書及び商品の内容を送信しました",
+                description="DMにて購入明細書及び商品の内容を送信しました。\n-# [購入明細はウェブサイトでも閲覧することができます](https://bainin.nennneko5787.net/mypage)",
                 colour=discord.Colour.green(),
             )
             await interaction.followup.send(embed=embed, ephemeral=True)
@@ -572,7 +572,7 @@ class JihankiPanelCog(commands.Cog):
 
             embed = discord.Embed(
                 title="購入しました！",
-                description="DMにて購入明細書及び商品の内容を送信しました",
+                description="DMにて購入明細書及び商品の内容を送信しました。\n-# [購入明細はウェブサイトでも閲覧することができます](https://bainin.nennneko5787.net/mypage",
                 colour=discord.Colour.green(),
             )
             await interaction.followup.send(embed=embed, ephemeral=True)
@@ -710,7 +710,7 @@ class JihankiPanelCog(commands.Cog):
 
             embed = discord.Embed(
                 title="購入しました！",
-                description="DMにて購入明細書及び商品の内容を送信しました",
+                description="DMにて購入明細書及び商品の内容を送信しました。\n-# [購入明細はウェブサイトでも閲覧することができます](https://bainin.nennneko5787.net/mypage",
                 colour=discord.Colour.green(),
             )
             await interaction.followup.send(embed=embed, ephemeral=True)
@@ -866,7 +866,7 @@ class JihankiPanelCog(commands.Cog):
 
                     embed = discord.Embed(
                         title="購入しました！",
-                        description="DMにて購入明細書及び商品の内容を送信しました",
+                        description="DMにて購入明細書及び商品の内容を送信しました。\n-# [購入明細はウェブサイトでも閲覧することができます](https://bainin.nennneko5787.net/mypage",
                         colour=discord.Colour.green(),
                     )
                     await interaction.followup.send(embed=embed, ephemeral=True)
@@ -995,7 +995,7 @@ class JihankiPanelCog(commands.Cog):
 
                     embed = discord.Embed(
                         title="購入しました！",
-                        description="DMにて購入明細書及び商品の内容を送信しました",
+                        description="DMにて購入明細書及び商品の内容を送信しました。\n-# [購入明細はウェブサイトでも閲覧することができます](https://bainin.nennneko5787.net/mypage",
                         colour=discord.Colour.green(),
                     )
                     await interaction.followup.send(embed=embed, ephemeral=True)
