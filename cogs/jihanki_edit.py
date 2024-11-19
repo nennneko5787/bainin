@@ -325,10 +325,10 @@ class JihankiEditCog(commands.Cog):
         name: str,
         description: str,
         price: app_commands.Range[int, 0],
-        infinite: app_commands.Choice[int] = app_commands.Choice(name="いいえ", value=False)
+        infinite: app_commands.Choice[int] = None,
     ):
         await interaction.response.send_modal(
-            AddGoodsModal(jihanki, name, description, price, infinite.value)
+            AddGoodsModal(jihanki, name, description, price, infinite.value if infinite else False)
         )
 
     class EditGoodModal(discord.ui.Modal):
