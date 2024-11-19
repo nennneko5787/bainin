@@ -595,6 +595,21 @@ class JihankiPanelCog(commands.Cog):
             await interaction.followup.send(embed=embed)
             return
 
+        if (jihanki["nsfw"]) and (
+            (not interaction.channel.is_nsfw())
+            or (
+                (interaction.channel.guild.nsfw_level != 1)
+                or (interaction.channel.guild.nsfw_level != 3)
+            )
+        ):
+            embed = discord.Embed(
+                title="エラーが発生しました",
+                description="全年齢対象のチャンネルで18歳以上対象の自販機の商品を購入することはできません。",
+                colour=discord.Colour.red(),
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            return
+
         goods: list[dict[str, str]] = orjson.loads(jihanki["goods"])
         try:
             good = goods[int(interaction.data["values"][0])]
@@ -1108,6 +1123,18 @@ class JihankiPanelCog(commands.Cog):
             embed = discord.Embed(
                 title="エラーが発生しました",
                 description="そのチャンネルに送信する権限はありません",
+                colour=discord.Colour.red(),
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            return
+
+        if (jihanki["nsfw"]) and (
+            (not channel.is_nsfw())
+            or ((channel.guild.nsfw_level != 1) or (channel.guild.nsfw_level != 3))
+        ):
+            embed = discord.Embed(
+                title="エラーが発生しました",
+                description="18歳以上対象の自販機を全年齢対象のチャンネルに配置することはできません。",
                 colour=discord.Colour.red(),
             )
             await interaction.followup.send(embed=embed, ephemeral=True)

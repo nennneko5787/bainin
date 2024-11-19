@@ -99,6 +99,7 @@ class JihankiEditCog(commands.Cog):
         name="自販機の名前",
         description="自販機の説明",
         achievement="実績チャンネル",
+        nsfw="自販機が18歳以上対象の商品を販売するかどうか。",
     )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
@@ -107,6 +108,7 @@ class JihankiEditCog(commands.Cog):
         interaction: discord.Interaction,
         name: str,
         description: str,
+        nsfw: bool,
         achievement: discord.TextChannel = None,
     ):
         if achievement:
@@ -123,12 +125,13 @@ class JihankiEditCog(commands.Cog):
         gen = SnowflakeGenerator(39)
         id = next(gen)
         await Database.pool.execute(
-            "INSERT INTO jihanki (id, name, description, owner_id, achievement_channel_id) VALUES ($1, $2, $3, $4, $5)",
+            "INSERT INTO jihanki (id, name, description, owner_id, achievement_channel_id, nsfw) VALUES ($1, $2, $3, $4, $5, $6)",
             id,
             name,
             description,
             interaction.user.id,
             achievement.id if achievement else None,
+            nsfw,
         )
         embed = discord.Embed(
             title="自販機を作成しました",
@@ -211,6 +214,7 @@ class JihankiEditCog(commands.Cog):
         name="自販機の名前",
         description="自販機の説明",
         achievement="実績チャンネル",
+        nsfw="自販機が18歳以上対象の商品を販売するかどうか。",
     )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
@@ -220,6 +224,7 @@ class JihankiEditCog(commands.Cog):
         jihanki: str,
         name: str,
         description: str,
+        nsfw: bool,
         achievement: discord.TextChannel = None,
     ):
         if achievement:
@@ -251,10 +256,11 @@ class JihankiEditCog(commands.Cog):
             await interaction.followup.send(embed=embed, ephemeral=True)
             return
         await Database.pool.execute(
-            "UPDATE ONLY jihanki SET name = $1, description = $2, achievement_channel_id = $3 WHERE id = $4",
+            "UPDATE ONLY jihanki SET name = $1, description = $2, achievement_channel_id = $3, nsfw = $4 WHERE id = $5",
             name,
             description,
             achievement.id if achievement else None,
+            nsfw,
             jihanki["id"],
         )
         embed = discord.Embed(
