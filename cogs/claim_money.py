@@ -360,6 +360,7 @@ class ClaimMoneyCog(commands.Cog):
             pass
 
     @app_commands.command(name="claim", description="請求パネルを作成します。")
+    @app_commands.rename(amount="請求額")
     @app_commands.describe(
         amount="請求する金額",
     )

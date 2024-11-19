@@ -95,11 +95,23 @@ class JihankiEditCog(commands.Cog):
         self.bot = bot
 
     @app_commands.command(name="make", description="自販機を作成します。")
+    @app_commands.rename(
+        name="名前",
+        description="説明",
+        achievement="実績チャンネル（省略可）",
+        nsfw="18歳以上対象かどうか",
+    )
     @app_commands.describe(
         name="自販機の名前",
         description="自販機の説明",
-        achievement="実績チャンネル",
-        nsfw="自販機が18歳以上対象の商品を販売するかどうか。",
+        achievement="実績を送信するチャンネル",
+        nsfw="自販機が18歳以上対象の商品を販売するかどうか",
+    )
+    @app_commands.choices(
+        nsfw=[
+            app_commands.Choice(name="はい", value=True),
+            app_commands.Choice(name="いいえ", value=False),
+        ]
     )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
@@ -108,7 +120,7 @@ class JihankiEditCog(commands.Cog):
         interaction: discord.Interaction,
         name: str,
         description: str,
-        nsfw: bool,
+        nsfw: app_commands.Choice[bool],
         achievement: discord.TextChannel = None,
     ):
         if achievement:
@@ -172,8 +184,9 @@ class JihankiEditCog(commands.Cog):
 
     @app_commands.command(name="delete", description="自販機を削除します。")
     @app_commands.autocomplete(jihanki=getJihankiList)
+    @app_commands.rename(jihanki="自販機")
     @app_commands.describe(
-        jihanki="編集したい自販機",
+        jihanki="削除したい自販機",
     )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
@@ -209,12 +222,25 @@ class JihankiEditCog(commands.Cog):
 
     @app_commands.command(name="edit", description="自販機を編集します。")
     @app_commands.autocomplete(jihanki=getJihankiList)
+    @app_commands.rename(
+        jihanki="自販機",
+        name="名前",
+        description="説明",
+        achievement="実績チャンネル（省略可）",
+        nsfw="18歳以上対象かどうか",
+    )
     @app_commands.describe(
         jihanki="編集したい自販機",
         name="自販機の名前",
         description="自販機の説明",
         achievement="実績チャンネル",
         nsfw="自販機が18歳以上対象の商品を販売するかどうか。",
+    )
+    @app_commands.choices(
+        nsfw=[
+            app_commands.Choice(name="はい", value=True),
+            app_commands.Choice(name="いいえ", value=False),
+        ]
     )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
@@ -224,7 +250,7 @@ class JihankiEditCog(commands.Cog):
         jihanki: str,
         name: str,
         description: str,
-        nsfw: bool,
+        nsfw: app_commands.Choice[bool],
         achievement: discord.TextChannel = None,
     ):
         if achievement:
@@ -270,12 +296,25 @@ class JihankiEditCog(commands.Cog):
 
     @app_commands.command(name="addgoods", description="自販機に商品を追加します。")
     @app_commands.autocomplete(jihanki=getJihankiList)
+    @app_commands.rename(
+        jihanki="自販機",
+        name="名前",
+        description="説明",
+        price="価格",
+        infinite="在庫無限（省略可）",
+    )
     @app_commands.describe(
         jihanki="商品を追加したい自販機",
         name="商品の名前",
         description="商品の説明",
         price="商品の価格",
-        infinite="在庫無限",
+        infinite="商品の在庫が無限かどうか（デフォルトはいいえ）",
+    )
+    @app_commands.choices(
+        infinite=[
+            app_commands.Choice(name="はい", value=True),
+            app_commands.Choice(name="いいえ", value=False),
+        ]
     )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
@@ -286,7 +325,7 @@ class JihankiEditCog(commands.Cog):
         name: str,
         description: str,
         price: app_commands.Range[int, 0],
-        infinite: bool = False,
+        infinite: app_commands.Choice[bool] = False,
     ):
         await interaction.response.send_modal(
             AddGoodsModal(jihanki, name, description, price, infinite)
@@ -378,6 +417,7 @@ class JihankiEditCog(commands.Cog):
         name="editgoods", description="自販機の商品を編集・確認します。"
     )
     @app_commands.autocomplete(jihanki=getJihankiList)
+    @app_commands.rename(jihanki="自販機")
     @app_commands.describe(jihanki="商品を編集したい自販機")
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
@@ -435,6 +475,7 @@ class JihankiEditCog(commands.Cog):
         name="removegoods", description="自販機から商品を削除します。"
     )
     @app_commands.autocomplete(jihanki=getJihankiList)
+    @app_commands.rename(jihanki="自販機")
     @app_commands.describe(jihanki="商品を削除したい自販機")
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)

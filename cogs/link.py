@@ -24,6 +24,7 @@ class AccountLinkCog(commands.Cog):
     @app_commands.command(
         name="check", description="KyashやPayPayのアカウントの情報を確認します。"
     )
+    @app_commands.rename(service="サービス")
     @app_commands.choices(
         service=[
             app_commands.Choice(name="Kyash", value="kyash"),
@@ -140,9 +141,10 @@ class AccountLinkCog(commands.Cog):
         name="proxy",
         description="使用するプロキシを変更することができます。",
     )
+    @app_commands.rename(service="サービス", proxy="プロキシ")
     @app_commands.describe(
         service="プロキシを変更したいサービス",
-        proxy="アクセスするために使用するプロキシ。",
+        proxy="アクセスするために使用するプロキシのアドレス。",
     )
     @app_commands.choices(
         service=[
@@ -207,9 +209,15 @@ class AccountLinkCog(commands.Cog):
         name="link",
         description="KyashやPayPayのアカウントとリンクします。アカウント変更もこっち",
     )
+    @app_commands.rename(
+        service="サービス",
+        credential="ログイン情報",
+        password="パスワード",
+        proxy="プロキシ",
+    )
     @app_commands.describe(
         service="リンクしたいサービス",
-        credential="Kyashの場合はメールアドレスです。PayPayの場合は電話番号です。",
+        credential="Kyashの場合はメールアドレスで、PayPayの場合は電話番号です。",
         password="ログインするために使用するパスワード。",
         proxy="アクセスするために使用するプロキシ。",
     )

@@ -1087,7 +1087,11 @@ class JihankiPanelCog(commands.Cog):
 
     @app_commands.command(name="send", description="自販機を送信します。")
     @app_commands.autocomplete(jihanki=getJihankiList)
-    @app_commands.describe(jihanki="送信したい自販機", channel="送信先チャンネル")
+    @app_commands.rename(jihanki="自販機", channel="チャンネル（省略可）")
+    @app_commands.describe(
+        jihanki="送信したい自販機",
+        channel="送信先チャンネル（デフォルトは現在のチャンネル）",
+    )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
     async def sendCommand(

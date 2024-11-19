@@ -43,6 +43,7 @@ class SendMoneyCog(commands.Cog):
         self.cipherSuite = Fernet(os.getenv("fernet_key").encode())
 
     @app_commands.command(name="sendmoney", description="ユーザーに送金します。")
+    @app_commands.rename(service="サービス", amount="金額", user="送信先")
     @app_commands.describe(
         service="送金する際に使用するサービス",
         amount="送金する金額",
