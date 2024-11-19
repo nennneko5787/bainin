@@ -1,4 +1,5 @@
 import asyncio
+import enum
 import os
 import traceback
 
@@ -15,7 +16,6 @@ from .database import Database
 dotenv.load_dotenv()
 
 cipherSuite = Fernet(os.getenv("fernet_key").encode())
-
 
 class AddGoodsModal(discord.ui.Modal, title="商品を追加"):
     def __init__(
@@ -120,7 +120,7 @@ class JihankiEditCog(commands.Cog):
         interaction: discord.Interaction,
         name: str,
         description: str,
-        nsfw: app_commands.Choice[int],
+        nsfw: int,
         achievement: discord.TextChannel = None,
     ):
         if achievement:
@@ -325,7 +325,7 @@ class JihankiEditCog(commands.Cog):
         name: str,
         description: str,
         price: app_commands.Range[int, 0],
-        infinite: app_commands.Choice[int] = False,
+        infinite: int = 0,
     ):
         await interaction.response.send_modal(
             AddGoodsModal(jihanki, name, description, price, infinite)
