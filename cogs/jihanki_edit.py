@@ -17,6 +17,7 @@ dotenv.load_dotenv()
 
 cipherSuite = Fernet(os.getenv("fernet_key").encode())
 
+
 class AddGoodsModal(discord.ui.Modal, title="商品を追加"):
     def __init__(
         self,
@@ -328,7 +329,9 @@ class JihankiEditCog(commands.Cog):
         infinite: app_commands.Choice[int] = None,
     ):
         await interaction.response.send_modal(
-            AddGoodsModal(jihanki, name, description, price, infinite.value if infinite else False)
+            AddGoodsModal(
+                jihanki, name, description, price, infinite.value if infinite else False
+            )
         )
 
     class EditGoodModal(discord.ui.Modal):
@@ -370,6 +373,7 @@ class JihankiEditCog(commands.Cog):
             self.value = discord.ui.TextInput(
                 label="内容",
                 placeholder="Chu!😘",
+                style=discord.TextStyle.long,
                 default=cipherSuite.decrypt(self.goods[self.select]["value"]).decode(),
             )
             self.add_item(self.value)
