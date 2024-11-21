@@ -184,7 +184,7 @@ class JihankiEditCog(commands.Cog):
     ) -> list[app_commands.Choice[str]]:
         jihankiList = await Database.pool.fetch("SELECT * FROM jihanki")
         jihankis = []
-        for jihanki in jihankiList
+        for jihanki in jihankiList:
             if not jihanki["freezed"]:
                 if jihanki["name"].startswith(current):
                     owner_id = jihanki["owner_id"]
