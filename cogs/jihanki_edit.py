@@ -53,6 +53,14 @@ class AddGoodsModal(discord.ui.Modal, title="商品を追加"):
                 self.jihanki,
                 interaction.user.id,
             )
+        if jihanki["freezed"]:
+            await interaction.delete_original_response()
+            embed = discord.Embed(
+                title=f'自販機が凍結されています\n```\n{jihanki["freezed"]}\n```',
+                colour=discord.Colour.red(),
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            return
         if jihanki["owner_id"] != interaction.user.id:
             embed = discord.Embed(
                 title="その自販機はあなたのものではありません",
@@ -282,6 +290,16 @@ class JihankiEditCog(commands.Cog):
                 jihanki,
                 interaction.user.id,
             )
+            
+        if jihanki["freezed"]:
+            await interaction.delete_original_response()
+            embed = discord.Embed(
+                title=f'自販機が凍結されています\n```\n{jihanki["freezed"]}\n```',
+                colour=discord.Colour.red(),
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            return
+            
         if jihanki["owner_id"] != interaction.user.id:
             embed = discord.Embed(
                 title="その自販機はあなたのものではありません",
@@ -448,6 +466,14 @@ class JihankiEditCog(commands.Cog):
                 jihanki,
                 interaction.user.id,
             )
+        if jihanki["freezed"]:
+            await interaction.delete_original_response()
+            embed = discord.Embed(
+                title=f'自販機が凍結されています\n```\n{jihanki["freezed"]}\n```',
+                colour=discord.Colour.red(),
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            return
         if jihanki["owner_id"] != interaction.user.id:
             embed = discord.Embed(
                 title="その自販機はあなたのものではありません",
@@ -506,6 +532,14 @@ class JihankiEditCog(commands.Cog):
                 jihanki,
                 interaction.user.id,
             )
+        if jihanki["freezed"]:
+            await interaction.delete_original_response()
+            embed = discord.Embed(
+                title=f'自販機が凍結されています\n```\n{jihanki["freezed"]}\n```',
+                colour=discord.Colour.red(),
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            return
         if jihanki["owner_id"] != interaction.user.id:
             embed = discord.Embed(
                 title="その自販機はあなたのものではありません",
