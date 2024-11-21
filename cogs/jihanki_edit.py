@@ -54,7 +54,6 @@ class AddGoodsModal(discord.ui.Modal, title="商品を追加"):
                 interaction.user.id,
             )
         if jihanki["freezed"]:
-            await interaction.delete_original_response()
             embed = discord.Embed(
                 title=f'自販機が凍結されています\n```\n{jihanki["freezed"]}\n```',
                 colour=discord.Colour.red(),
@@ -292,7 +291,6 @@ class JihankiEditCog(commands.Cog):
             )
             
         if jihanki["freezed"]:
-            await interaction.delete_original_response()
             embed = discord.Embed(
                 title=f'自販機が凍結されています\n```\n{jihanki["freezed"]}\n```',
                 colour=discord.Colour.red(),
@@ -467,7 +465,6 @@ class JihankiEditCog(commands.Cog):
                 interaction.user.id,
             )
         if jihanki["freezed"]:
-            await interaction.delete_original_response()
             embed = discord.Embed(
                 title=f'自販機が凍結されています\n```\n{jihanki["freezed"]}\n```',
                 colour=discord.Colour.red(),
@@ -533,7 +530,6 @@ class JihankiEditCog(commands.Cog):
                 interaction.user.id,
             )
         if jihanki["freezed"]:
-            await interaction.delete_original_response()
             embed = discord.Embed(
                 title=f'自販機が凍結されています\n```\n{jihanki["freezed"]}\n```',
                 colour=discord.Colour.red(),
