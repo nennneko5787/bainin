@@ -160,6 +160,12 @@ class JihankiEditCog(commands.Cog):
 
         embed = discord.Embed(
             title="⚠️注意",
+            description="児童ポルノや、日本の法律に違反している商品の販売は禁止です。詳しくは利用規約をお読みください。\nhttps://bainin.nennneko5787.net/terms",
+        )
+        await interaction.followup.send(embed=embed, ephemeral=True)
+
+        embed = discord.Embed(
+            title="⚠️注意",
             description=f"自販機を作るだけでは、実際に売上を上げることはできません！\n売上を上げたい場合、 </link:{commandId}> コマンドしてPayPayかKyashのアカウントをリンクする必要があります。\nわからないときはいつでも[サポートサーバー](https://discord.gg/2TfFUuY3RG)へどうぞ。",
         )
         await interaction.followup.send(embed=embed, ephemeral=True)
