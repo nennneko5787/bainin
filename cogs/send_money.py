@@ -70,7 +70,12 @@ class SendMoneyCog(commands.Cog):
                 description="ボットへは送金できません",
                 colour=discord.Colour.red(),
             )
-            await interaction.response.send_message(embed=embed)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+
+        if user.id == interaction.user.id:
+            embed = discord.Embed(title="自分自身には送金できません", colour=discord.Colour.red())
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
 
         async def sendLog(service: ServiceEnum, errorText: str):
             async with aiohttp.ClientSession() as session:
