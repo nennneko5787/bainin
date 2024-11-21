@@ -62,6 +62,11 @@ class ClaimMoneyCog(commands.Cog):
                     amount = int(customFields[2])
                     user = await self.bot.fetch_user(int(customFields[3]))
 
+                    if user.id == interaction.user.id:
+                        embed = discord.Embed(title="自分自身には送金できません", colour=discord.Colour.red())
+                        await interaction.followup.send(embed=embed, ephemeral=True)
+                        return
+
                     async def sendLog(errorText: str):
                         async with aiohttp.ClientSession() as session:
                             webhook = discord.Webhook.from_url(
@@ -266,6 +271,8 @@ class ClaimMoneyCog(commands.Cog):
                             )
                             await interaction.followup.send(embed=embed, ephemeral=True)
                             return
+
+                    await interaction.delete_original_response()
 
                     gen = SnowflakeGenerator(15)
                     paymentId = next(gen)
