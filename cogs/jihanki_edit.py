@@ -158,7 +158,7 @@ class JihankiEditCog(commands.Cog):
             description="`/addgoods` コマンドで商品を追加できます",
             colour=discord.Colour.green(),
         )
-        await interaction.followup.send(embed=embed)
+        await interaction.followup.send(embed=embed, ephemeral=True)
 
         commands = await self.bot.tree.fetch_commands()
         for cmd in commands:
@@ -205,7 +205,7 @@ class JihankiEditCog(commands.Cog):
     )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
-    async def editCommand(
+    async def deleteCommand(
         self,
         interaction: discord.Interaction,
         jihanki: str,
