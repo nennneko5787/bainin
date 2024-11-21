@@ -595,6 +595,15 @@ class JihankiPanelCog(commands.Cog):
             await interaction.followup.send(embed=embed)
             return
 
+        if jihanki["freezed"]:
+            await interaction.delete_original_response()
+            embed = discord.Embed(
+                title=f'自販機が凍結されています\n```\n{jihanki["freezed"]}\n```',
+                colour=discord.Colour.red(),
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            return
+
         if (jihanki["nsfw"]) and (
             (not interaction.channel.is_nsfw())
             and (
@@ -602,6 +611,7 @@ class JihankiPanelCog(commands.Cog):
                 and (interaction.channel.guild.nsfw_level != 3)
             )
         ):
+            await interaction.delete_original_response()
             embed = discord.Embed(
                 title="エラーが発生しました",
                 description="全年齢対象のチャンネルで18歳以上対象の自販機の商品を購入することはできません。",
@@ -1122,6 +1132,14 @@ class JihankiPanelCog(commands.Cog):
         if jihanki["owner_id"] != interaction.user.id:
             embed = discord.Embed(
                 title="その自販機はあなたのものではありません",
+                colour=discord.Colour.red(),
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            return
+
+        if jihanki["freezed"]:
+            embed = discord.Embed(
+                title=f'自販機が凍結されています\n```\n{jihanki["freezed"]}\n```',
                 colour=discord.Colour.red(),
             )
             await interaction.followup.send(embed=embed, ephemeral=True)
