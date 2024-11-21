@@ -177,16 +177,17 @@ class JihankiEditCog(commands.Cog):
     ) -> list[app_commands.Choice[str]]:
         jihankiList = await Database.pool.fetch("SELECT * FROM jihanki")
         jihankis = []
-        for jihanki in jihankiList:
-            if jihanki["name"].startswith(current):
-                owner_id = jihanki["owner_id"]
-                if owner_id == interaction.user.id:
-                    jihankis.append(
-                        app_commands.Choice(
-                            name=f'{jihanki["name"]}',
-                            value=str(jihanki["id"]),
+        for jihanki in jihankiList
+            if not jihanki["freezed"]:
+                if jihanki["name"].startswith(current):
+                    owner_id = jihanki["owner_id"]
+                    if owner_id == interaction.user.id:
+                        jihankis.append(
+                            app_commands.Choice(
+                                name=f'{jihanki["name"]}',
+                                value=str(jihanki["id"]),
+                            )
                         )
-                    )
         return jihankis
 
     @app_commands.command(name="delete", description="自販機を削除します。")
