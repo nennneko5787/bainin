@@ -290,6 +290,9 @@ class AccountLinkCog(commands.Cog):
                 await kyash.validate_otp(message.content)
             except:
                 traceback.print_exc()
+                await interaction.followup.send(
+                    "OTPの検証に失敗しました。", ephemeral=True
+                )
                 await message.reply("OTPの検証に失敗しました。")
 
             await Database.pool.execute(
@@ -364,6 +367,9 @@ class AccountLinkCog(commands.Cog):
                 await paypay.login(message.content)
             except:
                 traceback.print_exc()
+                await interaction.followup.send(
+                    "OTPの検証に失敗しました。", ephemeral=True
+                )
                 await message.reply("OTPの検証に失敗しました。")
                 return
 
