@@ -541,11 +541,6 @@ class JihankiEditCog(commands.Cog):
                     label=f'{good["name"]} ({good["price"]}円) {"(在庫無限)" if good.get("infinite", False) else ""}',
                     description=good["description"],
                     value=index,
-                    emoji=(
-                        discord.PartialEmoji.from_str(good.get("emoji", None))
-                        if good.get("emoji", None)
-                        else None
-                    ),
                 )
                 for index, good in enumerate(goods)
             ]
@@ -611,11 +606,6 @@ class JihankiEditCog(commands.Cog):
                     label=f'{good["name"]} ({good["price"]}円) {"(在庫無限)" if good.get("infinite", False) else ""}',
                     description=good["description"],
                     value=index,
-                    emoji=(
-                        discord.PartialEmoji.from_str(good.get("emoji", None))
-                        if good.get("emoji", None)
-                        else None
-                    ),
                 )
                 for index, good in enumerate(goods)
             ]
