@@ -3,6 +3,7 @@ import enum
 import os
 import traceback
 
+import emoji
 import discord
 import dotenv
 import orjson
@@ -16,6 +17,10 @@ from .database import Database
 dotenv.load_dotenv()
 
 cipherSuite = Fernet(os.getenv("fernet_key").encode())
+
+
+def isEmoji(s: str) -> bool:
+    return s in emoji.EMOJI_DATA
 
 
 class AddGoodsModal(discord.ui.Modal, title="商品を追加"):
@@ -77,6 +82,16 @@ class AddGoodsModal(discord.ui.Modal, title="商品を追加"):
             )
             await interaction.followup.send(embed=embed, ephemeral=True)
             return
+
+        if self.emoji:
+            emoji = discord.PartialEmoji.from_str(self.emoji.value)
+            if not emoji.is_custom_emoji() and not isEmoji(emoji.name):
+                embed = discord.Embed(
+                    title="絵文字が無効です！\n❤️などの通常の絵文字は`:heart:`ではなく`❤️`の状態で入力する必要があります。",
+                    colour=discord.Colour.red(),
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                return
 
         goods: list[dict[str, str]] = orjson.loads(jihanki["goods"])
         goods.append(
@@ -455,6 +470,14 @@ class JihankiEditCog(commands.Cog):
                 self.value.value.encode()
             ).decode()
             if self.emoji.value:
+                emoji = discord.PartialEmoji.from_str(self.emoji.value)
+                if not emoji.is_custom_emoji() and not isEmoji(emoji.name):
+                    embed = discord.Embed(
+                        title="絵文字が無効です！\n❤️などの通常の絵文字は`:heart:`ではなく`❤️`の状態で入力する必要があります。",
+                        colour=discord.Colour.red(),
+                    )
+                    await interaction.followup.send(embed=embed, ephemeral=True)
+                    return
                 self.goods[self.select]["emoji"] = self.emoji.value
             else:
                 self.goods[self.select]["emoji"] = None

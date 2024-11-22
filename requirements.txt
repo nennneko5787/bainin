@@ -7,3 +7,4 @@ fastapi[all]
 cryptography
 snowflake-id
 orjson
+emoji
