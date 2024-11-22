@@ -94,7 +94,11 @@ class JihankiPanelCog(commands.Cog):
                 label=f'{good["name"]} ({good["price"]}円)',
                 description=good["description"],
                 value=index,
-                emoji=good.get("emoji", None),
+                emoji=(
+                    discord.PartialEmoji.from_str(good.get("emoji", None))
+                    if good.get("emoji", None)
+                    else None
+                ),
             )
             for index, good in enumerate(goods)
         ]
