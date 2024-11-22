@@ -117,9 +117,7 @@ class AddGoodsModal(discord.ui.Modal, title="商品を追加"):
     async def on_error(
         self, interaction: discord.Interaction, error: Exception
     ) -> None:
-        await interaction.response.send_message(
-            "エラーです！ごめんなさい！", ephemeral=True
-        )
+        await interaction.followup.send("エラーです！ごめんなさい！", ephemeral=True)
 
         # Make sure we know what the error actually is
         traceback.print_exception(type(error), error, error.__traceback__)
