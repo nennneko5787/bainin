@@ -94,7 +94,7 @@ class JihankiPanelCog(commands.Cog):
                 label=f'{good["name"]} ({good["price"]}円)',
                 description=good["description"],
                 value=index,
-                label=good.get("emoji", None),
+                emoji=good.get("emoji", None),
             )
             for index, good in enumerate(goods)
         ]
