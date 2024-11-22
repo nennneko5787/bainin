@@ -1,14 +1,14 @@
+import math
 import os
 import traceback
-import math
 
+import discord
 import dotenv
 import httpx
-import discord
 import orjson
-from discord.ext import commands
 from cryptography.fernet import Fernet
-from fastapi import Request, Depends, Cookie, HTTPException
+from discord.ext import commands
+from fastapi import Cookie, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 

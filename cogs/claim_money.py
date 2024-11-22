@@ -63,7 +63,10 @@ class ClaimMoneyCog(commands.Cog):
                     user = await self.bot.fetch_user(int(customFields[3]))
 
                     if user.id == interaction.user.id:
-                        embed = discord.Embed(title="自分自身には送金できません", colour=discord.Colour.red())
+                        embed = discord.Embed(
+                            title="自分自身には送金できません",
+                            colour=discord.Colour.red(),
+                        )
                         await interaction.followup.send(embed=embed, ephemeral=True)
                         return
 

@@ -94,6 +94,7 @@ class JihankiPanelCog(commands.Cog):
                 label=f'{good["name"]} ({good["price"]}円)',
                 description=good["description"],
                 value=index,
+                label=good.get("emoji", None),
             )
             for index, good in enumerate(goods)
         ]
@@ -621,7 +622,11 @@ class JihankiPanelCog(commands.Cog):
             return
 
         if jihanki["owner_id"] == interaction.user.id:
-            embed = discord.Embed(title="自分が販売している商品は購入できません", description="ちゃんと販売できているので安心してください。", colour=discord.Colour.red())
+            embed = discord.Embed(
+                title="自分が販売している商品は購入できません",
+                description="ちゃんと販売できているので安心してください。",
+                colour=discord.Colour.red(),
+            )
             await interaction.followup.send(embed=embed, ephemeral=True)
             return
 

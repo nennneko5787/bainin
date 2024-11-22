@@ -73,7 +73,9 @@ class SendMoneyCog(commands.Cog):
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
         if user.id == interaction.user.id:
-            embed = discord.Embed(title="自分自身には送金できません", colour=discord.Colour.red())
+            embed = discord.Embed(
+                title="自分自身には送金できません", colour=discord.Colour.red()
+            )
             await interaction.response.send_message(embed=embed, ephemeral=True)
             return
 

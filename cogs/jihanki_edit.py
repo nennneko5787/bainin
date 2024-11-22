@@ -26,6 +26,7 @@ class AddGoodsModal(discord.ui.Modal, title="商品を追加"):
         description: str,
         price: int,
         infinite: bool = False,
+        emoji: str = None,
         title="商品を追加",
     ):
         super().__init__(title=title)
@@ -34,12 +35,21 @@ class AddGoodsModal(discord.ui.Modal, title="商品を追加"):
         self.description = description
         self.price = price
         self.infinite = infinite
-        self.goodsValue = discord.ui.TextInput(
-            label=f'"{name}"の中身',
-            style=discord.TextStyle.long,
-            placeholder="内容をここに入力",
-        )
-        self.add_item(self.goodsValue)
+        self.emoji = emoji
+        if len(name) >= 20:
+            self.goodsValue = discord.ui.TextInput(
+                label=f'"{name[0:20]}"... の中身',
+                style=discord.TextStyle.long,
+                placeholder="内容をここに入力",
+            )
+            self.add_item(self.goodsValue)
+        else:
+            self.goodsValue = discord.ui.TextInput(
+                label=f'"{name}"の中身',
+                style=discord.TextStyle.long,
+                placeholder="内容をここに入力",
+            )
+            self.add_item(self.goodsValue)
 
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
@@ -67,6 +77,7 @@ class AddGoodsModal(discord.ui.Modal, title="商品を追加"):
             )
             await interaction.followup.send(embed=embed, ephemeral=True)
             return
+
         goods: list[dict[str, str]] = orjson.loads(jihanki["goods"])
         goods.append(
             {
@@ -75,6 +86,7 @@ class AddGoodsModal(discord.ui.Modal, title="商品を追加"):
                 "price": self.price,
                 "infinite": self.infinite,
                 "value": cipherSuite.encrypt(self.goodsValue.value.encode()).decode(),
+                "emoji": self.emoji,
             }
         )
         await Database.pool.execute(
@@ -289,7 +301,7 @@ class JihankiEditCog(commands.Cog):
                 jihanki,
                 interaction.user.id,
             )
-            
+
         if jihanki["freezed"]:
             embed = discord.Embed(
                 title=f'自販機が凍結されています\n```\n{jihanki["freezed"]}\n```',
@@ -297,7 +309,7 @@ class JihankiEditCog(commands.Cog):
             )
             await interaction.followup.send(embed=embed, ephemeral=True)
             return
-            
+
         if jihanki["owner_id"] != interaction.user.id:
             embed = discord.Embed(
                 title="その自販機はあなたのものではありません",
@@ -326,6 +338,7 @@ class JihankiEditCog(commands.Cog):
         description="説明",
         price="価格",
         infinite="在庫無限",
+        emoji="ラベルの絵文字",
     )
     @app_commands.describe(
         jihanki="商品を追加したい自販機",
@@ -333,6 +346,7 @@ class JihankiEditCog(commands.Cog):
         description="商品の説明",
         price="商品の価格",
         infinite="商品の在庫が無限かどうか（デフォルトはいいえ）",
+        emoji="商品のラベルにつける絵文字",
     )
     @app_commands.choices(
         infinite=[
@@ -346,14 +360,20 @@ class JihankiEditCog(commands.Cog):
         self,
         interaction: discord.Interaction,
         jihanki: str,
-        name: str,
-        description: str,
+        name: app_commands.Range[str, 1, 100],
+        description: app_commands.Range[str, 1, 100],
         price: app_commands.Range[int, 0],
         infinite: app_commands.Choice[int] = None,
+        emoji: str = None,
     ):
         await interaction.response.send_modal(
             AddGoodsModal(
-                jihanki, name, description, price, infinite.value if infinite else False
+                jihanki,
+                name,
+                description,
+                price,
+                infinite.value if infinite else False,
+                emoji,
             )
         )
 
@@ -388,10 +408,18 @@ class JihankiEditCog(commands.Cog):
 
             self.price = discord.ui.TextInput(
                 label="価格",
-                placeholder="数字以外受け付けません",
+                placeholder="数字以外は受け付けません",
                 default=self.goods[self.select]["price"],
             )
             self.add_item(self.price)
+
+            self.emoji = discord.ui.TextInput(
+                label="ラベルの絵文字",
+                placeholder="絵文字以外は受け付けません",
+                default=self.goods[self.select].get("emoji", ""),
+                required=False,
+            )
+            self.add_item(self.emoji)
 
             self.value = discord.ui.TextInput(
                 label="内容",
@@ -426,6 +454,10 @@ class JihankiEditCog(commands.Cog):
             self.goods[self.select]["value"] = cipherSuite.encrypt(
                 self.value.value.encode()
             ).decode()
+            if self.emoji.value:
+                self.goods[self.select]["emoji"] = self.emoji.value
+            else:
+                self.goods[self.select]["emoji"] = None
 
             goodsJson = orjson.dumps(self.goods).decode()
             await Database.pool.execute(
