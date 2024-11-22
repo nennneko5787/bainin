@@ -84,7 +84,7 @@ class AddGoodsModal(discord.ui.Modal, title="商品を追加"):
             return
 
         if self.emoji:
-            emoji = discord.PartialEmoji.from_str(self.emoji.value)
+            emoji = discord.PartialEmoji.from_str(self.emoji)
             if not emoji.is_custom_emoji() and not isEmoji(emoji.name):
                 embed = discord.Embed(
                     title="絵文字が無効です！\n❤️などの通常の絵文字は`:heart:`ではなく`❤️`の状態で入力する必要があります。",
