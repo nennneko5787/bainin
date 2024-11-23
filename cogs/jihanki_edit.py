@@ -133,18 +133,24 @@ class JihankiEditCog(commands.Cog):
         description="説明",
         achievement="実績チャンネル",
         nsfw="18歳以上対象かどうか",
+        shuffle="商品の並びをシャッフル",
     )
     @app_commands.describe(
         name="自販機の名前",
         description="自販機の説明",
         achievement="実績を送信するチャンネル",
         nsfw="自販機が18歳以上対象の商品を販売するかどうか",
+        shuffle="商品を購入されるたびに商品の並びをシャッフルするかどうか",
     )
     @app_commands.choices(
         nsfw=[
             app_commands.Choice(name="はい", value=True),
             app_commands.Choice(name="いいえ", value=False),
-        ]
+        ],
+        shuffle=[
+            app_commands.Choice(name="はい", value=True),
+            app_commands.Choice(name="いいえ", value=False),
+        ],
     )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
@@ -155,6 +161,9 @@ class JihankiEditCog(commands.Cog):
         description: str,
         nsfw: app_commands.Choice[int],
         achievement: discord.TextChannel = None,
+        shuffle: app_commands.Choice[int] = app_commands.Choice(
+            name="いいえ", value=False
+        ),
     ):
         if achievement:
             if not achievement.permissions_for(interaction.guild.me).send_messages:
@@ -170,13 +179,14 @@ class JihankiEditCog(commands.Cog):
         gen = SnowflakeGenerator(39)
         id = next(gen)
         await Database.pool.execute(
-            "INSERT INTO jihanki (id, name, description, owner_id, achievement_channel_id, nsfw) VALUES ($1, $2, $3, $4, $5, $6)",
+            "INSERT INTO jihanki (id, name, description, owner_id, achievement_channel_id, nsfw, shuffle) VALUES ($1, $2, $3, $4, $5, $6, $7)",
             id,
             name,
             description,
             interaction.user.id,
             achievement.id if achievement else None,
             nsfw.value,
+            shuffle.value,
         )
         embed = discord.Embed(
             title="自販機を作成しました",
@@ -268,6 +278,7 @@ class JihankiEditCog(commands.Cog):
         description="説明",
         achievement="実績チャンネル",
         nsfw="18歳以上対象かどうか",
+        shuffle="商品の並びをシャッフル",
     )
     @app_commands.describe(
         jihanki="編集したい自販機",
@@ -275,12 +286,17 @@ class JihankiEditCog(commands.Cog):
         description="自販機の説明",
         achievement="実績チャンネル",
         nsfw="自販機が18歳以上対象の商品を販売するかどうか。",
+        shuffle="商品を購入されるたびに商品の並びをシャッフルするかどうか",
     )
     @app_commands.choices(
         nsfw=[
             app_commands.Choice(name="はい", value=True),
             app_commands.Choice(name="いいえ", value=False),
-        ]
+        ],
+        shuffle=[
+            app_commands.Choice(name="はい", value=True),
+            app_commands.Choice(name="いいえ", value=False),
+        ],
     )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
@@ -292,6 +308,9 @@ class JihankiEditCog(commands.Cog):
         description: str,
         nsfw: app_commands.Choice[int],
         achievement: discord.TextChannel = None,
+        shuffle: app_commands.Choice[int] = app_commands.Choice(
+            name="いいえ", value=False
+        ),
     ):
         if achievement:
             if not achievement.permissions_for(interaction.guild.me).send_messages:
@@ -331,11 +350,12 @@ class JihankiEditCog(commands.Cog):
             await interaction.followup.send(embed=embed, ephemeral=True)
             return
         await Database.pool.execute(
-            "UPDATE ONLY jihanki SET name = $1, description = $2, achievement_channel_id = $3, nsfw = $4 WHERE id = $5",
+            "UPDATE ONLY jihanki SET name = $1, description = $2, achievement_channel_id = $3, nsfw = $4, shuffle = $5 WHERE id = $6",
             name,
             description,
             achievement.id if achievement else None,
             nsfw.value,
+            shuffle.value,
             jihanki["id"],
         )
         embed = discord.Embed(

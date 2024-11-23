@@ -2,6 +2,7 @@ import asyncio
 import enum
 import os
 import traceback
+import random
 from typing import Callable
 
 import aiohttp
@@ -102,6 +103,7 @@ class JihankiPanelCog(commands.Cog):
             )
             for index, good in enumerate(goods)
         ]
+        random.shuffle(items)
         items.insert(
             0,
             discord.SelectOption(
