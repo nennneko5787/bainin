@@ -161,9 +161,7 @@ class JihankiEditCog(commands.Cog):
         description: str,
         nsfw: app_commands.Choice[int],
         achievement: discord.TextChannel = None,
-        shuffle: app_commands.Choice[int] = app_commands.Choice(
-            name="いいえ", value=False
-        ),
+        shuffle: app_commands.Choice[int] = False,
     ):
         if achievement:
             if not achievement.permissions_for(interaction.guild.me).send_messages:
@@ -308,9 +306,7 @@ class JihankiEditCog(commands.Cog):
         description: str,
         nsfw: app_commands.Choice[int],
         achievement: discord.TextChannel = None,
-        shuffle: app_commands.Choice[int] = app_commands.Choice(
-            name="いいえ", value=False
-        ),
+        shuffle: app_commands.Choice[int] = False,
     ):
         if achievement:
             if not achievement.permissions_for(interaction.guild.me).send_messages:
