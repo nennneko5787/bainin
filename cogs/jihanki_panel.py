@@ -292,7 +292,7 @@ class JihankiPanelCog(commands.Cog):
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
 
-            if self.ownerKyash.link_amount < self.good["price"]:
+            if int(self.ownerKyash.link_amount) < self.good["price"]:
                 embed = discord.Embed(
                     title="お金が足りません！！",
                     description=f"送金リンクを作り直してください！！**{self.good['price']}円で！！**",
@@ -317,8 +317,8 @@ class JihankiPanelCog(commands.Cog):
                 return
 
             try:
-                if self.ownerKyash.link_amount > self.good["price"]:
-                    amount = self.ownerKyash.link_amount - self.good["price"]
+                if int(self.ownerKyash.link_amount) > self.good["price"]:
+                    amount = int(self.ownerKyash.link_amount) - self.good["price"]
                     await self.ownerKyash.create_link(amount)
                     embed = discord.Embed(
                         title="多く払った分をお返しします",
@@ -483,7 +483,7 @@ class JihankiPanelCog(commands.Cog):
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
 
-            if self.ownerPayPay.link_amount < self.good["price"]:
+            if int(self.ownerPayPay.link_amount) < self.good["price"]:
                 embed = discord.Embed(
                     title="お金が足りません！！",
                     description=f"送金リンクを作り直してください！！**{self.good['price']}円で！！**",
@@ -492,7 +492,7 @@ class JihankiPanelCog(commands.Cog):
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
 
-            linkAmount: int = self.ownerPayPay.link_amount
+            linkAmount: int = int(self.ownerPayPay.link_amount)
 
             try:
                 await self.ownerPayPay.link_receive(self.url.value, self.password.value)
@@ -794,7 +794,7 @@ class JihankiPanelCog(commands.Cog):
                         )
                         await interaction.followup.send(embed=embed, ephemeral=True)
                         return
-                    if kyash.all_balance < good["price"]:
+                    if int(kyash.all_balance) < good["price"]:
                         embed = discord.Embed(
                             title="残高が足りません",
                             description="Kyashをチャージしてください",
@@ -942,7 +942,7 @@ class JihankiPanelCog(commands.Cog):
                         await interaction.followup.send(embed=embed, ephemeral=True)
                         return
 
-                    if ((paypay.money or 0) + (paypay.money_light or 0)) < good[
+                    if ((int(paypay.money) or 0) + (int(paypay.money_light) or 0)) < good[
                         "price"
                     ]:
                         embed = discord.Embed(
