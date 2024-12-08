@@ -1140,6 +1140,13 @@ class JihankiPanelCog(commands.Cog):
                 jihanki,
                 interaction.user.id,
             )
+            
+        if not jihanki:
+            embed = discord.Embed(title="自販機が存在しません。", description="名前が間違っていないかご確認ください。", colour=discord.Colour.red())
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            return
+
+            
         if jihanki["owner_id"] != interaction.user.id:
             embed = discord.Embed(
                 title="その自販機はあなたのものではありません",
