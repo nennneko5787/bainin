@@ -254,7 +254,7 @@ class SendMoneyCog(commands.Cog):
                 )
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
-            if ((paypay.money or 0) + (paypay.money_light or 0)) < amount:
+            if (int(paypay.money or 0) + int(paypay.money_light or 0)) < amount:
                 embed = discord.Embed(
                     title="残高が足りません",
                     description="PayPayをチャージしてください",
