@@ -942,7 +942,7 @@ class JihankiPanelCog(commands.Cog):
                         await interaction.followup.send(embed=embed, ephemeral=True)
                         return
 
-                    if ((int(paypay.money) or 0) + (int(paypay.money_light) or 0)) < good[
+                    if ((int(paypay.money or 0)) + (int(paypay.money_light or 0))) < good[
                         "price"
                     ]:
                         embed = discord.Embed(
