@@ -16,7 +16,7 @@ class HelpCog(commands.Cog):
         embed = (
             discord.Embed(
                 title="このボットの使い方",
-                description="自販機も作れて送金・請求もDiscordでできるボットです。説明をよく読んでご利用ください～！\nサポートサーバー: https://discord.gg/2TfFUuY3RG",
+                description="自販機も作れて送金・請求もDiscordでできるボットです。説明をよく読んでご利用ください～！\nサポートサーバー: https://discord.gg/PN3KWEnYzX",
                 colour=random.choice(
                     [
                         discord.Colour.from_rgb(134, 206, 203),
