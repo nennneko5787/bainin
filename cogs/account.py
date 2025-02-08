@@ -59,7 +59,7 @@ class AccountManager:
                 if paypayAccount["proxy"]:
                     proxies = {
                         "http": paypayAccount["proxy"],
-                        "https": paypayAccount["proxy"],
+                        # "https": paypayAccount["proxy"],
                     }
                 else:
                     proxies = None
@@ -134,7 +134,7 @@ class AccountManager:
             if paypayAccount["proxy"]:
                 proxies = {
                     "http": paypayAccount["proxy"],
-                    "https": paypayAccount["proxy"],
+                    # "https": paypayAccount["proxy"],
                 }
             else:
                 proxies = None
