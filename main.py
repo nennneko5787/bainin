@@ -82,7 +82,7 @@ async def lifespan(app: FastAPI):
     await Database.connect()
     asyncio.create_task(bot.start(os.getenv("discord")))
     yield
-    async with asyncio.timeout(60):
+    async with asyncio.timeout(10):
         await Database.pool.close()
 
 
