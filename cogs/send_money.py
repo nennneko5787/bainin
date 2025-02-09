@@ -118,7 +118,7 @@ class SendMoneyCog(commands.Cog):
             except AccountNotLinkedException:
                 embed = discord.Embed(
                     title="送信先ユーザーがKyashのアカウントをリンクしていません",
-                    description=f"{user.mention} さんに「PayPayのアカウントをリンクしてください！」と言ってあげてください。",
+                    description=f"{user.mention} さんに「Kyashのアカウントをリンクしてください！」と言ってあげてください。",
                     colour=discord.Colour.red(),
                 )
                 await interaction.followup.send(embed=embed, ephemeral=True)
