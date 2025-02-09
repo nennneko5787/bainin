@@ -56,17 +56,9 @@ class AccountManager:
                 if not paypayAccount:
                     raise AccountNotLinkedException()
 
-                if paypayAccount["proxy"]:
-                    proxies = {
-                        "http://": paypayAccount["proxy"],
-                        "https://": paypayAccount["proxy"],
-                    }
-                else:
-                    proxies = None
-
                 cls.paypayExternalUserIds[userId] = paypayAccount["external_user_id"]
 
-                paypay = PayPay(proxies=proxies)
+                paypay = PayPay(proxy=paypayAccount["proxy"])
                 try:
                     await paypay.initialize(
                         access_token=cls.cipherSuite.decrypt(
@@ -75,7 +67,7 @@ class AccountManager:
                     )
                 except:
                     try:
-                        paypay = PayPay(proxies=proxies)
+                        paypay = PayPay(proxy=paypayAccount["proxy"])
                         await paypay.token_refresh(
                             cls.cipherSuite.decrypt(
                                 paypayAccount["refresh_token"]
@@ -96,7 +88,7 @@ class AccountManager:
                             and paypayAccount["password"]
                         ):
                             try:
-                                paypay = PayPay(proxies=proxies)
+                                paypay = PayPay(proxy=paypayAccount["proxy"])
                                 await paypay.initialize(
                                     phone=cls.cipherSuite.decrypt(
                                         paypayAccount["phone"]
@@ -131,17 +123,9 @@ class AccountManager:
             if not paypayAccount:
                 raise AccountNotLinkedException()
 
-            if paypayAccount["proxy"]:
-                proxies = {
-                    "http://": paypayAccount["proxy"],
-                    "https://": paypayAccount["proxy"],
-                }
-            else:
-                proxies = None
-
             cls.paypayExternalUserIds[userId] = paypayAccount["external_user_id"]
 
-            paypay = PayPay(proxies=proxies)
+            paypay = PayPay(proxy=paypayAccount["proxy"])
             try:
                 await paypay.initialize(
                     access_token=cls.cipherSuite.decrypt(
@@ -150,7 +134,7 @@ class AccountManager:
                 )
             except:
                 try:
-                    paypay = PayPay(proxies=proxies)
+                    paypay = PayPay(proxy=paypayAccount["proxy"])
                     await paypay.token_refresh(
                         cls.cipherSuite.decrypt(paypayAccount["refresh_token"]).decode()
                     )
@@ -169,7 +153,7 @@ class AccountManager:
                         and paypayAccount["password"]
                     ):
                         try:
-                            paypay = PayPay(proxies=proxies)
+                            paypay = PayPay(proxy=paypayAccount["proxy"])
                             await paypay.initialize(
                                 phone=cls.cipherSuite.decrypt(
                                     paypayAccount["phone"]
@@ -205,15 +189,7 @@ class AccountManager:
             if not kyashAccount:
                 raise AccountNotLinkedException()
 
-            if kyashAccount["proxy"]:
-                proxies = {
-                    "http": kyashAccount["proxy"],
-                    "https": kyashAccount["proxy"],
-                }
-            else:
-                proxies = None
-
-            kyash = Kyash(proxy=proxies)
+            kyash = Kyash(proxy=kyashAccount["proxy"])
             try:
                 await kyash.login(
                     email=cls.cipherSuite.decrypt(kyashAccount["email"]).decode(),

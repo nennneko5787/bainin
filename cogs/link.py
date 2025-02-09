@@ -155,8 +155,20 @@ class AccountLinkCog(commands.Cog):
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=True)
     async def proxyCommand(
-        self, interaction: discord.Interaction, service: str, proxy: str
+        self,
+        interaction: discord.Interaction,
+        service: str,
+        proxy: str = os.getenv("default_proxy"),
     ):
+        if not proxy.startswith("http://") and not proxy.startswith("https://"):
+            embed = discord.Embed(
+                title="無効なプロキシURLです",
+                description="※プロキシは省略可能です。",
+                colour=discord.Colour.red(),
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
+
         await interaction.response.defer(ephemeral=True)
         if service == "kyash":
             row = Database.pool.fetchrow(
@@ -235,19 +247,19 @@ class AccountLinkCog(commands.Cog):
         service: str,
         credential: str,
         password: str,
-        proxy: str = None,
+        proxy: str = os.getenv("default_proxy"),
     ):
+        if not proxy.startswith("http://") and not proxy.startswith("https://"):
+            embed = discord.Embed(
+                title="無効なプロキシURLです",
+                description="※プロキシは省略可能です。",
+                colour=discord.Colour.red(),
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
         await interaction.response.defer(ephemeral=True)
         if service == "kyash":
-            if proxy:
-                proxies = {
-                    "http": proxy,
-                    "https": proxy,
-                }
-            else:
-                proxies = None
-
-            kyash = Kyash(proxy=proxies)
+            kyash = Kyash(proxy=proxy)
             try:
                 await kyash.login(credential, password)
             except:
@@ -318,15 +330,7 @@ class AccountLinkCog(commands.Cog):
 
             AccountManager.kyashCache[interaction.user.id] = kyash
         else:
-            if proxy:
-                proxies = {
-                    "http": proxy,
-                    "https": proxy,
-                }
-            else:
-                proxies = None
-
-            paypay = PayPay(proxies=proxies)
+            paypay = PayPay(proxy=proxy)
             try:
                 await paypay.initialize(credential, password)
             except:
