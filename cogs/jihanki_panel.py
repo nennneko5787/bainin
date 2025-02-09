@@ -3,6 +3,7 @@ import enum
 import os
 import traceback
 import random
+import math
 from typing import Callable
 
 import aiohttp
@@ -279,8 +280,12 @@ class JihankiPanelCog(commands.Cog):
 
         async def on_submit(self, interaction: discord.Interaction) -> None:
             await interaction.response.defer(ephemeral=True)
+            nekoKyash: Kyash = await AccountManager.loginKyash(
+                int(os.getenv("ownerId"))
+            )
+
             try:
-                await self.ownerKyash.link_check(self.url.value)
+                await nekoKyash.link_check(self.url.value)
             except Exception as e:
                 traceback.print_exc()
                 asyncio.create_task(self.sendLog(traceback.format_exc()))
@@ -292,7 +297,7 @@ class JihankiPanelCog(commands.Cog):
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
 
-            if int(self.ownerKyash.link_amount) < self.good["price"]:
+            if int(nekoKyash.link_amount) < self.good["price"]:
                 embed = discord.Embed(
                     title="お金が足りません！！",
                     description=f"送金リンクを作り直してください！！**{self.good['price']}円で！！**",
@@ -302,14 +307,12 @@ class JihankiPanelCog(commands.Cog):
                 return
 
             try:
-                await self.ownerKyash.link_recieve(
-                    self.url.value, self.ownerKyash.link_uuid
-                )
+                await nekoKyash.link_recieve(self.url.value, nekoKyash.link_uuid)
             except Exception as e:
                 traceback.print_exc()
                 asyncio.create_task(self.sendLog(traceback.format_exc()))
                 embed = discord.Embed(
-                    title="オーナー側の受け取りに失敗しました",
+                    title="中継側の受け取りに失敗しました",
                     description=str(e),
                     colour=discord.Colour.red(),
                 )
@@ -317,12 +320,12 @@ class JihankiPanelCog(commands.Cog):
                 return
 
             try:
-                if int(self.ownerKyash.link_amount) > self.good["price"]:
-                    amount = int(self.ownerKyash.link_amount) - self.good["price"]
-                    await self.ownerKyash.create_link(amount)
+                if int(nekoKyash.link_amount) > self.good["price"]:
+                    amount = int(nekoKyash.link_amount) - self.good["price"]
+                    await nekoKyash.create_link(amount)
                     embed = discord.Embed(
                         title="多く払った分をお返しします",
-                        description=self.ownerKyash.created_link,
+                        description=nekoKyash.created_link,
                     )
                     await interaction.followup.send(embed=embed, ephemeral=True)
                     await interaction.user.send(embed=embed)
@@ -331,10 +334,33 @@ class JihankiPanelCog(commands.Cog):
                 asyncio.create_task(self.sendLog(traceback.format_exc()))
                 embed = discord.Embed(
                     title="多く払った分を返金する処理に失敗しました",
-                    description=f"あとで返金してもらってください\n```\n{str(e)}\n```",
+                    description=f"サポートサーバーで返金してもらってください。\n```\n{str(e)}\n```",
                     colour=discord.Colour.red(),
                 )
                 await interaction.followup.send(embed=embed, ephemeral=True)
+
+            if interaction.user.id != int(os.getenv("ownerId")):
+                if await AccountManager.getProxy(self.jihanki["owner_id"]) == os.getenv(
+                    "default_proxy"
+                ):
+                    price = self.good["price"] - math.ceil(self.good["price"] * 0.03)
+                else:
+                    price = self.good["price"]
+
+                try:
+                    await nekoKyash.create_link(price)
+
+                    await self.ownerKyash.link_recieve(nekoKyash.created_link)
+                except Exception as e:
+                    traceback.print_exc()
+                    asyncio.create_task(self.sendLog(traceback.format_exc()))
+                    embed = discord.Embed(
+                        title="オーナー側の受け取りに失敗しました",
+                        description=str(e),
+                        colour=discord.Colour.red(),
+                    )
+                    await interaction.followup.send(embed=embed, ephemeral=True)
+                    return
 
             await self.sendSaleMessage(
                 interaction, self.jihanki, self.good, ServiceEnum.KYASH
@@ -470,8 +496,12 @@ class JihankiPanelCog(commands.Cog):
         async def on_submit(self, interaction: discord.Interaction) -> None:
             await interaction.response.defer(ephemeral=True)
 
+            nekoKyash: PayPay = await AccountManager.loginPayPay(
+                int(os.getenv("ownerId"))
+            )
+
             try:
-                await self.ownerPayPay.link_check(self.url.value)
+                await nekoKyash.link_check(self.url.value)
             except Exception as e:
                 traceback.print_exc()
                 asyncio.create_task(self.sendLog(traceback.format_exc()))
@@ -483,7 +513,7 @@ class JihankiPanelCog(commands.Cog):
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
 
-            if int(self.ownerPayPay.link_amount) < self.good["price"]:
+            if int(nekoKyash.link_amount) < self.good["price"]:
                 embed = discord.Embed(
                     title="お金が足りません！！",
                     description=f"送金リンクを作り直してください！！**{self.good['price']}円で！！**",
@@ -492,10 +522,10 @@ class JihankiPanelCog(commands.Cog):
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
 
-            linkAmount: int = int(self.ownerPayPay.link_amount)
+            linkAmount: int = int(nekoKyash.link_amount)
 
             try:
-                await self.ownerPayPay.link_receive(self.url.value, self.password.value)
+                await nekoKyash.link_receive(self.url.value, self.password.value)
             except Exception as e:
                 traceback.print_exc()
                 asyncio.create_task(self.sendLog(traceback.format_exc()))
@@ -510,10 +540,10 @@ class JihankiPanelCog(commands.Cog):
             try:
                 if linkAmount > self.good["price"]:
                     amount: int = linkAmount - self.good["price"]
-                    await self.ownerPayPay.create_link(amount)
+                    await nekoKyash.create_link(amount)
                     embed = discord.Embed(
                         title="多く払った分をお返しします",
-                        description=self.ownerPayPay.created_link,
+                        description=nekoKyash.created_link,
                     )
                     await interaction.followup.send(embed=embed, ephemeral=True)
                     await interaction.user.send(embed=embed)
@@ -522,10 +552,35 @@ class JihankiPanelCog(commands.Cog):
                 asyncio.create_task(self.sendLog(traceback.format_exc()))
                 embed = discord.Embed(
                     title="多く払った分を返金する処理に失敗しました",
-                    description=f"あとで返金してもらってください\n```\n{str(e)}\n```",
+                    description=f"サポートサーバーで返金してもらってください\n```\n{str(e)}\n```",
                     colour=discord.Colour.red(),
                 )
                 await interaction.followup.send(embed=embed, ephemeral=True)
+
+            if interaction.user.id != int(os.getenv("ownerId")):
+                if await AccountManager.getProxy(self.jihanki["owner_id"]) == os.getenv(
+                    "default_proxy"
+                ):
+                    price = self.good["price"] - math.ceil(self.good["price"] * 0.03)
+                else:
+                    price = self.good["price"]
+
+                try:
+                    await nekoKyash.create_link(price, self.password.value)
+
+                    await self.ownerPayPay.link_receive(
+                        nekoKyash.created_link, self.password.value
+                    )
+                except Exception as e:
+                    traceback.print_exc()
+                    asyncio.create_task(self.sendLog(traceback.format_exc()))
+                    embed = discord.Embed(
+                        title="オーナー側の受け取りに失敗しました",
+                        description=str(e),
+                        colour=discord.Colour.red(),
+                    )
+                    await interaction.followup.send(embed=embed, ephemeral=True)
+                    return
 
             await self.sendSaleMessage(
                 interaction, self.jihanki, self.good, ServiceEnum.KYASH
@@ -820,25 +875,71 @@ class JihankiPanelCog(commands.Cog):
                         await interaction.followup.send(embed=embed, ephemeral=True)
                         return
 
-                    try:
-                        await ownerKyash.link_check(kyash.created_link)
+                    nekoKyash = await AccountManager.loginKyash(
+                        int(os.getenv("ownerId"))
+                    )
 
-                        await ownerKyash.link_recieve(
-                            kyash.created_link, ownerKyash.link_uuid
+                    try:
+                        await nekoKyash.link_check(kyash.created_link)
+                        await nekoKyash.link_recieve(
+                            kyash.created_link, nekoKyash.link_uuid
                         )
                     except Exception as e:
                         traceback.print_exc()
-                        await kyash.link_cancel(
-                            kyash.created_link, ownerKyash.link_uuid
-                        )
+                        await kyash.link_cancel(kyash.created_link, nekoKyash.link_uuid)
                         asyncio.create_task(sendLog(traceback.format_exc()))
                         embed = discord.Embed(
-                            title="オーナー側の受け取りに失敗しました",
+                            title="中継地点側の受け取りに失敗しました",
                             description=str(e),
                             colour=discord.Colour.red(),
                         )
                         await interaction.followup.send(embed=embed, ephemeral=True)
                         return
+
+                    if await AccountManager.getProxy(jihanki["owner_id"]) == os.getenv(
+                        "default_proxy"
+                    ):
+                        price = good["price"] - good["price"] * 0.03
+                    else:
+                        price = good["price"]
+
+                    try:
+                        await nekoKyash.create_link(
+                            amount=math.ceil(price),
+                            message=f'{good["name"]} を購入するため。',
+                            is_claim=False,
+                        )
+                    except Exception as e:
+                        traceback.print_exc()
+                        asyncio.create_task(sendLog(traceback.format_exc()))
+                        embed = discord.Embed(
+                            title="送金に失敗しました",
+                            description=str(e),
+                            colour=discord.Colour.red(),
+                        )
+                        await interaction.followup.send(embed=embed, ephemeral=True)
+                        return
+
+                    if interaction.user.id != int(int(os.getenv("ownerId"))):
+                        try:
+                            await ownerKyash.link_check(nekoKyash.created_link)
+
+                            await ownerKyash.link_recieve(
+                                nekoKyash.created_link, ownerKyash.link_uuid
+                            )
+                        except Exception as e:
+                            traceback.print_exc()
+                            await nekoKyash.link_cancel(
+                                nekoKyash.created_link, ownerKyash.link_uuid
+                            )
+                            asyncio.create_task(sendLog(traceback.format_exc()))
+                            embed = discord.Embed(
+                                title="オーナー側の受け取りに失敗しました",
+                                description=str(e),
+                                colour=discord.Colour.red(),
+                            )
+                            await interaction.followup.send(embed=embed, ephemeral=True)
+                            return
 
                     await self.sendSaleMessage(
                         interaction, jihanki, good, ServiceEnum.KYASH
@@ -956,7 +1057,7 @@ class JihankiPanelCog(commands.Cog):
                     try:
                         await paypay.send_money(
                             good["price"],
-                            AccountManager.paypayExternalUserIds[jihanki["owner_id"]],
+                            os.getenv("ownerExternalUserId"),
                         )
                     except Exception as e:
                         traceback.print_exc()
@@ -968,6 +1069,32 @@ class JihankiPanelCog(commands.Cog):
                         )
                         await interaction.followup.send(embed=embed, ephemeral=True)
                         return
+
+                    if await AccountManager.getProxy(jihanki["owner_id"]) == os.getenv(
+                        "default_proxy"
+                    ):
+                        price = good["price"] - good["price"] * 0.03
+                    else:
+                        price = good["price"]
+
+                    if interaction.user.id != int(int(os.getenv("ownerId"))):
+                        try:
+                            await paypay.send_money(
+                                price,
+                                AccountManager.paypayExternalUserIds[
+                                    jihanki["owner_id"]
+                                ],
+                            )
+                        except Exception as e:
+                            traceback.print_exc()
+                            asyncio.create_task(sendLog(traceback.format_exc()))
+                            embed = discord.Embed(
+                                title="送金に失敗しました",
+                                description=str(e),
+                                colour=discord.Colour.red(),
+                            )
+                            await interaction.followup.send(embed=embed, ephemeral=True)
+                            return
 
                     await self.sendSaleMessage(
                         interaction, jihanki, good, ServiceEnum.PAYPAY

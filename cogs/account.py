@@ -1,5 +1,6 @@
 import os
 import traceback
+from typing import Literal, Optional
 
 import dotenv
 from aiokyasher import Kyash
@@ -43,11 +44,22 @@ class AccountManager:
             return True
 
     @classmethod
+    async def getProxy(
+        cls, userId: int, service: Literal["kyash", "paypay"]
+    ) -> Optional[str]:
+        account = await Database.pool.fetchrow(
+            f"SELECT * FROM {service} WHERE id = $1", userId
+        )
+        if not account:
+            raise AccountNotLinkedException()
+        return account["proxy"]
+
+    @classmethod
     async def loginPayPay(cls, userId: int) -> PayPay:
         if userId in cls.paypayCache:
             paypay = cls.paypayCache[userId]
             try:
-                await paypay.alive()
+                await paypay.get_balance()
                 return paypay
             except:
                 paypayAccount = await Database.pool.fetchrow(
