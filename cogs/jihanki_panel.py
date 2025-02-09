@@ -101,7 +101,7 @@ class JihankiPanelCog(commands.Cog):
                     else None
                 ),
             )
-            for index, good in enumerate(goods)
+            for index, good in enumerate(goods[0:20])
         ]
         random.shuffle(items)
         items.insert(
@@ -942,9 +942,9 @@ class JihankiPanelCog(commands.Cog):
                         await interaction.followup.send(embed=embed, ephemeral=True)
                         return
 
-                    if ((int(paypay.money or 0)) + (int(paypay.money_light or 0))) < good[
-                        "price"
-                    ]:
+                    if (
+                        (int(paypay.money or 0)) + (int(paypay.money_light or 0))
+                    ) < good["price"]:
                         embed = discord.Embed(
                             title="残高が足りません",
                             description="PayPayをチャージしてください",
@@ -1140,13 +1140,16 @@ class JihankiPanelCog(commands.Cog):
                 jihanki,
                 interaction.user.id,
             )
-            
+
         if not jihanki:
-            embed = discord.Embed(title="自販機が存在しません。", description="名前が間違っていないかご確認ください。", colour=discord.Colour.red())
+            embed = discord.Embed(
+                title="自販機が存在しません。",
+                description="名前が間違っていないかご確認ください。",
+                colour=discord.Colour.red(),
+            )
             await interaction.followup.send(embed=embed, ephemeral=True)
             return
 
-            
         if jihanki["owner_id"] != interaction.user.id:
             embed = discord.Embed(
                 title="その自販機はあなたのものではありません",

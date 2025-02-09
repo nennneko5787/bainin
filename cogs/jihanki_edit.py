@@ -562,7 +562,7 @@ class JihankiEditCog(commands.Cog):
                     description=good["description"],
                     value=index,
                 )
-                for index, good in enumerate(goods)
+                for index, good in enumerate(goods[0:20])
             ]
         )
 
@@ -627,7 +627,7 @@ class JihankiEditCog(commands.Cog):
                     description=good["description"],
                     value=index,
                 )
-                for index, good in enumerate(goods)
+                for index, good in enumerate(goods[0:20])
             ]
         )
 
