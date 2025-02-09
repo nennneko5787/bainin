@@ -627,14 +627,14 @@ class JihankiPanelCog(commands.Cog):
             await interaction.followup.send(embed=embed, ephemeral=True)
             return
 
-        if jihanki["owner_id"] == interaction.user.id:
-            embed = discord.Embed(
-                title="自分が販売している商品は購入できません",
-                description="ちゃんと販売できているので安心してください。",
-                colour=discord.Colour.red(),
-            )
-            await interaction.followup.send(embed=embed, ephemeral=True)
-            return
+        # if jihanki["owner_id"] == interaction.user.id:
+        #    embed = discord.Embed(
+        #        title="自分が販売している商品は購入できません",
+        #        description="ちゃんと販売できているので安心してください。",
+        #        colour=discord.Colour.red(),
+        #    )
+        #    await interaction.followup.send(embed=embed, ephemeral=True)
+        #    return
 
         goods: list[dict[str, str]] = orjson.loads(jihanki["goods"])
         try:
