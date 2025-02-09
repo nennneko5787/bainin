@@ -259,7 +259,7 @@ class AccountLinkCog(commands.Cog):
             return
         await interaction.response.defer(ephemeral=True)
         if service == "kyash":
-            kyash = Kyash()
+            kyash = Kyash(proxy=proxy)
             try:
                 await kyash.login(credential, password)
             except:
@@ -330,7 +330,7 @@ class AccountLinkCog(commands.Cog):
 
             AccountManager.kyashCache[interaction.user.id] = kyash
         else:
-            paypay = PayPay()
+            paypay = PayPay(proxy=proxy)
             try:
                 await paypay.initialize(credential, password)
             except:
