@@ -4,7 +4,7 @@ import traceback
 import discord
 from discord.ext import commands
 
-from .database import Database
+from services.database import Database
 
 
 class AdminCog(commands.Cog):

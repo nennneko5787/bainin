@@ -9,13 +9,13 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, ORJSONResponse
 from fastapi.templating import Jinja2Templates
 
-from cogs.database import Database
+from services.database import Database
 
 dotenv.load_dotenv()
 
 discord.utils.setup_logging()
 
-bot = commands.Bot("takoyaki#", intents=discord.Intents.default())
+bot = commands.Bot(["takoyaki#", "t#"], intents=discord.Intents.default())
 
 
 @tasks.loop(seconds=20)
@@ -30,16 +30,14 @@ async def precenseLoop():
 @bot.event
 async def on_ready():
     precenseLoop.start()
+    print("Logined as ", bot.user.name)
+    print(bot.user.id)
 
 
 @bot.event
 async def setup_hook():
     if os.getenv("site_test") != "a":
-        await bot.load_extension("cogs.link")
-        await bot.load_extension("cogs.jihanki_edit")
-        await bot.load_extension("cogs.jihanki_panel")
-        await bot.load_extension("cogs.send_money")
-        await bot.load_extension("cogs.claim_money")
+        await bot.load_extension("cogs.jihanki.edit")
         await bot.load_extension("cogs.help")
         await bot.load_extension("cogs.admin")
     await bot.load_extension("cogs.site")

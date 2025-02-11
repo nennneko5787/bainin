@@ -29,34 +29,41 @@ class HelpCog(commands.Cog):
                 url=interaction.client.user.display_avatar,
             )
             .add_field(
-                name="/link",
+                name="/account link",
                 value="PayPayやKyashのアカウントとリンクできます。",
             )
-            .add_field(name="/proxy", value="使用するプロキシを設定・編集します。")
             .add_field(
-                name="/check",
+                name="/account proxy", value="使用するプロキシを設定・編集します。"
+            )
+            .add_field(
+                name="/account check",
                 value="PayPayやKyashを開かずとも、所持金を確認することができます。(本ボットではPayPayポイントはご利用いただけないため、所持していても表示されません。)",
             )
             .add_field(
-                name="/sendmoney",
+                name="/money send",
                 value="Discordのユーザーを指定するだけで簡単に送金することができます。\n送信先のユーザーがPayPayかKyashのアカウントをリンクしている必要があります。",
             )
             .add_field(
-                name="/claim",
+                name="/money claim",
                 value="他のDiscordユーザーに簡単に請求することができるパネルを送信します。",
             )
             .set_footer(text="この埋め込みの色は2色のうちからランダムで変わります")
         )
 
         if interaction.is_guild_integration():
-            embed.add_field(name="/make", value="自販機を作成します。").add_field(
-                name="/edit", value="自販機を編集します。"
-            ).add_field(name="/addgoods", value="自販機に商品を追加します。").add_field(
-                name="/editgoods", value="自販機の商品の中身を確認・修正します。"
+            embed.add_field(
+                name="/jihanki make", value="自販機を作成します。"
+            ).add_field(name="/jihanki edit", value="自販機を編集します。").add_field(
+                name="/jihanki delete", value="自販機を削除します。"
             ).add_field(
-                name="/removegoods", value="自販機から商品を削除します。"
+                name="/jihanki goods add", value="自販機に商品を追加します。"
             ).add_field(
-                name="/send",
+                name="/jihanki goods edit",
+                value="自販機の商品の中身を確認・修正します。",
+            ).add_field(
+                name="/jihanki goods remove", value="自販機から商品を削除します。"
+            ).add_field(
+                name="/jihanki send",
                 value="自販機を現在のチャンネル、または特定のチャンネルに送信します。",
             )
         else:

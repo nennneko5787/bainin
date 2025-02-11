@@ -24,7 +24,7 @@ class FailedToLoginException(Exception):
     pass
 
 
-class AccountManager:
+class AccountService:
     kyashCache: dict[int, Kyash] = {}
     paypayCache: dict[int, PayPay] = {}
     paypayExternalUserIds: dict[int, str] = {}

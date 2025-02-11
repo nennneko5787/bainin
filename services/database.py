@@ -2,8 +2,6 @@ import os
 
 import asyncpg
 import dotenv
-from aiokyasher import Kyash
-from aiopaypaython import PayPay
 
 dotenv.load_dotenv()
 

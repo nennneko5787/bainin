@@ -12,7 +12,7 @@ from fastapi import Cookie, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from .database import Database
+from services.database import Database
 
 dotenv.load_dotenv()
 
