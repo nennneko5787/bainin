@@ -1,13 +1,14 @@
+import os
+
 import discord
+import dotenv
+import emoji
+from cryptography.fernet import Fernet
 from discord import app_commands
 from discord.ext import commands
 from snowflake import SnowflakeGenerator
-from cryptography.fernet import Fernet
-import emoji
-import os
-import dotenv
 
-from objects import Jihanki, Good
+from objects import Good, Jihanki
 from services.jihanki import JihankiService
 
 dotenv.load_dotenv()
@@ -203,13 +204,15 @@ class EditGoodModal(discord.ui.Modal):
         await interaction.followup.send(embed=embed, ephemeral=True)
 
 
+jihankiGroup = app_commands.Group(name="jihanki", description="自販機関連のコマンド。")
+goodsGroup = app_commands.Group(
+    name="goods", description="商品関連のコマンド。", parent=jihankiGroup
+)
+
+
 class JihankiEditCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-
-    jihankiGroup = app_commands.Group(
-        name="jihanki", description="自販機関連のコマンド。"
-    )
 
     @jihankiGroup.command(name="make", description="自販機を作成します。")
     @app_commands.rename(
@@ -410,10 +413,6 @@ class JihankiEditCog(commands.Cog):
         jihanki.achievementChannelId = achievementChannelId
         jihanki.shuffle = shuffle.value
         await JihankiService.editJihanki(jihanki)
-
-    goodsGroup = app_commands.Group(
-        name="goods", description="商品関連のコマンド。", parent=jihankiGroup
-    )
 
     @goodsGroup.command(name="add", description="自販機に商品を追加します。")
     @app_commands.autocomplete(jihanki=JihankiService.getJihankiList)

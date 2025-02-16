@@ -37,10 +37,14 @@ async def on_ready():
 @bot.event
 async def setup_hook():
     if os.getenv("site_test") != "a":
-        await bot.load_extension("cogs.jihanki.edit")
         await bot.load_extension("cogs.help")
         await bot.load_extension("cogs.admin")
+        await bot.load_extension("cogs.jihanki.edit")
+        await bot.load_extension("cogs.jihanki.panel")
+        await bot.load_extension("cogs.money.send")
+        await bot.load_extension("cogs.money.claim")
     await bot.load_extension("cogs.site")
+    print(bot.tree.get_commands())
 
     app.add_api_route(
         "/callback",

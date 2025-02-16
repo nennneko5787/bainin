@@ -44,6 +44,18 @@ class AccountService:
             return True
 
     @classmethod
+    async def kyashExists(cls, userId: int) -> bool:
+        if userId in cls.paypayCache:
+            return True
+        else:
+            kyashAccount = await Database.pool.fetchrow(
+                "SELECT * FROM kyash WHERE id = $1", userId
+            )
+            if not kyashAccount:
+                return False
+            return True
+
+    @classmethod
     async def getProxy(
         cls, userId: int, service: Literal["kyash", "paypay"]
     ) -> Optional[str]:
