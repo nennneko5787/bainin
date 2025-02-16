@@ -192,7 +192,8 @@ class ClaimMoneyCog(commands.Cog):
         except KeyError:
             pass
 
-    @moneyGroup.command(name="claim", description="請求パネルを作成します。")
+    # @moneyGroup.command(name="claim", description="請求パネルを作成します。")
+    @app_commands.command(name="claim", description="請求パネルを作成します。")
     @app_commands.rename(amount="請求額")
     @app_commands.describe(
         amount="請求する金額",
@@ -232,4 +233,4 @@ class ClaimMoneyCog(commands.Cog):
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(ClaimMoneyCog(bot))
-    bot.tree.add_command(moneyGroup)
+    # bot.tree.add_command(moneyGroup)

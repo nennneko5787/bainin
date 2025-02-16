@@ -204,7 +204,14 @@ class EditGoodModal(discord.ui.Modal):
         await interaction.followup.send(embed=embed, ephemeral=True)
 
 
-jihankiGroup = app_commands.Group(name="jihanki", description="自販機関連のコマンド。")
+context = app_commands.AppCommandContext(guild=True)
+installs = app_commands.AppInstallationType(guild=True)
+jihankiGroup = app_commands.Group(
+    name="jihanki",
+    description="自販機関連のコマンド。",
+    allowed_contexts=context,
+    allowed_installs=installs,
+)
 goodsGroup = app_commands.Group(
     name="goods", description="商品関連のコマンド。", parent=jihankiGroup
 )
@@ -214,7 +221,8 @@ class JihankiEditCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @jihankiGroup.command(name="make", description="自販機を作成します。")
+    # @jihankiGroup.command(name="make", description="自販機を作成します。")
+    @app_commands.command(name="make", description="自販機を作成します。")
     @app_commands.rename(
         name="名前",
         description="説明",
@@ -303,7 +311,8 @@ class JihankiEditCog(commands.Cog):
         )
         await interaction.followup.send(embed=embed, ephemeral=True)
 
-    @jihankiGroup.command(name="delete", description="自販機を削除します。")
+    # @jihankiGroup.command(name="delete", description="自販機を削除します。")
+    @app_commands.command(name="delete", description="自販機を削除します。")
     @app_commands.autocomplete(_jihanki=JihankiService.getJihankiList)
     @app_commands.rename(_jihanki="自販機")
     @app_commands.describe(
@@ -335,7 +344,8 @@ class JihankiEditCog(commands.Cog):
             return
         await JihankiService.deleteJihanki(jihanki)
 
-    @jihankiGroup.command(name="edit", description="自販機を編集します。")
+    # @jihankiGroup.command(name="edit", description="自販機を編集します。")
+    @app_commands.command(name="edit", description="自販機を編集します。")
     @app_commands.autocomplete(_jihanki=JihankiService.getJihankiList)
     @app_commands.rename(
         _jihanki="自販機",
@@ -414,7 +424,8 @@ class JihankiEditCog(commands.Cog):
         jihanki.shuffle = shuffle.value
         await JihankiService.editJihanki(jihanki)
 
-    @goodsGroup.command(name="add", description="自販機に商品を追加します。")
+    # @goodsGroup.command(name="add", description="自販機に商品を追加します。")
+    @app_commands.command(name="addgoods", description="自販機に商品を追加します。")
     @app_commands.autocomplete(jihanki=JihankiService.getJihankiList)
     @app_commands.rename(
         jihanki="自販機",
@@ -461,7 +472,10 @@ class JihankiEditCog(commands.Cog):
             )
         )
 
-    @goodsGroup.command(name="edit", description="自販機の商品を編集・確認します。")
+    # @goodsGroup.command(name="edit", description="自販機の商品を編集・確認します。")
+    @app_commands.command(
+        name="editgoods", description="自販機の商品を編集・確認します。"
+    )
     @app_commands.autocomplete(_jihanki=JihankiService.getJihankiList)
     @app_commands.rename(_jihanki="自販機")
     @app_commands.describe(_jihanki="商品を編集したい自販機")
@@ -524,7 +538,10 @@ class JihankiEditCog(commands.Cog):
         )
         await interaction.followup.send(embed=embed, view=view)
 
-    @goodsGroup.command(name="delete", description="自販機の商品を編集・確認します。")
+    # @goodsGroup.command(name="delete", description="自販機の商品を編集・確認します。")
+    @app_commands.command(
+        name="deletegoods", description="自販機の商品を編集・確認します。"
+    )
     @app_commands.autocomplete(_jihanki=JihankiService.getJihankiList)
     @app_commands.rename(_jihanki="自販機")
     @app_commands.describe(_jihanki="商品を編集したい自販機")

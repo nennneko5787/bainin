@@ -32,7 +32,14 @@ def serviceString(service: PaymentType):
             return "不明"
 
 
-moneyGroup = app_commands.Group(name="money", description="自販機関連のコマンド。")
+moneyGroup = app_commands.Group(
+    name="money",
+    description="自販機関連のコマンド。",
+    allowed_contexts=app_commands.AppCommandContext(
+        guild=True, dm_channel=True, private_channel=True
+    ),
+    allowed_installs=app_commands.AppInstallationType(guild=True, user=True),
+)
 
 
 class SendMoneyCog(commands.Cog):
@@ -40,15 +47,16 @@ class SendMoneyCog(commands.Cog):
         self.bot = bot
         self.cipherSuite = Fernet(os.getenv("fernet_key").encode())
 
-    @moneyGroup.command(name="send", description="ユーザーに送金します。")
-    @app_commands.rename(service="サービス", amount="金額", user="送信先")
+    # @moneyGroup.command(name="send", description="ユーザーに送金します。")
+    @moneyGroup.command(name="sendmoney", description="ユーザーに送金します。")
+    @app_commands.rename(_service="サービス", amount="金額", user="送信先")
     @app_commands.describe(
-        service="送金する際に使用するサービス",
+        _service="送金する際に使用するサービス",
         amount="送金する金額",
         user="送金先ユーザー",
     )
     @app_commands.choices(
-        service=[
+        _service=[
             app_commands.Choice(name="Kyash", value="KYASH"),
             app_commands.Choice(name="PayPay", value="PAYPAY"),
         ]
@@ -58,7 +66,7 @@ class SendMoneyCog(commands.Cog):
     async def sendMoneyCommand(
         self,
         interaction: discord.Interaction,
-        service: str,
+        _service: str,
         amount: app_commands.Range[int, 1],
         user: discord.User,
     ):
@@ -110,7 +118,7 @@ class SendMoneyCog(commands.Cog):
                 await webhook.send(embed=embed)
 
         await interaction.response.defer(ephemeral=True)
-        service = PaymentType(service)
+        service = PaymentType(_service.value)
         try:
             await MoneyService.sendMoney(
                 amount=amount, target=interaction.user, to=user

@@ -45,6 +45,7 @@ async def setup_hook():
         await bot.load_extension("cogs.money.claim")
     await bot.load_extension("cogs.site")
     print(bot.tree.get_commands())
+    await bot.tree.sync()
 
     app.add_api_route(
         "/callback",

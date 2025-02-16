@@ -55,7 +55,8 @@ class JihankiPanelCog(commands.Cog):
 
         await message.edit(embed=embed, view=view)
 
-    @jihankiGroup.command(name="send", description="自販機を送信します。")
+    # @jihankiGroup.command(name="send", description="自販機を送信します。")
+    @app_commands.command(name="send", description="自販機を送信します。")
     @app_commands.autocomplete(_jihanki=JihankiService.getJihankiList)
     @app_commands.rename(_jihanki="自販機", channel="チャンネル")
     @app_commands.describe(
@@ -144,4 +145,4 @@ class JihankiPanelCog(commands.Cog):
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(JihankiPanelCog(bot))
-    bot.tree.add_command(goodsGroup)
+    # bot.tree.add_command(goodsGroup)
