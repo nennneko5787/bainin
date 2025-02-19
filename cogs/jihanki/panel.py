@@ -41,7 +41,7 @@ def serviceString(service: PaymentType):
 class JihankiPanelCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.botOwner: discord.user = None
+        self.botOwner: discord.User = None
         self.ctxUpdateJihanki = app_commands.ContextMenu(
             name="自販機を再読み込み",
             callback=self.updateJihankiContextMenu,
@@ -49,7 +49,9 @@ class JihankiPanelCog(commands.Cog):
         self.bot.tree.add_command(self.ctxUpdateJihanki)
 
     async def cog_load(self) -> None:
-        self.botOwner = await self.bot.fetch_user(int(os.getenv("ownerId")))
+        self.botOwner: discord.User = await self.bot.fetch_user(
+            int(os.getenv("ownerId"))
+        )
         await AccountService.paypayExists(self.botOwner.id)
         await AccountService.kyashExists(self.botOwner.id)
 
