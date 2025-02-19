@@ -50,6 +50,8 @@ class JihankiPanelCog(commands.Cog):
 
     async def cog_load(self) -> None:
         self.botOwner = await self.bot.fetch_user(int(os.getenv("ownerId")))
+        await AccountService.paypayExists(self.botOwner.id)
+        await AccountService.kyashExists(self.botOwner.id)
 
     async def cog_unload(self) -> None:
         self.bot.tree.remove_command(
