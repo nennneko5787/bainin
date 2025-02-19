@@ -188,7 +188,7 @@ class SendMoneyCog(commands.Cog):
         embed = (
             discord.Embed(
                 title="送金しました！",
-                description="トラブルが発生した場合は[サポートサーバー](https://discord.gg/2TfFUuY3RG)までどうぞ",
+                description="トラブルが発生した場合は[サポートサーバー](https://discord.gg/PN3KWEnYzX)までどうぞ",
                 colour=discord.Colour.green(),
             )
             .set_thumbnail(url=user.display_avatar)

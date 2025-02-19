@@ -83,15 +83,15 @@ class AccountService:
                 cls.paypayExternalUserIds[userId] = paypayAccount["external_user_id"]
 
                 paypay = PayPay(proxy=paypayAccount["proxy"])
+                await paypay.initialize(
+                    access_token=cls.cipherSuite.decrypt(
+                        paypayAccount["access_token"]
+                    ).decode()
+                )
                 try:
-                    await paypay.initialize(
-                        access_token=cls.cipherSuite.decrypt(
-                            paypayAccount["access_token"]
-                        ).decode()
-                    )
+                    await paypay.get_balance()
                 except:
                     try:
-                        paypay = PayPay(proxy=paypayAccount["proxy"])
                         await paypay.token_refresh(
                             cls.cipherSuite.decrypt(
                                 paypayAccount["refresh_token"]
@@ -150,15 +150,15 @@ class AccountService:
             cls.paypayExternalUserIds[userId] = paypayAccount["external_user_id"]
 
             paypay = PayPay(proxy=paypayAccount["proxy"])
+            await paypay.initialize(
+                access_token=cls.cipherSuite.decrypt(
+                    paypayAccount["access_token"]
+                ).decode()
+            )
             try:
-                await paypay.initialize(
-                    access_token=cls.cipherSuite.decrypt(
-                        paypayAccount["access_token"]
-                    ).decode()
-                )
+                await paypay.get_balance()
             except:
                 try:
-                    paypay = PayPay(proxy=paypayAccount["proxy"])
                     await paypay.token_refresh(
                         cls.cipherSuite.decrypt(paypayAccount["refresh_token"]).decode()
                     )
