@@ -323,7 +323,7 @@ class JihankiPanelCog(commands.Cog):
             kyashButton = discord.ui.Button(
                 style=discord.ButtonStyle.primary,
                 label="Kyashで購入",
-                emoji=discord.PartialEmoji.from_str("<a:kyash:1301478014600609832>"),
+                emoji=discord.PartialEmoji.from_str("<:kyash:1301478014600609832>"),
             )
 
             async def buyWithKyash(interaction: discord.Interaction):
@@ -427,7 +427,7 @@ class JihankiPanelCog(commands.Cog):
             paypayButton = discord.ui.Button(
                 style=discord.ButtonStyle.danger,
                 label="PayPayで購入",
-                emoji=discord.PartialEmoji.from_str("<a:kyash:1301478014600609832>"),
+                emoji=discord.PartialEmoji.from_str("<:paypay:1301478001430626348>"),
             )
 
             async def buyWithPayPay(interaction: discord.Interaction):
@@ -472,7 +472,7 @@ class JihankiPanelCog(commands.Cog):
                     _self = self
                     _interaction = interaction
 
-                    class PayPayModal(discord.ui.Modal, title="Kyashで購入"):
+                    class PayPayModal(discord.ui.Modal, title="PayPayで購入"):
                         url = discord.ui.TextInput(
                             label="PayPayの送金URL",
                             placeholder="https://kyash.me/payments/XXXXXXXXXXX",
