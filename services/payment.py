@@ -47,7 +47,7 @@ class PaymentService:
         if int(linkInfo.amount) < amount:
             raise MoneyNotEnough()
 
-        await sellerPayPayAccount.link_receive(url, passcode)
+        await sellerPayPayAccount.link_receive(url, passcode, linkInfo)
 
     @classmethod
     async def payWithKyash(
