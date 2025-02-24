@@ -93,7 +93,16 @@ class AccountLinkCog(commands.Cog):
                 return
         else:
             try:
-                paypay: PayPay = await AccountService.loginPayPay(interaction.user.id)
+                if await AccountService.paypayExists():
+                    paypay: PayPay = await AccountService.loginPayPay(
+                        interaction.user.id
+                    )
+                elif await AccountService.paypayWebAPIExists():
+                    paypay: PayPayWebAPI = await AccountService.loginPayPayWebAPI(
+                        interaction.user.id
+                    )
+                else:
+                    raise AccountNotLinkedException()
                 profile = await paypay.get_profile()
                 balance = await paypay.get_balance()
                 embed = (
