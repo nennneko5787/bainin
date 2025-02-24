@@ -406,10 +406,10 @@ class AccountLinkCog(commands.Cog):
                 """,
                 interaction.user.id,
                 expiresAt,
-                paypay.access_token,
+                self.cipherSuite.encrypt(paypay.access_token.encode()).decode(),
                 paypay.client_uuid,
-                paypay.phone,
-                paypay.password,
+                self.cipherSuite.encrypt(credential.encode()).decode(),
+                self.cipherSuite.encrypt(password.encode()).decode(),
                 proxy,
             )
             await message.reply(f"アカウントをリンクしました。")
