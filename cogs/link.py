@@ -93,11 +93,11 @@ class AccountLinkCog(commands.Cog):
                 return
         else:
             try:
-                if await AccountService.paypayExists():
+                if await AccountService.paypayExists(interaction.user.id):
                     paypay: PayPay = await AccountService.loginPayPay(
                         interaction.user.id
                     )
-                elif await AccountService.paypayWebAPIExists():
+                elif await AccountService.paypayWebAPIExists(interaction.user.id):
                     paypay: PayPayWebAPI = await AccountService.loginPayPayWebAPI(
                         interaction.user.id
                     )
