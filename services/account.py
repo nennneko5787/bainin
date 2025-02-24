@@ -44,7 +44,7 @@ class AccountService:
             )
             if not paypayAccount:
                 return False
-            if not paypayAccount["client_id"]:
+            if not paypayAccount["client_uuid"]:
                 return False
             cls.paypayExternalUserIds[userId] = paypayAccount["external_user_id"]
             return True
@@ -59,7 +59,7 @@ class AccountService:
             )
             if not paypayAccount:
                 return False
-            if not paypayAccount["webapi_client_id"]:
+            if not paypayAccount["webapi_client_uuid"]:
                 return False
             return True
 
