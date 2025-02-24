@@ -316,7 +316,7 @@ class JihankiPanelCog(commands.Cog):
         handlePayPay = await AccountService.paypayExists(jihanki.ownerId)
         handleKyash = await AccountService.kyashExists(jihanki.ownerId)
 
-        buyerHasPayPay = await AccountService.paypayExists(interaction.user.id)
+        buyerHasPayPay = await AccountService.paypayWebAPIExists(interaction.user.id)
         buyerHasKyash = await AccountService.kyashExists(interaction.user.id)
 
         if handleKyash:
