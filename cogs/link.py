@@ -353,7 +353,7 @@ class AccountLinkCog(commands.Cog):
                 return
 
             await interaction.followup.send(
-                f"**2分以内**に、SMSに届いた**{paypay.otp_prefix}-**から始まるコードを入力してください。\n**{paypay.otp_prefix}-**は**含めないでください。**",
+                f"**2分以内**に、SMSに届いた**{paypay.otp_prefix}-**から始まるコードを**このボットのダイレクトメッセージ**へ送信してください。\n**{paypay.otp_prefix}-**は**含めないでください。**",
                 ephemeral=True,
             )
 
