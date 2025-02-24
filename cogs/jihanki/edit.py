@@ -195,7 +195,7 @@ class EditGoodModal(discord.ui.Modal):
         else:
             self.jihanki.goods[self.select].emoji = None
 
-        await JihankiService.editJihanki(self.jihanki)
+        await JihankiService.editJihanki(self.jihanki, editGoods=True)
 
         embed = discord.Embed(
             title="編集しました！",
