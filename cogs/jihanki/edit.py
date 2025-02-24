@@ -203,6 +203,35 @@ class EditGoodModal(discord.ui.Modal):
         )
         await interaction.followup.send(embed=embed, ephemeral=True)
 
+        view = discord.ui.View(timeout=None)
+        select = discord.ui.Select(
+            options=[
+                discord.SelectOption(
+                    label=f'{good.name} ({good.price}円) {"(在庫無限)" if good.infinite else ""}',
+                    description=good.description,
+                    value=index,
+                )
+                for index, good in enumerate(self.jihanki.goods[0:20])
+            ]
+        )
+
+        async def editGoodsOnSelect(_interaction: discord.Interaction):
+            await _interaction.response.send_modal(
+                EditGoodModal(
+                    self.jihanki,
+                    int(_interaction.data["values"][0]),
+                    interaction,
+                )
+            )
+
+        select.callback = editGoodsOnSelect
+        view.add_item(select)
+        embed = discord.Embed(
+            title="確認・編集する商品を選択してください", colour=discord.Colour.pink()
+        )
+
+        await self.interaction.edit_original_response(embed=embed, view=view)
+
 
 context = app_commands.AppCommandContext(guild=True)
 installs = app_commands.AppInstallationType(guild=True)
@@ -538,16 +567,14 @@ class JihankiEditCog(commands.Cog):
         )
         await interaction.followup.send(embed=embed, view=view)
 
-    # @goodsGroup.command(name="delete", description="自販機の商品を編集・確認します。")
-    @app_commands.command(
-        name="deletegoods", description="自販機の商品を編集・確認します。"
-    )
+    # @goodsGroup.command(name="remove", description="自販機の商品を削除します。")
+    @app_commands.command(name="removegoods", description="自販機の商品を削除します。")
     @app_commands.autocomplete(_jihanki=JihankiService.getJihankiList)
     @app_commands.rename(_jihanki="自販機")
-    @app_commands.describe(_jihanki="商品を編集したい自販機")
+    @app_commands.describe(_jihanki="商品を削除したい自販機")
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
-    async def deleteGoodsCommand(
+    async def removeGoodsCommand(
         self,
         interaction: discord.Interaction,
         _jihanki: str,
@@ -581,31 +608,52 @@ class JihankiEditCog(commands.Cog):
             options=[
                 discord.SelectOption(
                     label=f'{good.name} ({good.price}円) {"(在庫無限)" if good.infinite else ""}',
-                    description=good["description"],
+                    description=good.description,
                     value=index,
                 )
                 for index, good in enumerate(jihanki.goods[0:20])
             ]
         )
 
-        async def editGoodsOnSelect(_interaction: discord.Interaction):
-            await interaction.response.defer(ephemeral=True)
+        async def removeGoodsOnSelect(_interaction: discord.Interaction):
+            await _interaction.response.defer(ephemeral=True)
             try:
-                jihanki.goods.remove(jihanki.goods[int(interaction.data["values"][0])])
+                jihanki.goods.remove(jihanki.goods[int(_interaction.data["values"][0])])
                 await JihankiService.editJihanki(jihanki, editGoods=True)
 
                 embed = discord.Embed(
                     title="自販機から商品を削除しました",
                     colour=discord.Colour.green(),
                 )
-                await interaction.followup.send(embed=embed, ephemeral=True)
+                await _interaction.followup.send(embed=embed, ephemeral=True)
+
+                view = discord.ui.View(timeout=None)
+                select = discord.ui.Select(
+                    options=[
+                        discord.SelectOption(
+                            label=f'{good.name} ({good.price}円) {"(在庫無限)" if good.infinite else ""}',
+                            description=good.description,
+                            value=index,
+                        )
+                        for index, good in enumerate(jihanki.goods[0:20])
+                    ]
+                )
+
+                select.callback = removeGoodsOnSelect
+                view.add_item(select)
+                embed = discord.Embed(
+                    title="確認・編集する商品を選択してください",
+                    colour=discord.Colour.pink(),
+                )
+
+                await interaction.edit_original_response(embed=embed, view=view)
             except Exception as e:
                 embed = discord.Embed(
                     title="その商品はすでに削除済みです", colour=discord.Colour.red()
                 )
                 await interaction.followup.send(embed=embed, ephemeral=True)
 
-        select.callback = editGoodsOnSelect
+        select.callback = removeGoodsOnSelect
         view.add_item(select)
         embed = discord.Embed(
             title="確認・編集する商品を選択してください", colour=discord.Colour.pink()
