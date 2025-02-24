@@ -2,6 +2,7 @@ git+https://github.com/Rapptz/discord.py.git
 asyncpg
 git+https://github.com/nennneko5787/aiokyasher
 git+https://github.com/nennneko5787/aiopaypaython
+git+https://github.com/nennneko5787/aiopaypaython-webapi
 python-dotenv
 fastapi[all]
 cryptography

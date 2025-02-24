@@ -39,10 +39,10 @@ class PaymentService:
     async def receivePayPayUrl(
         self, *, url: str, amount: int, seller: discord.Member, passcode: str = None
     ):
-        if not await AccountService.paypayExists(seller.id):
+        if not await AccountService.paypayWebAPIExists(seller.id):
             raise AccountNotLinked()
 
-        sellerPayPayAccount = await AccountService.loginPayPay(seller.id)
+        sellerPayPayAccount = await AccountService.loginPayPayWebAPI(seller.id)
         linkInfo = await sellerPayPayAccount.link_check(url)
         if int(linkInfo.amount) < amount:
             raise MoneyNotEnough()

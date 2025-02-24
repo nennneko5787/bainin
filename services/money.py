@@ -26,7 +26,7 @@ class MoneyService:
                 "送金先ユーザーにPayPayアカウントをリンクするようにお願いしてください"
             )
         targetPayPayAccount = await AccountService.loginPayPay(target.id)
-        toPayPayExternalId = AccountService.paypayExternalUserIds[to.id]
+        toPayPayExternalId = await AccountService.loginPayPay(to.id)
 
         await targetPayPayAccount.send_money(amount, toPayPayExternalId)
         return True

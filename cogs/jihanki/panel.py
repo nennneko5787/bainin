@@ -333,18 +333,6 @@ class JihankiPanelCog(commands.Cog):
                         await PaymentService.payWithKyash(
                             amount=good.price,
                             buyer=interaction.user,
-                            seller=self.botOwner,
-                        )
-                        if await AccountService.getProxy(
-                            seller.id, service="kyash"
-                        ) == os.getenv("default_proxy"):
-                            price = good.price - math.ceil(good.price * 0.03)
-                        else:
-                            price = good.price
-
-                        await PaymentService.payWithKyash(
-                            amount=price,
-                            buyer=self.botOwner,
                             seller=seller,
                         )
                     except MoneyNotEnough:
@@ -382,18 +370,6 @@ class JihankiPanelCog(commands.Cog):
                                 await PaymentService.receiveKyashUrl(
                                     url=self.url.value,
                                     amount=good.price,
-                                    seller=_self.botOwner,
-                                )
-                                if await AccountService.getProxy(
-                                    seller.id, service="kyash"
-                                ) == os.getenv("default_proxy"):
-                                    price = good.price - math.ceil(good.price * 0.03)
-                                else:
-                                    price = good.price
-
-                                await PaymentService.payWithKyash(
-                                    amount=price,
-                                    buyer=_self.botOwner,
                                     seller=seller,
                                 )
                             except MoneyNotEnough:
@@ -431,105 +407,49 @@ class JihankiPanelCog(commands.Cog):
             )
 
             async def buyWithPayPay(interaction: discord.Interaction):
-                if buyerHasPayPay:
-                    await interaction.response.defer(ephemeral=True)
-                    try:
-                        await PaymentService.payWithPayPay(
-                            amount=good.price,
-                            buyer=interaction.user,
-                            seller=self.botOwner,
-                        )
-                        if await AccountService.getProxy(
-                            seller.id, service="paypay"
-                        ) == os.getenv("default_proxy"):
-                            price = good.price - math.ceil(good.price * 0.03)
-                        else:
-                            price = good.price
+                _self = self
+                _interaction = interaction
 
-                        await PaymentService.payWithPayPay(
-                            amount=price,
-                            buyer=self.botOwner,
-                            seller=seller,
-                        )
-                    except MoneyNotEnough:
-                        embed = discord.Embed(
-                            title="お金が足りません！！",
-                            description=f"PayPayをチャージしてください",
-                            colour=discord.Colour.red(),
-                        )
-                        await interaction.followup.send(embed=embed, ephemeral=True)
-                        return
-                    except:
-                        embed = discord.Embed(
-                            title="エラーが発生しました",
-                            description=f"[サポートサーバー](https://discord.gg/PN3KWEnYzX)のサポートチャンネルで\n- 以下のエラーログ\n- 発生手順\nを送信してください。\n```\n{traceback.format_exc()}\n```",
-                            colour=discord.Colour.red(),
-                        )
-                        await interaction.followup.send(embed=embed, ephemeral=True)
-                        return
-                    await postProcessing(PaymentType.PAYPAY)
-                else:
-                    _self = self
-                    _interaction = interaction
+                class PayPayModal(discord.ui.Modal, title="PayPayで購入"):
+                    url = discord.ui.TextInput(
+                        label="PayPayの送金URL",
+                        placeholder="https://kyash.me/payments/XXXXXXXXXXX",
+                    )
+                    passcode = discord.ui.TextInput(
+                        label="送金URLのパスコード",
+                        placeholder="パスコードを設定していない場合は省略可",
+                        required=False,
+                        max_length=4,
+                    )
 
-                    class PayPayModal(discord.ui.Modal, title="PayPayで購入"):
-                        url = discord.ui.TextInput(
-                            label="PayPayの送金URL",
-                            placeholder="https://kyash.me/payments/XXXXXXXXXXX",
-                        )
-                        passcode = discord.ui.TextInput(
-                            label="送金URLのパスコード",
-                            placeholder="パスコードを設定していない場合は省略可",
-                            required=False,
-                            max_length=4,
-                        )
+                    async def on_submit(self, interaction: discord.Interaction) -> None:
+                        await interaction.response.defer(ephemeral=True)
+                        try:
+                            await PaymentService.receivePayPayUrl(
+                                url=self.url.value,
+                                amount=good.price,
+                                seller=seller,
+                                passcode=self.passcode.value,
+                            )
+                        except MoneyNotEnough:
+                            embed = discord.Embed(
+                                title="お金が足りません！！",
+                                description=f"送金リンクを作り直してください！！**{good.price}円で！！**",
+                                colour=discord.Colour.red(),
+                            )
+                            await interaction.followup.send(embed=embed, ephemeral=True)
+                            return
+                        except:
+                            embed = discord.Embed(
+                                title="エラーが発生しました",
+                                description=f"[サポートサーバー](https://discord.gg/PN3KWEnYzX)のサポートチャンネルで\n- 以下のエラーログ\n- 発生手順\nを送信してください。\n```\n{traceback.format_exc()}\n```",
+                                colour=discord.Colour.red(),
+                            )
+                            await interaction.followup.send(embed=embed, ephemeral=True)
+                            return
+                        await postProcessing(PaymentType.PAYPAY)
 
-                        async def on_submit(
-                            self, interaction: discord.Interaction
-                        ) -> None:
-                            await interaction.response.defer(ephemeral=True)
-                            try:
-                                await PaymentService.receivePayPayUrl(
-                                    url=self.url.value,
-                                    amount=good.price,
-                                    seller=_self.botOwner,
-                                    passcode=self.passcode.value,
-                                )
-                                if await AccountService.getProxy(
-                                    seller.id, service="paypay"
-                                ) == os.getenv("default_proxy"):
-                                    price = good.price - math.ceil(good.price * 0.03)
-                                else:
-                                    price = good.price
-
-                                await PaymentService.payWithPayPay(
-                                    amount=price,
-                                    buyer=_self.botOwner,
-                                    seller=seller,
-                                )
-                            except MoneyNotEnough:
-                                embed = discord.Embed(
-                                    title="お金が足りません！！",
-                                    description=f"送金リンクを作り直してください！！**{good.price}円で！！**",
-                                    colour=discord.Colour.red(),
-                                )
-                                await interaction.followup.send(
-                                    embed=embed, ephemeral=True
-                                )
-                                return
-                            except:
-                                embed = discord.Embed(
-                                    title="エラーが発生しました",
-                                    description=f"[サポートサーバー](https://discord.gg/PN3KWEnYzX)のサポートチャンネルで\n- 以下のエラーログ\n- 発生手順\nを送信してください。\n```\n{traceback.format_exc()}\n```",
-                                    colour=discord.Colour.red(),
-                                )
-                                await interaction.followup.send(
-                                    embed=embed, ephemeral=True
-                                )
-                                return
-                            await postProcessing(PaymentType.PAYPAY)
-
-                    await interaction.response.send_modal(PayPayModal())
+                await interaction.response.send_modal(PayPayModal())
 
             paypayButton.callback = buyWithPayPay
             view.add_item(paypayButton)
