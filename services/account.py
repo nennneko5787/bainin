@@ -193,7 +193,7 @@ class AccountService:
             )
 
             await Database.pool.execute(
-                "UPDATE ONLY paypay SET webapi_access_token = $1 WHERE id = $3",
+                "UPDATE ONLY paypay SET webapi_access_token = $1 WHERE id = $2",
                 paypay.access_token,
                 userId,
             )
