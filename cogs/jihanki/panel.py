@@ -306,10 +306,10 @@ class JihankiPanelCog(commands.Cog):
 
         view = discord.ui.View(timeout=300)
 
-        handlePayPay = await AccountService.paypayExists(jihanki.ownerId)
+        handlePayPay = await AccountService.paypayWebAPIExists(jihanki.ownerId)
         handleKyash = await AccountService.kyashExists(jihanki.ownerId)
 
-        buyerHasPayPay = await AccountService.paypayWebAPIExists(interaction.user.id)
+        buyerHasPayPay = await AccountService.paypayExists(interaction.user.id)
         buyerHasKyash = await AccountService.kyashExists(interaction.user.id)
 
         if handleKyash:
