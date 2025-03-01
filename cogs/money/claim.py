@@ -96,7 +96,7 @@ class ClaimMoneyCog(commands.Cog):
                             amount=amount, target=interaction.user, to=user
                         )
                     except:
-                        await sendLog(service, traceback.format_exc())
+                        await sendLog(traceback.format_exc())
 
                     await interaction.delete_original_response()
 

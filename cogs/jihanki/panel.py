@@ -48,13 +48,6 @@ class JihankiPanelCog(commands.Cog):
         )
         self.bot.tree.add_command(self.ctxUpdateJihanki)
 
-    async def cog_load(self) -> None:
-        self.botOwner: discord.User = await self.bot.fetch_user(
-            int(os.getenv("ownerId"))
-        )
-        await AccountService.paypayExists(self.botOwner.id)
-        await AccountService.kyashExists(self.botOwner.id)
-
     async def cog_unload(self) -> None:
         self.bot.tree.remove_command(
             self.ctxUpdateJihanki.name, type=self.ctxUpdateJihanki.type
